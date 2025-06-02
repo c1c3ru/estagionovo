@@ -86,10 +86,7 @@ class AppStrings {
   static const String applyFilters = 'Aplicar';
   static const String clearFilters = 'Limpar';
 
-    // Roles/Funções
-  static const String student = 'Estudante';
-  static const String supervisor = 'Supervisor';
-  static const String admin = 'Administrador';
+  // User roles (removed duplicates - keeping original definitions)
 
 
   // Comum
@@ -105,8 +102,8 @@ class AppStrings {
   static const String approved = 'Aprovado';
   static const String rejected = 'Rejeitado';
 
-  // Mensagens de carregamento
-  static const String loading = 'Carregando...';
+  // Loading states (removed duplicate - keeping original definition)
+
   static const String saving = 'Salvando...';
   static const String processing = 'Processando...';
 

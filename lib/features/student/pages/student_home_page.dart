@@ -1,8 +1,4 @@
 // lib/features/student/presentation/pages/student_home_page.dart
-import 'package:estagio/domain/entities/student.dart';
-import 'package:estagio/domain/entities/time_log.dart';
-import 'package:estagio/features/auth/bloc/auth_bloc.dart';
-import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -13,11 +9,17 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 // Assumindo que StudentAppDrawer e StudentBottomNavBar estão em shared/widgets
-
+import '../../../shared/widgets/student_app_drawer.dart';
+import '../../../shared/widgets/student_bottom_nav_bar.dart';
+import '../../../../domain/entities/student_entity.dart';
+import '../../../../domain/entities/time_log_entity.dart';
 import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
 // Importe o AuthBloc para obter o ID do usuário logado
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart' as auth_state;
+
 
 class StudentHomePage extends StatefulWidget {
   const StudentHomePage({Key? key}) : super(key: key);
@@ -44,12 +46,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
     if (currentAuthState is auth_state.AuthSuccess) {
       _currentUserId = currentAuthState.user.id;
       if (_currentUserId != null) {
-        _studentBloc.add(
-          LoadStudentDashboardDataEvent(userId: _currentUserId!),
-        );
-        _studentBloc.add(
-          FetchActiveTimeLogEvent(userId: _currentUserId!),
-        ); // Busca log ativo
+        _studentBloc.add(LoadStudentDashboardDataEvent(userId: _currentUserId!));
+        _studentBloc.add(FetchActiveTimeLogEvent(userId: _currentUserId!)); // Busca log ativo
       }
     }
 
@@ -61,9 +59,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             _currentUserId = authState.user.id;
           });
           if (_currentUserId != null) {
-            _studentBloc.add(
-              LoadStudentDashboardDataEvent(userId: _currentUserId!),
-            );
+            _studentBloc.add(LoadStudentDashboardDataEvent(userId: _currentUserId!));
             _studentBloc.add(FetchActiveTimeLogEvent(userId: _currentUserId!));
           }
         }
@@ -94,20 +90,17 @@ class _StudentHomePageState extends State<StudentHomePage> {
   void _performCheckOut() {
     if (_currentUserId != null && _activeTimeLog != null) {
       // Pode adicionar um diálogo para descrição aqui
-      _studentBloc.add(
-        StudentCheckOutEvent(
-          userId: _currentUserId!,
-          activeTimeLogId: _activeTimeLog!.id,
-        ),
-      );
+      _studentBloc.add(StudentCheckOutEvent(
+        userId: _currentUserId!,
+        activeTimeLogId: _activeTimeLog!.id,
+      ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nenhum check-in ativo encontrado para finalizar.'),
-        ),
+        const SnackBar(content: Text('Nenhum check-in ativo encontrado para finalizar.')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,12 +124,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
           ),
         ],
       ),
-      drawer: const StudentAppDrawer(
-        currentIndex: 0,
-      ), // Ajuste o currentIndex conforme necessário
-      bottomNavigationBar: const StudentBottomNavBar(
-        currentIndex: 0,
-      ), // Ajuste o currentIndex
+      drawer: const StudentAppDrawer(currentIndex: 0), // Ajuste o currentIndex conforme necessário
+      bottomNavigationBar: const StudentBottomNavBar(currentIndex: 0), // Ajuste o currentIndex
       body: BlocConsumer<StudentBloc, StudentState>(
         bloc: _studentBloc,
         listener: (context, state) {
@@ -150,7 +139,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
               );
           } else if (state is StudentTimeLogOperationSuccess) {
-            ScaffoldMessenger.of(context)
+             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
@@ -160,13 +149,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
               );
             // Após check-in/check-out, busca o novo estado do log ativo
             if (_currentUserId != null) {
-              _studentBloc.add(
-                FetchActiveTimeLogEvent(userId: _currentUserId!),
-              );
+              _studentBloc.add(FetchActiveTimeLogEvent(userId: _currentUserId!));
               // Recarregar dados do dashboard para atualizar estatísticas
-              _studentBloc.add(
-                LoadStudentDashboardDataEvent(userId: _currentUserId!),
-              );
+               _studentBloc.add(LoadStudentDashboardDataEvent(userId: _currentUserId!));
             }
           } else if (state is ActiveTimeLogFetched) {
             setState(() {
@@ -175,38 +160,31 @@ class _StudentHomePageState extends State<StudentHomePage> {
           }
         },
         builder: (context, state) {
-          if (state is StudentLoading &&
-              state is! StudentDashboardLoadSuccess) {
+          if (state is StudentLoading && state is! StudentDashboardLoadSuccess) {
             // Mostra loading apenas se não houver dados de dashboard anteriores
             // ou se for um loading específico de uma operação que não seja o load inicial.
             // Para o load inicial, queremos mostrar o loading até StudentDashboardLoadSuccess.
-            if (state is! StudentDashboardLoadSuccess &&
-                _studentBloc.state is! StudentDashboardLoadSuccess) {
-              return const LoadingIndicator();
+            if (state is! StudentDashboardLoadSuccess && _studentBloc.state is! StudentDashboardLoadSuccess) {
+                 return const LoadingIndicator();
             }
           }
 
           if (state is StudentDashboardLoadSuccess) {
-            _activeTimeLog = state
-                .timeStats
-                .activeTimeLog; // Atualiza o log ativo localmente
+            _activeTimeLog = state.timeStats.activeTimeLog; // Atualiza o log ativo localmente
             return _buildDashboardContent(context, state);
           }
 
-          if (state is StudentOperationFailure &&
-              _studentBloc.state is! StudentDashboardLoadSuccess) {
-            return _buildErrorState(context, state.message);
+          if (state is StudentOperationFailure && _studentBloc.state is! StudentDashboardLoadSuccess) {
+             return _buildErrorState(context, state.message);
           }
 
           // Estado inicial ou se _currentUserId for nulo
           if (_currentUserId == null && state is! StudentLoading) {
-            return const Center(
-              child: Text('A aguardar informações do utilizador...'),
-            );
+            return const Center(child: Text('A aguardar informações do utilizador...'));
           }
 
           // Fallback para loading se nenhum outro estado corresponder e estivermos à espera do dashboard
-          return const LoadingIndicator();
+           return const LoadingIndicator();
         },
       ),
     );
@@ -245,10 +223,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  Widget _buildDashboardContent(
-    BuildContext context,
-    StudentDashboardLoadSuccess state,
-  ) {
+
+  Widget _buildDashboardContent(BuildContext context, StudentDashboardLoadSuccess state) {
     final theme = Theme.of(context);
     final student = state.student;
     final timeStats = state.timeStats;
@@ -256,8 +232,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
     return RefreshIndicator(
       onRefresh: _refreshDashboard,
-      child: ListView(
-        // Usar ListView em vez de SingleChildScrollView para RefreshIndicator funcionar melhor
+      child: ListView( // Usar ListView em vez de SingleChildScrollView para RefreshIndicator funcionar melhor
         padding: const EdgeInsets.all(16.0),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
@@ -265,20 +240,11 @@ class _StudentHomePageState extends State<StudentHomePage> {
           const SizedBox(height: 24),
           _buildCheckInOutSection(context, theme),
           const SizedBox(height: 24),
-          Text(
-            AppStrings.status,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(AppStrings.status, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           _buildStatsGrid(context, student, timeStats),
           const SizedBox(height: 24),
-          _buildSectionHeader(
-            context,
-            AppStrings.weeklySummary,
-            null,
-          ), // Sem ação "Ver todos"
+          _buildSectionHeader(context, AppStrings.weeklySummary, null), // Sem ação "Ver todos"
           const SizedBox(height: 8),
           _buildWeeklySummaryCard(context, student, timeStats),
           const SizedBox(height: 24),
@@ -287,7 +253,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           }),
           const SizedBox(height: 8),
           _buildRecentTimeLogs(context, timeStats.recentLogs),
-          const SizedBox(height: 24),
+           const SizedBox(height: 24),
           // TODO: Adicionar widget de Colegas Online se implementado
         ],
       ),
@@ -306,21 +272,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
             CircleAvatar(
               radius: 30,
               backgroundColor: theme.colorScheme.primaryContainer,
-              backgroundImage:
-                  student.profilePictureUrl != null &&
-                      student.profilePictureUrl!.isNotEmpty
+              backgroundImage: student.profilePictureUrl != null && student.profilePictureUrl!.isNotEmpty
                   ? NetworkImage(student.profilePictureUrl!)
                   : null,
-              child:
-                  student.profilePictureUrl == null ||
-                      student.profilePictureUrl!.isEmpty
+              child: student.profilePictureUrl == null || student.profilePictureUrl!.isEmpty
                   ? Text(
-                      student.fullName.isNotEmpty
-                          ? student.fullName[0].toUpperCase()
-                          : '?',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
+                      student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
+                      style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimaryContainer),
                     )
                   : null,
             ),
@@ -331,17 +289,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 children: [
                   Text(
                     'Olá, ${student.fullName.split(" ").first}!', // Apenas o primeiro nome
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     student.course,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.hintColor,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -351,7 +305,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
               icon: Icon(Icons.edit_outlined, color: theme.colorScheme.primary),
               tooltip: 'Editar Perfil',
               onPressed: () => Modular.to.pushNamed('/student/profile'),
-            ),
+            )
           ],
         ),
       ),
@@ -370,22 +324,15 @@ class _StudentHomePageState extends State<StudentHomePage> {
           children: [
             Text(
               isCheckedIn ? 'Check-in ativo desde:' : 'Pronto para começar?',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             if (isCheckedIn && _activeTimeLog != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  DateUtil.formatTimeOfDay(
-                    _activeTimeLog!.checkInTime,
-                  ), // Usando DateUtil
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  DateUtil.formatTimeOfDay(_activeTimeLog!.checkInTime), // Usando DateUtil
+                  style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -393,9 +340,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             AppButton(
               text: isCheckedIn ? AppStrings.checkOut : AppStrings.checkIn,
               onPressed: isCheckedIn ? _performCheckOut : _performCheckIn,
-              backgroundColor: isCheckedIn
-                  ? AppColors.warning
-                  : AppColors.success,
+              backgroundColor: isCheckedIn ? AppColors.warning : AppColors.success,
               icon: isCheckedIn ? Icons.logout_outlined : Icons.login_outlined,
             ),
           ],
@@ -404,11 +349,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  Widget _buildStatsGrid(
-    BuildContext context,
-    StudentEntity student,
-    StudentTimeStats timeStats,
-  ) {
+  Widget _buildStatsGrid(BuildContext context, StudentEntity student, StudentTimeStats timeStats) {
     final theme = Theme.of(context);
     return GridView.count(
       crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 2,
@@ -470,9 +411,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             const SizedBox(height: 8),
             Text(
               title,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.hintColor,
-              ),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -480,10 +419,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             const SizedBox(height: 4),
             Text(
               value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -494,21 +430,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  Widget _buildSectionHeader(
-    BuildContext context,
-    String title,
-    VoidCallback? onViewAllPressed,
-  ) {
+  Widget _buildSectionHeader(BuildContext context, String title, VoidCallback? onViewAllPressed) {
     final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         if (onViewAllPressed != null)
           TextButton(
             onPressed: onViewAllPressed,
@@ -518,11 +445,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  Widget _buildWeeklySummaryCard(
-    BuildContext context,
-    StudentEntity student,
-    StudentTimeStats timeStats,
-  ) {
+  Widget _buildWeeklySummaryCard(BuildContext context, StudentEntity student, StudentTimeStats timeStats) {
     final theme = Theme.of(context);
     final progress = student.weeklyHoursTarget > 0
         ? (timeStats.hoursThisWeek / student.weeklyHoursTarget).clamp(0.0, 1.0)
@@ -542,31 +465,20 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppStrings.hoursThisWeek,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text(AppStrings.hoursThisWeek, style: theme.textTheme.bodyMedium),
                     Text(
                       timeStats.hoursThisWeek.toStringAsFixed(1) + ' h',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                     ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      AppStrings.weeklyTarget,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    Text(
+                     Text(AppStrings.weeklyTarget, style: theme.textTheme.bodyMedium),
+                     Text(
                       '${student.weeklyHoursTarget.toStringAsFixed(1)} h',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -574,29 +486,19 @@ class _StudentHomePageState extends State<StudentHomePage> {
             ),
             const SizedBox(height: 16),
             if (student.weeklyHoursTarget > 0)
-              ClipRRect(
-                // Para arredondar o LinearProgressIndicator
+              ClipRRect( // Para arredondar o LinearProgressIndicator
                 borderRadius: BorderRadius.circular(10),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: theme.colorScheme.primaryContainer.withAlpha(
-                    100,
-                  ),
+                  backgroundColor: theme.colorScheme.primaryContainer.withAlpha(100),
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    progress >= 1.0
-                        ? AppColors.success
-                        : theme.colorScheme.primary,
+                    progress >= 1.0 ? AppColors.success : theme.colorScheme.primary,
                   ),
                   minHeight: 12,
                 ),
               )
             else
-              Text(
-                'Meta semanal não definida.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
+              Text('Meta semanal não definida.', style: theme.textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
             const SizedBox(height: 8),
             if (student.weeklyHoursTarget > 0)
               Text(
@@ -613,10 +515,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  Widget _buildRecentTimeLogs(
-    BuildContext context,
-    List<TimeLogEntity> recentLogs,
-  ) {
+  Widget _buildRecentTimeLogs(BuildContext context, List<TimeLogEntity> recentLogs) {
     final theme = Theme.of(context);
     if (recentLogs.isEmpty) {
       return Card(
@@ -627,16 +526,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
           child: Center(
             child: Column(
               children: [
-                Icon(
-                  Icons.history_toggle_off_outlined,
-                  size: 48,
-                  color: theme.hintColor,
-                ),
+                Icon(Icons.history_toggle_off_outlined, size: 48, color: theme.hintColor),
                 const SizedBox(height: 16),
-                Text(
-                  AppStrings.noRecentTimeLogs,
-                  style: theme.textTheme.bodyLarge,
-                ),
+                Text(AppStrings.noRecentTimeLogs, style: theme.textTheme.bodyLarge),
                 const SizedBox(height: 16),
                 AppButton(
                   text: AppStrings.logTime,
@@ -663,37 +555,23 @@ class _StudentHomePageState extends State<StudentHomePage> {
           margin: const EdgeInsets.only(bottom: 8.0),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: log.approved
-                  ? AppColors.statusActive.withAlpha(50)
-                  : theme.colorScheme.secondaryContainer,
+              backgroundColor: log.approved ? AppColors.statusActive.withAlpha(50) : theme.colorScheme.secondaryContainer,
               child: Icon(
-                log.approved
-                    ? Icons.check_circle_outline
-                    : Icons.hourglass_empty_outlined,
-                color: log.approved
-                    ? AppColors.statusActive
-                    : theme.colorScheme.onSecondaryContainer,
+                log.approved ? Icons.check_circle_outline : Icons.hourglass_empty_outlined,
+                color: log.approved ? AppColors.statusActive : theme.colorScheme.onSecondaryContainer,
                 size: 20,
               ),
             ),
             title: Text(
               '${log.hoursLogged?.toStringAsFixed(1) ?? "-"} horas - ${DateUtil.formatDate(log.logDate)}',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500),
             ),
             subtitle: Text(
-              log.description != null && log.description!.isNotEmpty
-                  ? log.description!
-                  : 'Sem descrição',
+              log.description != null && log.description!.isNotEmpty ? log.description! : 'Sem descrição',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: theme.hintColor,
-            ),
+            trailing: Icon(Icons.arrow_forward_ios, size: 14, color: theme.hintColor),
             onTap: () {
               // TODO: Navegar para detalhes do log de tempo ou permitir edição
               // Modular.to.pushNamed('/student/time-log-details', arguments: log.id);
@@ -712,17 +590,10 @@ class DateUtil {
     if (date == null) return '';
     return DateFormat('dd/MM/yyyy').format(date);
   }
-
-  static String formatTimeOfDay(TimeOfDay? timeOfDay) {
+   static String formatTimeOfDay(TimeOfDay? timeOfDay) {
     if (timeOfDay == null) return '';
     final now = DateTime.now();
-    final dt = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
+    final dt = DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
     return DateFormat('HH:mm').format(dt);
   }
 }

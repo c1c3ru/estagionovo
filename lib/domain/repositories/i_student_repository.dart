@@ -1,10 +1,10 @@
 // lib/domain/repositories/i_student_repository.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/core/enum/class_shift.dart';
-import 'package:estagio/domain/entities/student.dart';
-import 'package:estagio/domain/entities/time_log.dart';
 import 'package:flutter/material.dart'; // Para TimeOfDay
+import '../entities/student_entity.dart';
+import '../entities/time_log_entity.dart';
 import '../../core/errors/app_exceptions.dart';
+import '../../data/models/enums.dart'; // Para ClassShift
 
 // Parâmetros para atualizar perfil do estudante
 class UpdateStudentProfileParams {
@@ -34,14 +34,13 @@ class UpdateStudentProfileParams {
   });
 }
 
+
 abstract class IStudentRepository {
   /// Obtém os detalhes do perfil de um estudante pelo seu ID de utilizador.
   Future<Either<AppFailure, StudentEntity>> getStudentDetails(String userId);
 
   /// Atualiza os detalhes do perfil de um estudante.
-  Future<Either<AppFailure, StudentEntity>> updateStudentProfile(
-    UpdateStudentProfileParams params,
-  );
+  Future<Either<AppFailure, StudentEntity>> updateStudentProfile(UpdateStudentProfileParams params);
 
   /// Obtém os registos de tempo de um estudante.
   Future<Either<AppFailure, List<TimeLogEntity>>> getStudentTimeLogs({
@@ -55,15 +54,12 @@ abstract class IStudentRepository {
     required String studentId,
     required DateTime logDate,
     required TimeOfDay checkInTime,
-    TimeOfDay?
-    checkOutTime, // Opcional no momento da criação se for só check-in
+    TimeOfDay? checkOutTime, // Opcional no momento da criação se for só check-in
     String? description,
   });
 
   /// Atualiza um registo de tempo existente (ex: adicionar check-out, editar descrição).
-  Future<Either<AppFailure, TimeLogEntity>> updateTimeLog(
-    TimeLogEntity timeLog,
-  );
+  Future<Either<AppFailure, TimeLogEntity>> updateTimeLog(TimeLogEntity timeLog);
 
   /// Remove um registo de tempo.
   Future<Either<AppFailure, void>> deleteTimeLog(String timeLogId);
@@ -77,8 +73,32 @@ abstract class IStudentRepository {
   /// Realiza o check-out para um estudante, finalizando o registo de tempo.
   Future<Either<AppFailure, TimeLogEntity>> checkOut({
     required String studentId,
-    required String
-    activeTimeLogId, // ID do time_log que foi iniciado no check-in
+    required String activeTimeLogId, // ID do time_log que foi iniciado no check-in
     String? description, // Descrição para o período
+  });
+}
+import 'package:dartz/dartz.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../entities/student_entity.dart';
+
+abstract class IStudentRepository {
+  Future<Either<AppFailure, StudentEntity>> getStudentDetails(String userId);
+  Future<Either<AppFailure, StudentEntity>> updateStudentProfile(StudentEntity student);
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents();
+  Future<Either<AppFailure, StudentEntity>> createStudent(StudentEntity student);
+  Future<Either<AppFailure, void>> deleteStudent(String studentId);
+}
+
+class FilterStudentsParams {
+  final String? course;
+  final String? institution;
+  final StudentStatus? status;
+  final String? supervisorId;
+
+  const FilterStudentsParams({
+    this.course,
+    this.institution,
+    this.status,
+    this.supervisorId,
   });
 }

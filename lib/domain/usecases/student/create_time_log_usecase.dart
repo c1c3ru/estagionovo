@@ -1,6 +1,5 @@
 // lib/domain/usecases/student/create_time_log_usecase.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/domain/entities/time_log.dart';
 import 'package:flutter/material.dart'; // Para TimeOfDay
 import '../../../core/errors/app_exceptions.dart';
 import '../../entities/time_log_entity.dart';
@@ -23,26 +22,10 @@ class CreateTimeLogUsecase {
     }
     // Validação para garantir que checkOutTime, se fornecido, é posterior a checkInTime no mesmo dia.
     if (checkOutTime != null) {
-      final checkInDateTime = DateTime(
-        logDate.year,
-        logDate.month,
-        logDate.day,
-        checkInTime.hour,
-        checkInTime.minute,
-      );
-      final checkOutDateTime = DateTime(
-        logDate.year,
-        logDate.month,
-        logDate.day,
-        checkOutTime.hour,
-        checkOutTime.minute,
-      );
+      final checkInDateTime = DateTime(logDate.year, logDate.month, logDate.day, checkInTime.hour, checkInTime.minute);
+      final checkOutDateTime = DateTime(logDate.year, logDate.month, logDate.day, checkOutTime.hour, checkOutTime.minute);
       if (checkOutDateTime.isBefore(checkInDateTime)) {
-        return Left(
-          ValidationFailure(
-            'A hora de saída deve ser posterior à hora de entrada.',
-          ),
-        );
+        return Left(ValidationFailure('A hora de saída deve ser posterior à hora de entrada.'));
       }
     }
 

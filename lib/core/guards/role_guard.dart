@@ -1,9 +1,9 @@
 // lib/core/guards/role_guard.dart
 import 'dart:async';
-import 'package:estagio/core/enum/user_role.dart';
-import 'package:estagio/features/auth/bloc/auth_bloc.dart';
-import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
 import 'package:flutter_modular/flutter_modular.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/bloc/auth_state.dart' as auth_state; // Usar alias
+import '../enums/user_role.dart'; // O seu enum UserRole
 
 /// Um RouteGuard que verifica se o utilizador autenticado tem um dos papéis permitidos.
 /// Se não estiver autenticado ou não tiver o papel correto, redireciona.
@@ -11,9 +11,7 @@ class RoleGuard extends RouteGuard {
   final List<UserRole> allowedRoles;
 
   RoleGuard(this.allowedRoles)
-    : super(
-        redirectTo: '/auth/unauthorized',
-      ); // Rota para não autorizado ou de volta ao login
+      : super(redirectTo: '/auth/unauthorized'); // Rota para não autorizado ou de volta ao login
 
   @override
   FutureOr<bool> canActivate(String path, ParallelRoute route) {
@@ -22,8 +20,7 @@ class RoleGuard extends RouteGuard {
 
     if (currentState is auth_state.AuthSuccess) {
       // Utilizador está autenticado, verifica o papel
-      final UserRole currentUserRole = currentState
-          .userRole; // Ou currentState.user.role se UserEntity tiver a role
+      final UserRole currentUserRole = currentState.userRole; // Ou currentState.user.role se UserEntity tiver a role
 
       if (allowedRoles.contains(currentUserRole)) {
         // O papel do utilizador está na lista de papéis permitidos
@@ -32,9 +29,7 @@ class RoleGuard extends RouteGuard {
         // Papel não permitido, redireciona para '/auth/unauthorized'
         // Ou, se preferir, redirecione para uma rota base segura como '/auth/login'
         // ou para um dashboard específico do papel atual do utilizador se fizer sentido.
-        Modular.to.navigate(
-          '/auth/unauthorized',
-        ); // Exemplo de rota para não autorizado
+        Modular.to.navigate('/auth/unauthorized'); // Exemplo de rota para não autorizado
         return false;
       }
     } else {

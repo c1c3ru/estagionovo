@@ -1,7 +1,4 @@
 // lib/features/student/presentation/widgets/time_tracker_widget.dart
-import 'package:estagio/domain/entities/time_log.dart';
-import 'package:estagio/features/auth/bloc/auth_bloc.dart';
-import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart'; // Para obter o AuthBloc
@@ -10,7 +7,9 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
-
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart'; // Para obter o userId
+import '../../../auth/presentation/bloc/auth_state.dart' as auth_state; // Para obter o userId
 import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
@@ -63,9 +62,7 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
       _studentBloc.add(StudentCheckInEvent(userId: _userId!));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ID do utilizador não disponível para check-in.'),
-        ),
+        const SnackBar(content: Text('ID do utilizador não disponível para check-in.')),
       );
     }
   }
@@ -73,17 +70,13 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
   void _performCheckOut() {
     if (_userId != null && _activeTimeLog != null) {
       // Pode adicionar um diálogo para descrição aqui
-      _studentBloc.add(
-        StudentCheckOutEvent(
-          userId: _userId!,
-          activeTimeLogId: _activeTimeLog!.id,
-        ),
-      );
+      _studentBloc.add(StudentCheckOutEvent(
+        userId: _userId!,
+        activeTimeLogId: _activeTimeLog!.id,
+      ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nenhum check-in ativo encontrado para finalizar.'),
-        ),
+        const SnackBar(content: Text('Nenhum check-in ativo encontrado para finalizar.')),
       );
     }
   }
@@ -112,23 +105,23 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
           if (_userId != null) {
             _studentBloc.add(FetchActiveTimeLogEvent(userId: _userId!));
           }
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.success,
-              ),
-            );
+           ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.success,
+                ),
+              );
         } else if (state is StudentOperationFailure) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: theme.colorScheme.error,
-              ),
-            );
+           ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: theme.colorScheme.error,
+                ),
+              );
         }
       },
       child: Card(
@@ -138,16 +131,11 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize
-                .min, // Para que o Card não ocupe todo o espaço vertical
+            mainAxisSize: MainAxisSize.min, // Para que o Card não ocupe todo o espaço vertical
             children: [
               Text(
-                _activeTimeLog != null
-                    ? 'Check-in ativo desde:'
-                    : 'Pronto para começar?',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                _activeTimeLog != null ? 'Check-in ativo desde:' : 'Pronto para começar?',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               if (_activeTimeLog != null)
@@ -156,9 +144,7 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
                   child: Text(
                     _formatTimeOfDay(_activeTimeLog!.checkInTime),
                     style: theme.textTheme.headlineMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -166,25 +152,15 @@ class _TimeTrackerWidgetState extends State<TimeTrackerWidget> {
               BlocBuilder<StudentBloc, StudentState>(
                 bloc: _studentBloc,
                 builder: (context, state) {
-                  bool isLoading =
-                      state
-                          is StudentLoading; // Verifica se está a carregar uma operação de log
+                  bool isLoading = state is StudentLoading; // Verifica se está a carregar uma operação de log
                   bool isCheckedIn = _activeTimeLog != null;
 
                   return AppButton(
-                    text: isCheckedIn
-                        ? AppStrings.checkOut
-                        : AppStrings.checkIn,
-                    onPressed: isLoading
-                        ? null
-                        : (isCheckedIn ? _performCheckOut : _performCheckIn),
+                    text: isCheckedIn ? AppStrings.checkOut : AppStrings.checkIn,
+                    onPressed: isLoading ? null : (isCheckedIn ? _performCheckOut : _performCheckIn),
                     isLoading: isLoading,
-                    backgroundColor: isCheckedIn
-                        ? AppColors.warning
-                        : AppColors.success,
-                    icon: isCheckedIn
-                        ? Icons.logout_outlined
-                        : Icons.login_outlined,
+                    backgroundColor: isCheckedIn ? AppColors.warning : AppColors.success,
+                    icon: isCheckedIn ? Icons.logout_outlined : Icons.login_outlined,
                   );
                 },
               ),

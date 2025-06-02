@@ -1,10 +1,10 @@
 // lib/features/auth/presentation/bloc/auth_bloc.dart
 import 'dart:async';
-import 'package:estagio/domain/entities/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart'; // Para o Either
 
 import '../../../../core/errors/app_exceptions.dart';
+import '../../../../domain/entities/user_entity.dart';
 import '../../../../domain/usecases/auth/get_current_user_usecase.dart';
 import '../../../../domain/usecases/auth/login_usecase.dart';
 import '../../../../domain/usecases/auth/logout_usecase.dart';
@@ -13,6 +13,7 @@ import '../../../../domain/usecases/auth/reset_password_usecase.dart';
 import '../../../../domain/usecases/auth/update_profile_usecase.dart';
 import '../../../../domain/usecases/auth/get_auth_state_changes_usecase.dart';
 import '../../../../domain/repositories/i_auth_repository.dart'; // Para LoginParams, RegisterParams, UpdateProfileParams
+import '../../../../core/enums/user_role.dart'; // Ajuste o caminho se UserRole estiver em core/enums ou data/models/enums
 
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -38,14 +39,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required ResetPasswordUsecase resetPasswordUsecase,
     required UpdateProfileUsecase updateProfileUsecase,
     required GetAuthStateChangesUsecase getAuthStateChangesUsecase,
-  }) : _loginUsecase = loginUsecase,
-       _registerUsecase = registerUsecase,
-       _logoutUsecase = logoutUsecase,
-       _getCurrentUserUsecase = getCurrentUserUsecase,
-       _resetPasswordUsecase = resetPasswordUsecase,
-       _updateProfileUsecase = updateProfileUsecase,
-       _getAuthStateChangesUsecase = getAuthStateChangesUsecase,
-       super(const AuthInitial()) {
+  })  : _loginUsecase = loginUsecase,
+        _registerUsecase = registerUsecase,
+        _logoutUsecase = logoutUsecase,
+        _getCurrentUserUsecase = getCurrentUserUsecase,
+        _resetPasswordUsecase = resetPasswordUsecase,
+        _updateProfileUsecase = updateProfileUsecase,
+        _getAuthStateChangesUsecase = getAuthStateChangesUsecase,
+        super(const AuthInitial()) {
     on<LoginSubmittedEvent>(_onLoginSubmitted);
     on<RegisterSubmittedEvent>(_onRegisterSubmitted);
     on<LogoutRequestedEvent>(_onLogoutRequested);
@@ -70,8 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     result.fold(
       (failure) => emit(AuthFailure(message: failure.message)),
-      (userEntity) =>
-          emit(AuthSuccess(user: userEntity, userRole: userEntity.role)),
+      (userEntity) => emit(AuthSuccess(user: userEntity, userRole: userEntity.role)),
     );
   }
 
@@ -92,12 +92,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthFailure(message: failure.message)),
       // Após o registo, o utilizador normalmente precisa confirmar o email.
       // O UserEntity retornado aqui pode ser o utilizador antes da confirmação.
-      (userEntity) => emit(
-        const AuthRegistrationSuccess(
-          message:
-              'Conta criada com sucesso! Verifique o seu email para confirmação.',
-        ),
-      ),
+      (userEntity) => emit(const AuthRegistrationSuccess(
+          message: 'Conta criada com sucesso! Verifique o seu email para confirmação.')),
     );
   }
 
@@ -109,9 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _logoutUsecase.call();
     result.fold(
       (failure) => emit(AuthFailure(message: failure.message)),
-      (_) => emit(
-        const AuthUnauthenticated(),
-      ), // Após logout, o estado é não autenticado
+      (_) => emit(const AuthUnauthenticated()), // Após logout, o estado é não autenticado
     );
   }
 
@@ -123,12 +117,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _resetPasswordUsecase.call(event.email);
     result.fold(
       (failure) => emit(AuthFailure(message: failure.message)),
-      (_) => emit(
-        const AuthPasswordResetEmailSent(
-          message:
-              'Instruções para redefinição de senha enviadas para o seu email.',
-        ),
-      ),
+      (_) => emit(const AuthPasswordResetEmailSent(
+          message: 'Instruções para redefinição de senha enviadas para o seu email.')),
     );
   }
 
@@ -142,9 +132,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // emit(const AuthLoading());
     final result = await _getCurrentUserUsecase.call();
     result.fold(
-      (failure) => emit(
-        const AuthUnauthenticated(),
-      ), // Se falhar ao buscar, assume não autenticado
+      (failure) => emit(const AuthUnauthenticated()), // Se falhar ao buscar, assume não autenticado
       (userEntity) {
         if (userEntity != null) {
           emit(AuthSuccess(user: userEntity, userRole: userEntity.role));
@@ -169,19 +157,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     result.fold(
-      (failure) => emit(
-        AuthFailure(message: failure.message),
-      ), // Ou um ProfileUpdateFailure state
+      (failure) => emit(AuthFailure(message: failure.message)), // Ou um ProfileUpdateFailure state
       (updatedUserEntity) {
-        emit(AuthProfileUpdateSuccess(updatedUser: updatedUserEntity));
-        // Re-emitir AuthSuccess para atualizar qualquer UI que dependa do UserEntity principal
-        emit(
-          AuthSuccess(
-            user: updatedUserEntity,
-            userRole: updatedUserEntity.role,
-          ),
-        );
-      },
+         emit(AuthProfileUpdateSuccess(updatedUser: updatedUserEntity));
+         // Re-emitir AuthSuccess para atualizar qualquer UI que dependa do UserEntity principal
+         emit(AuthSuccess(user: updatedUserEntity, userRole: updatedUserEntity.role));
+      }
     );
   }
 

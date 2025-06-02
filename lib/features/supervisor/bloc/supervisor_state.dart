@@ -1,9 +1,9 @@
 // lib/features/supervisor/presentation/bloc/supervisor_state.dart
 import 'package:equatable/equatable.dart';
-import 'package:estagio/domain/entities/contract.dart';
-import 'package:estagio/domain/entities/student.dart';
-import 'package:estagio/domain/entities/supervisor.dart';
-import 'package:estagio/domain/entities/time_log.dart';
+import '../../../../domain/entities/student_entity.dart';
+import '../../../../domain/entities/supervisor_entity.dart';
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../../domain/entities/contract_entity.dart';
 
 // Dados agregados para o dashboard do supervisor
 class SupervisorDashboardStats extends Equatable {
@@ -21,11 +21,11 @@ class SupervisorDashboardStats extends Equatable {
 
   @override
   List<Object?> get props => [
-    totalStudents,
-    activeStudents,
-    inactiveStudents,
-    expiringContractsSoon,
-  ];
+        totalStudents,
+        activeStudents,
+        inactiveStudents,
+        expiringContractsSoon,
+      ];
 
   SupervisorDashboardStats copyWith({
     int? totalStudents,
@@ -37,8 +37,7 @@ class SupervisorDashboardStats extends Equatable {
       totalStudents: totalStudents ?? this.totalStudents,
       activeStudents: activeStudents ?? this.activeStudents,
       inactiveStudents: inactiveStudents ?? this.inactiveStudents,
-      expiringContractsSoon:
-          expiringContractsSoon ?? this.expiringContractsSoon,
+      expiringContractsSoon: expiringContractsSoon ?? this.expiringContractsSoon,
     );
   }
 }
@@ -58,17 +57,15 @@ class SupervisorLoading extends SupervisorState {
   final String? loadingMessage; // Mensagem opcional durante o carregamento
   const SupervisorLoading({this.loadingMessage});
 
-  @override
+   @override
   List<Object?> get props => [loadingMessage];
 }
 
 /// Estado quando os dados do dashboard do supervisor são carregados.
 class SupervisorDashboardLoadSuccess extends SupervisorState {
-  final SupervisorEntity?
-  supervisorProfile; // Perfil do supervisor logado (opcional aqui)
+  final SupervisorEntity? supervisorProfile; // Perfil do supervisor logado (opcional aqui)
   final List<StudentEntity> students; // Lista de estudantes (pode ser filtrada)
-  final List<ContractEntity>
-  contracts; // Lista de contratos para o Gantt ou visão geral
+  final List<ContractEntity> contracts; // Lista de contratos para o Gantt ou visão geral
   final SupervisorDashboardStats stats;
   final bool showGanttView; // Para alternar entre lista e Gantt
 
@@ -81,13 +78,7 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
   });
 
   @override
-  List<Object?> get props => [
-    supervisorProfile,
-    students,
-    contracts,
-    stats,
-    showGanttView,
-  ];
+  List<Object?> get props => [supervisorProfile, students, contracts, stats, showGanttView];
 
   SupervisorDashboardLoadSuccess copyWith({
     SupervisorEntity? supervisorProfile,
@@ -141,6 +132,7 @@ class SupervisorContractsLoadSuccess extends SupervisorState {
   @override
   List<Object?> get props => [contracts];
 }
+
 
 /// Estado de sucesso para operações CRUD (Criar, Atualizar, Remover estudante/contrato, Aprovar log).
 class SupervisorOperationSuccess extends SupervisorState {

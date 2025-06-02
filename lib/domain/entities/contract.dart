@@ -1,7 +1,7 @@
 // lib/domain/entities/contract_entity.dart
 import 'package:equatable/equatable.dart';
-import 'package:estagio/core/enum/contract_status.dart';
 // Importa o enum ContractStatus da camada de dados.
+import '../../data/models/enums.dart';
 
 class ContractEntity extends Equatable {
   final String id;
@@ -34,19 +34,19 @@ class ContractEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    studentId,
-    supervisorId,
-    contractType,
-    status,
-    startDate,
-    endDate,
-    description,
-    documentUrl,
-    createdBy,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        studentId,
+        supervisorId,
+        contractType,
+        status,
+        startDate,
+        endDate,
+        description,
+        documentUrl,
+        createdBy,
+        createdAt,
+        updatedAt,
+      ];
 
   ContractEntity copyWith({
     String? id,
@@ -70,19 +70,13 @@ class ContractEntity extends Equatable {
     return ContractEntity(
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
-      supervisorId: clearSupervisorId == true
-          ? null
-          : supervisorId ?? this.supervisorId,
+      supervisorId: clearSupervisorId == true ? null : supervisorId ?? this.supervisorId,
       contractType: contractType ?? this.contractType,
       status: status ?? this.status,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      description: clearDescription == true
-          ? null
-          : description ?? this.description,
-      documentUrl: clearDocumentUrl == true
-          ? null
-          : documentUrl ?? this.documentUrl,
+      description: clearDescription == true ? null : description ?? this.description,
+      documentUrl: clearDocumentUrl == true ? null : documentUrl ?? this.documentUrl,
       createdBy: clearCreatedBy == true ? null : createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,

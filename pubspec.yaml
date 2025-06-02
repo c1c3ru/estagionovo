@@ -4,7 +4,7 @@ description: Aplicativo de gerenciamento de estagiários e bolsistas.
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.8.0 <4.0.0' # Dart 3.3+ recomendado para as versões mais recentes dos pacotes
+  sdk: '>=3.3.0 <4.0.0' # Dart 3.3+ recomendado para as versões mais recentes dos pacotes
 
 dependencies:
   flutter:

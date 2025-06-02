@@ -1,10 +1,12 @@
 // lib/app_module.dart
 import 'package:estagio/core/enum/user_role.dart';
 import 'package:estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter/material.dart'; // ADICIONADO PARA WIDGETS
+import 'package:flutter_bloc/flutter_bloc.dart'; // ADICIONADO PARA BLOCBUILDER
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Core (Guards, Enums não são injetados, mas podem ser importados por outros módulos)
+// Core
 import 'core/guards/auth_guard.dart';
 import 'core/guards/role_guard.dart';
 
@@ -42,12 +44,7 @@ import 'domain/usecases/auth/get_current_user_usecase.dart';
 import 'domain/usecases/auth/reset_password_usecase.dart';
 import 'domain/usecases/auth/update_profile_usecase.dart';
 import 'domain/usecases/auth/get_auth_state_changes_usecase.dart';
-// Usecases (Student) - Registados no StudentModule
-// Usecases (Supervisor) - Registados no SupervisorModule
-// Usecases (Contract) - Registados nos módulos que os usam ou aqui se forem muito globais
 
-// --- FEATURES ---
-// BLoCs (AuthBloc é global)
 // Modules
 import 'features/auth/auth_module.dart';
 import 'features/student/student_module.dart';
@@ -55,105 +52,70 @@ import 'features/supervisor/supervisor_module.dart';
 
 class AppModule extends Module {
   @override
-  List<Module> get imports => [
-    // Se você criar um CoreModule com binds comuns (ex: HttpClient), importe-o.
-    // CoreModule(),
-  ];
+  List<Module> get imports => [];
 
   @override
   void binds(Injector i) {
     // --- CORE ---
-    // Guards (são instanciados diretamente nas rotas, mas podem ser registados se tiverem dependências)
-    // i.add<AuthGuard>(() => AuthGuard());
+    // i.add<AuthGuard>(() => AuthGuard()); // Instanciado diretamente nas rotas
     // i.addFactoryParam<RoleGuard, List<UserRole>, void>((roles, _) => RoleGuard(roles));
 
     // --- CAMADA DE DADOS ---
-    // Supabase Client (SINGLETON)
     i.addSingleton<SupabaseClient>(() => Supabase.instance.client);
-
-    // Datasources (Supabase) - Singletons
     i.addSingleton<IAuthSupabaseDatasource>(
-      () => AuthSupabaseDatasource(i.get<SupabaseClient>()),
-    );
+        () => AuthSupabaseDatasource(i.get<SupabaseClient>()));
     i.addSingleton<IStudentSupabaseDatasource>(
-      () => StudentSupabaseDatasource(i.get<SupabaseClient>()),
-    );
+        () => StudentSupabaseDatasource(i.get<SupabaseClient>()));
     i.addSingleton<ISupervisorSupabaseDatasource>(
-      () => SupervisorSupabaseDatasource(i.get<SupabaseClient>()),
-    );
+        () => SupervisorSupabaseDatasource(i.get<SupabaseClient>()));
     i.addSingleton<ITimeLogSupabaseDatasource>(
-      () => TimeLogSupabaseDatasource(i.get<SupabaseClient>()),
-    );
+        () => TimeLogSupabaseDatasource(i.get<SupabaseClient>()));
     i.addSingleton<IContractSupabaseDatasource>(
-      () => ContractSupabaseDatasource(i.get<SupabaseClient>()),
-    );
-
-    // Datasources (Local) - Singletons
+        () => ContractSupabaseDatasource(i.get<SupabaseClient>()));
     i.addSingleton<IPreferencesManager>(() => PreferencesManager());
-    i.addSingleton<ICacheManager>(
-      () => InMemoryCacheManager(),
-    ); // Ou outra implementação
+    i.addSingleton<ICacheManager>(() => InMemoryCacheManager());
 
-    // Repositories (Implementações) - Singletons
+    // Repositories
     i.addSingleton<IAuthRepository>(
-      () => AuthRepository(i.get<IAuthSupabaseDatasource>()),
-    );
-    i.addSingleton<IStudentRepository>(
-      () => StudentRepository(
+        () => AuthRepository(i.get<IAuthSupabaseDatasource>()));
+    i.addSingleton<IStudentRepository>(() => StudentRepository(
         i.get<IStudentSupabaseDatasource>(),
-        i.get<ITimeLogSupabaseDatasource>(),
-      ),
-    );
-    i.addSingleton<ISupervisorRepository>(
-      () => SupervisorRepository(
+        i.get<ITimeLogSupabaseDatasource>()));
+    i.addSingleton<ISupervisorRepository>(() => SupervisorRepository(
         i.get<ISupervisorSupabaseDatasource>(),
         i.get<IStudentSupabaseDatasource>(),
         i.get<ITimeLogSupabaseDatasource>(),
-        i.get<IContractSupabaseDatasource>(),
-      ),
-    );
+        i.get<IContractSupabaseDatasource>()));
     i.addSingleton<ITimeLogRepository>(
-      () => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()),
-    );
+        () => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()));
     i.addSingleton<IContractRepository>(
-      () => ContractRepository(i.get<IContractSupabaseDatasource>()),
-    );
+        () => ContractRepository(i.get<IContractSupabaseDatasource>()));
 
     // --- CAMADA DE DOMÍNIO ---
-    // Usecases (Auth) - Factories (geralmente sem estado)
+    // Usecases (Auth)
     i.add<LoginUsecase>(() => LoginUsecase(i.get<IAuthRepository>()));
     i.add<RegisterUsecase>(() => RegisterUsecase(i.get<IAuthRepository>()));
     i.add<LogoutUsecase>(() => LogoutUsecase(i.get<IAuthRepository>()));
     i.add<GetCurrentUserUsecase>(
-      () => GetCurrentUserUsecase(i.get<IAuthRepository>()),
-    );
+        () => GetCurrentUserUsecase(i.get<IAuthRepository>()));
     i.add<ResetPasswordUsecase>(
-      () => ResetPasswordUsecase(i.get<IAuthRepository>()),
-    );
+        () => ResetPasswordUsecase(i.get<IAuthRepository>()));
     i.add<UpdateProfileUsecase>(
-      () => UpdateProfileUsecase(i.get<IAuthRepository>()),
-    );
+        () => UpdateProfileUsecase(i.get<IAuthRepository>()));
     i.add<GetAuthStateChangesUsecase>(
-      () => GetAuthStateChangesUsecase(i.get<IAuthRepository>()),
-    );
-
-    // Usecases de Student, Supervisor, Contract serão registados nos seus respectivos módulos
-    // de feature, pois são mais específicos para essas features.
-    // Se algum usecase for verdadeiramente global, pode ser registado aqui.
+        () => GetAuthStateChangesUsecase(i.get<IAuthRepository>()));
 
     // --- FEATURES ---
-    // BLoCs (AuthBloc é global) - Singleton
-    i.addSingleton<AuthBloc>(
-      () => AuthBloc(
-        loginUsecase: i.get<LoginUsecase>(),
-        registerUsecase: i.get<RegisterUsecase>(),
-        logoutUsecase: i.get<LogoutUsecase>(),
-        getCurrentUserUsecase: i.get<GetCurrentUserUsecase>(),
-        resetPasswordUsecase: i.get<ResetPasswordUsecase>(),
-        updateProfileUsecase: i.get<UpdateProfileUsecase>(),
-        getAuthStateChangesUsecase: i.get<GetAuthStateChangesUsecase>(),
-      ),
-    );
+    // BLoCs (AuthBloc é global)
+    i.addSingleton<AuthBloc>(() => AuthBloc(
+          loginUsecase: i.get<LoginUsecase>(),
+          registerUsecase: i.get<RegisterUsecase>(),
+          logoutUsecase: i.get<LogoutUsecase>(),
+          getCurrentUserUsecase: i.get<GetCurrentUserUsecase>(),
+          resetPasswordUsecase: i.get<ResetPasswordUsecase>(),
+          updateProfileUsecase: i.get<UpdateProfileUsecase>(),
+          getAuthStateChangesUsecase: i.get<GetAuthStateChangesUsecase>(),
+        ));
   }
 
   @override
@@ -165,7 +127,7 @@ class AppModule extends Module {
       module: StudentModule(),
       guards: [
         AuthGuard(),
-        RoleGuard([UserRole.student]),
+        RoleGuard([UserRole.student]), // UserRole importado de core/enums
       ],
     );
 
@@ -176,71 +138,58 @@ class AppModule extends Module {
         AuthGuard(),
         RoleGuard([
           UserRole.supervisor,
-          UserRole.admin,
-        ]), // Admin também pode aceder
+          UserRole.admin
+        ]), // UserRole importado de core/enums
       ],
     );
 
-    // Rota de Admin (Exemplo, se houver um AdminModule)
-    // r.module(
-    //   '/admin',
-    //   module: AdminModule(),
-    //   guards: [
-    //     AuthGuard(),
-    //     RoleGuard([UserRole.admin]),
-    //   ],
-    // );
-
-    // Rota inicial da aplicação
-    // O AuthGuard na rota '/' ou uma SplashPage que ouve o AuthBloc
-    // geralmente lida com o redirecionamento inicial.
-    // Se não houver guarda na rota raiz, um redirecionamento explícito é necessário.
     r.child(
       '/',
-      child: (context) =>
-          const InitialRedirectWidget(), // Um widget que decide para onde ir
-      guards: [AuthGuard()], // AuthGuard na raiz para proteger
+      child: (context) => const InitialRedirectWidget(),
+      guards: [AuthGuard()],
     );
-    // Se o AuthGuard redirecionar para /auth/login por defeito quando não autenticado,
-    // e para uma rota interna quando autenticado, isso pode funcionar.
-    // Ou, InitialRedirectWidget pode ouvir o AuthBloc.
   }
 }
 
 // Widget simples para redirecionamento inicial baseado no estado de autenticação
-// Este widget seria usado se a rota '/' não tivesse um guard que já fizesse o redirecionamento.
-// Com o AuthGuard na rota '/', este widget pode não ser estritamente necessário,
-// mas pode adicionar lógica extra se preciso.
 class InitialRedirectWidget extends StatelessWidget {
   const InitialRedirectWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      bloc: Modular.get<AuthBloc>(), // Obtém o AuthBloc global
+    // O AuthBloc deve ser obtido do contexto se o AppWidget o provê via BlocProvider.
+    // Se o AppWidget ainda não foi construído, Modular.get pode ser usado, mas
+    // é melhor prática usar context.watch ou context.read se estiver dentro de um widget
+    // que já tem o BlocProvider acima dele na árvore.
+    // Como este widget é parte do AppModule e pode ser a primeira coisa renderizada,
+    // Modular.get é uma opção aqui, assumindo que o AuthBloc já foi 'bindado'.
+    final authBloc = Modular.get<AuthBloc>();
+
+    return BlocBuilder<AuthBloc, auth_feature_state.AuthState>(
+      // Usando o alias para o AuthState da feature
+      bloc: authBloc,
       builder: (context, state) {
-        if (state is Authenticated) {
+        if (state is auth_feature_state.Authenticated) {
+          // Usando o alias
           // Utilizador autenticado, redireciona com base no papel
           switch (state.userRole) {
+            // userRole do estado AuthSuccess
             case UserRole.student:
-              // Usar replaceAllNamed para limpar a pilha de navegação
               Modular.to.replaceAllNamed('/student/');
               break;
             case UserRole.supervisor:
               Modular.to.replaceAllNamed('/supervisor/');
               break;
             case UserRole.admin:
-              // Modular.to.replaceAllNamed('/admin/'); // Se houver rota de admin
               Modular.to.replaceAllNamed(
-                '/supervisor/',
-              ); // Admin pode ir para supervisor por agora
+                  '/supervisor/'); // Admin pode ir para supervisor por agora
               break;
             default:
-              // Papel desconhecido ou não tratado, vai para o login
               Modular.to.replaceAllNamed('/auth/login');
           }
-        } else if (state is Unauthenticated || state is AuthFailure) {
-          // Não autenticado ou falha, vai para o login
+        } else if (state is auth_feature_state.Unauthenticated ||
+            state is auth_feature_state.AuthFailure) {
+          // Usando o alias
           Modular.to.replaceAllNamed('/auth/login');
         }
         // Enquanto AuthInitial ou AuthLoading, mostra um indicador

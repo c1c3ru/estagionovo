@@ -1,20 +1,20 @@
-  // lib/core/enums/user_role.dart
+// lib/core/enum/user_role.dart
 enum UserRole {
+  unknown,
   student,
   supervisor,
-  admin,
-  unknown;
+  admin;
 
-  static UserRole fromString(String? roleString) {
-    switch (roleString?.toLowerCase()) {
-      case 'student':
-        return UserRole.student;
-      case 'supervisor':
-        return UserRole.supervisor;
-      case 'admin':
-        return UserRole.admin;
-      default:
-        return UserRole.unknown;
+  String get displayName {
+    switch (this) {
+      case UserRole.student:
+        return 'Estudante';
+      case UserRole.supervisor:
+        return 'Supervisor';
+      case UserRole.admin:
+        return 'Administrador';
+      case UserRole.unknown:
+        return 'Desconhecido';
     }
   }
 
@@ -26,24 +26,21 @@ enum UserRole {
         return 'supervisor';
       case UserRole.admin:
         return 'admin';
-      default:
+      case UserRole.unknown:
         return 'unknown';
     }
   }
 
-  String get displayName {
-    switch (this) {
-      case UserRole.student:
-        return 'Estudante';
-      case UserRole.supervisor:
-        return 'Supervisor';
-      case UserRole.admin:
-        return 'Administrador';
+  static UserRole fromString(String role) {
+    switch (role.toLowerCase()) {
+      case 'student':
+        return UserRole.student;
+      case 'supervisor':
+        return UserRole.supervisor;
+      case 'admin':
+        return UserRole.admin;
       default:
-        return 'Desconhecido';
+        return UserRole.unknown;
     }
   }
-
-  /// Verifica se a role é válida (não é unknown).
-  bool isValid() => this != UserRole.unknown;
 }

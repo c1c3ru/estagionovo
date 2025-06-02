@@ -1,7 +1,6 @@
 // lib/domain/repositories/i_contract_repository.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/core/enum/contract_status.dart';
-import 'package:estagio/domain/entities/contract.dart';
+import '../entities/contract_entity.dart';
 import '../../core/errors/app_exceptions.dart';
 
 // Parâmetros para criar/atualizar um contrato
@@ -15,10 +14,9 @@ class UpsertContractParams {
   final DateTime endDate;
   final String? description;
   final String? documentUrl;
-  final String
-  createdBy; // ID do usuário (supervisor/admin) que está a criar/atualizar
+  final String createdBy; // ID do usuário (supervisor/admin) que está a criar/atualizar
 
-  UpsertContractParams({
+   UpsertContractParams({
     this.id,
     required this.studentId,
     this.supervisorId,
@@ -32,19 +30,16 @@ class UpsertContractParams {
   });
 }
 
+
 abstract class IContractRepository {
   /// Cria um novo contrato.
-  Future<Either<AppFailure, ContractEntity>> createContract(
-    UpsertContractParams params,
-  );
+  Future<Either<AppFailure, ContractEntity>> createContract(UpsertContractParams params);
 
   /// Obtém um contrato específico pelo seu ID.
   Future<Either<AppFailure, ContractEntity>> getContractById(String contractId);
 
   /// Obtém todos os contratos para um estudante específico.
-  Future<Either<AppFailure, List<ContractEntity>>> getContractsForStudent(
-    String studentId,
-  );
+  Future<Either<AppFailure, List<ContractEntity>>> getContractsForStudent(String studentId);
 
   /// Obtém todos os contratos (geralmente para um supervisor ou admin).
   /// Pode incluir filtros por status, supervisor, etc.
@@ -55,9 +50,7 @@ abstract class IContractRepository {
   });
 
   /// Atualiza um contrato existente.
-  Future<Either<AppFailure, ContractEntity>> updateContract(
-    UpsertContractParams params,
-  );
+  Future<Either<AppFailure, ContractEntity>> updateContract(UpsertContractParams params);
 
   /// Remove um contrato.
   Future<Either<AppFailure, void>> deleteContract(String contractId);

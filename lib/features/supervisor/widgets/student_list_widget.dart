@@ -1,17 +1,20 @@
 // lib/features/supervisor/presentation/widgets/student_list_widget.dart
-import 'package:estagio/core/enum/user_role.dart';
-import 'package:estagio/domain/entities/student.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart'; // Para formatação de datas
 
 import '../../../../core/constants/app_colors.dart'; // Para cores de status
 import '../../../../core/utils/date_utils.dart'; // Para DateUtil, se criado
+import '../../../../domain/entities/student_entity.dart';
+import '../../../../data/models/enums.dart'; // Para StudentStatus e sua extensão displayName
 
 class StudentListWidget extends StatelessWidget {
   final List<StudentEntity> students;
 
-  const StudentListWidget({Key? key, required this.students}) : super(key: key);
+  const StudentListWidget({
+    Key? key,
+    required this.students,
+  }) : super(key: key);
 
   Color _getStatusColor(StudentStatus status, BuildContext context) {
     final theme = Theme.of(context);
@@ -69,59 +72,37 @@ class StudentListWidget extends StatelessWidget {
     return ListView.separated(
       itemCount: students.length,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      physics:
-          const ClampingScrollPhysics(), // Para funcionar bem dentro de outro scroll, se necessário
-      shrinkWrap:
-          true, // Se estiver dentro de uma Column/ListView que não define altura
+      physics: const ClampingScrollPhysics(), // Para funcionar bem dentro de outro scroll, se necessário
+      shrinkWrap: true, // Se estiver dentro de uma Column/ListView que não define altura
       itemBuilder: (context, index) {
         final student = students[index];
-        final statusColor = _getStatusColor(
-          student.role == UserRole.student
-              ? StudentStatus.active
-              : StudentStatus.inactive,
-          context,
-        ); // Exemplo simplificado de status
+        final statusColor = _getStatusColor(student.role == UserRole.student ? StudentStatus.active : StudentStatus.inactive, context); // Exemplo simplificado de status
         // A StudentEntity não tem um campo 'status' direto como o enum StudentStatus.
         // A lógica de status do estudante (ativo, inativo, etc.) pode depender da data do contrato
         // ou de um campo 'is_active' na tabela 'users' ou 'students'.
         // Para este exemplo, vou usar a data do contrato para um status visual simples.
-        final bool isActiveBasedOnContract =
-            student.contractEndDate.isAfter(DateTime.now()) &&
-            student.contractStartDate.isBefore(DateTime.now());
-        final displayStatus = isActiveBasedOnContract
-            ? StudentStatus.active
-            : StudentStatus.inactive; // Simplificação
+        final bool isActiveBasedOnContract = student.contractEndDate.isAfter(DateTime.now()) && student.contractStartDate.isBefore(DateTime.now());
+        final displayStatus = isActiveBasedOnContract ? StudentStatus.active : StudentStatus.inactive; // Simplificação
         final displayStatusColor = _getStatusColor(displayStatus, context);
+
 
         return Card(
           elevation: 1.5,
-          margin: const EdgeInsets.symmetric(
-            horizontal: 0,
-            vertical: 6.0,
-          ), // Ajustado para não ter margem horizontal se a page já tiver padding
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6.0), // Ajustado para não ter margem horizontal se a page já tiver padding
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             leading: CircleAvatar(
               radius: 24,
               backgroundColor: displayStatusColor.withAlpha(50),
-              backgroundImage:
-                  student.profilePictureUrl != null &&
-                      student.profilePictureUrl!.isNotEmpty
+              backgroundImage: student.profilePictureUrl != null && student.profilePictureUrl!.isNotEmpty
                   ? NetworkImage(student.profilePictureUrl!)
                   : null,
-              child:
-                  student.profilePictureUrl == null ||
-                      student.profilePictureUrl!.isEmpty
+              child: student.profilePictureUrl == null || student.profilePictureUrl!.isEmpty
                   ? Text(
-                      student.fullName.isNotEmpty
-                          ? student.fullName[0].toUpperCase()
-                          : '?',
+                      student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: displayStatusColor,
@@ -132,9 +113,7 @@ class StudentListWidget extends StatelessWidget {
             ),
             title: Text(
               student.fullName,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -145,9 +124,7 @@ class StudentListWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   student.course,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.hintColor,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -157,8 +134,7 @@ class StudentListWidget extends StatelessWidget {
                     Icon(Icons.circle, size: 8, color: displayStatusColor),
                     const SizedBox(width: 4),
                     Text(
-                      displayStatus
-                          .displayName, // Usando a extensão para nome amigável
+                      displayStatus.displayName, // Usando a extensão para nome amigável
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: displayStatusColor,
                         fontWeight: FontWeight.w500,
@@ -168,9 +144,7 @@ class StudentListWidget extends StatelessWidget {
                     Expanded(
                       child: Text(
                         _getDaysRemainingText(student.contractEndDate),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.hintColor,
-                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -178,11 +152,7 @@ class StudentListWidget extends StatelessWidget {
                 ),
               ],
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: theme.hintColor,
-            ),
+            trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: theme.hintColor),
             onTap: () {
               // Navegar para a página de detalhes do estudante
               Modular.to.pushNamed('/supervisor/student-details/${student.id}');
@@ -190,9 +160,7 @@ class StudentListWidget extends StatelessWidget {
           ),
         );
       },
-      separatorBuilder: (context, index) => const SizedBox(
-        height: 0,
-      ), // Sem separador visível, o Card já tem margem
+      separatorBuilder: (context, index) => const SizedBox(height: 0), // Sem separador visível, o Card já tem margem
     );
   }
 }

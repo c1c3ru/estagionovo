@@ -1,7 +1,7 @@
 // lib/domain/usecases/contract/create_contract_usecase.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/domain/entities/contract.dart';
 import '../../../core/errors/app_exceptions.dart';
+import '../../entities/contract_entity.dart';
 import '../../repositories/i_contract_repository.dart'; // Contém UpsertContractParams
 
 class CreateContractUsecase {
@@ -9,24 +9,16 @@ class CreateContractUsecase {
 
   CreateContractUsecase(this._repository);
 
-  Future<Either<AppFailure, ContractEntity>> call(
-    UpsertContractParams params,
-  ) async {
+  Future<Either<AppFailure, ContractEntity>> call(UpsertContractParams params) async {
     // Validações básicas
     if (params.studentId.isEmpty) {
       return Left(ValidationFailure('O ID do estudante é obrigatório.'));
     }
     if (params.createdBy.isEmpty) {
-      return Left(
-        ValidationFailure('O ID do criador do contrato é obrigatório.'),
-      );
+      return Left(ValidationFailure('O ID do criador do contrato é obrigatório.'));
     }
     if (params.startDate.isAfter(params.endDate)) {
-      return Left(
-        ValidationFailure(
-          'A data de início não pode ser posterior à data de término.',
-        ),
-      );
+      return Left(ValidationFailure('A data de início não pode ser posterior à data de término.'));
     }
     // Outras validações específicas do contrato podem ser adicionadas aqui.
 

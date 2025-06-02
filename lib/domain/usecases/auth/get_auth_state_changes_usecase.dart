@@ -1,6 +1,5 @@
 // lib/domain/usecases/auth/get_auth_state_changes_usecase.dart
-import 'package:estagio/domain/entities/user.dart';
-
+import '../../entities/user_entity.dart';
 import '../../repositories/i_auth_repository.dart';
 
 class GetAuthStateChangesUsecase {

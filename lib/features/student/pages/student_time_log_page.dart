@@ -1,7 +1,4 @@
 // lib/features/student/presentation/pages/student_time_log_page.dart
-import 'package:estagio/domain/entities/time_log.dart';
-import 'package:estagio/features/auth/bloc/auth_bloc.dart';
-import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -13,7 +10,9 @@ import '../../../../core/utils/validators.dart'; // Para validação no formulá
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart' as auth_state;
 import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
@@ -71,32 +70,19 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
   void _showAddEditTimeLogDialog({TimeLogEntity? timeLog}) {
     if (_currentUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'ID do utilizador não encontrado. Não é possível adicionar/editar registo.',
-          ),
-        ),
+        const SnackBar(content: Text('ID do utilizador não encontrado. Não é possível adicionar/editar registo.')),
       );
       return;
     }
 
     final _formKey = GlobalKey<FormState>();
     final _dateController = TextEditingController(
-      text: timeLog != null
-          ? DateFormat('dd/MM/yyyy').format(timeLog.logDate)
-          : DateFormat('dd/MM/yyyy').format(DateTime.now()),
-    );
+        text: timeLog != null ? DateFormat('dd/MM/yyyy').format(timeLog.logDate) : DateFormat('dd/MM/yyyy').format(DateTime.now()));
     final _checkInController = TextEditingController(
-      text: timeLog != null ? _formatTimeOfDay(timeLog.checkInTime) : '',
-    );
+        text: timeLog != null ? _formatTimeOfDay(timeLog.checkInTime) : '');
     final _checkOutController = TextEditingController(
-      text: timeLog?.checkOutTime != null
-          ? _formatTimeOfDay(timeLog!.checkOutTime!)
-          : '',
-    );
-    final _descriptionController = TextEditingController(
-      text: timeLog?.description ?? '',
-    );
+        text: timeLog?.checkOutTime != null ? _formatTimeOfDay(timeLog!.checkOutTime!) : '');
+    final _descriptionController = TextEditingController(text: timeLog?.description ?? '');
 
     DateTime selectedDate = timeLog?.logDate ?? DateTime.now();
     TimeOfDay? selectedCheckInTime = timeLog?.checkInTime;
@@ -106,11 +92,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text(
-            timeLog == null
-                ? 'Adicionar Registo de Tempo'
-                : 'Editar Registo de Tempo',
-          ),
+          title: Text(timeLog == null ? 'Adicionar Registo de Tempo' : 'Editar Registo de Tempo'),
           content: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -123,24 +105,18 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                     labelText: 'Data',
                     prefixIcon: Icons.calendar_today_outlined,
                     readOnly: true,
-                    validator: (value) =>
-                        Validators.required(value, fieldName: 'Data'),
+                    validator: (value) => Validators.required(value, fieldName: 'Data'),
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: dialogContext,
                         initialDate: selectedDate,
                         firstDate: DateTime(2000),
-                        lastDate: DateTime.now().add(
-                          const Duration(days: 1),
-                        ), // Permite até amanhã para evitar problemas de fuso
+                        lastDate: DateTime.now().add(const Duration(days: 1)), // Permite até amanhã para evitar problemas de fuso
                       );
                       if (picked != null && picked != selectedDate) {
-                        setState(() {
-                          // setState do diálogo, não da página
+                        setState(() { // setState do diálogo, não da página
                           selectedDate = picked;
-                          _dateController.text = DateFormat(
-                            'dd/MM/yyyy',
-                          ).format(picked);
+                          _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
                         });
                       }
                     },
@@ -152,18 +128,14 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                     labelText: 'Hora de Entrada',
                     prefixIcon: Icons.access_time_outlined,
                     readOnly: true,
-                    validator: (value) => Validators.required(
-                      value,
-                      fieldName: 'Hora de Entrada',
-                    ),
+                    validator: (value) => Validators.required(value, fieldName: 'Hora de Entrada'),
                     onTap: () async {
                       final TimeOfDay? picked = await showTimePicker(
                         context: dialogContext,
                         initialTime: selectedCheckInTime ?? TimeOfDay.now(),
                       );
                       if (picked != null && picked != selectedCheckInTime) {
-                        setState(() {
-                          // setState do diálogo
+                         setState(() { // setState do diálogo
                           selectedCheckInTime = picked;
                           _checkInController.text = _formatTimeOfDay(picked);
                         });
@@ -183,8 +155,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                         initialTime: selectedCheckOutTime ?? TimeOfDay.now(),
                       );
                       if (picked != null && picked != selectedCheckOutTime) {
-                        setState(() {
-                          // setState do diálogo
+                         setState(() { // setState do diálogo
                           selectedCheckOutTime = picked;
                           _checkOutController.text = _formatTimeOfDay(picked);
                         });
@@ -216,41 +187,31 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
               onPressed: () {
                 if (_formKey.currentState?.validate() ?? false) {
                   if (selectedCheckInTime == null) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Por favor, selecione a hora de entrada.',
-                        ),
-                      ),
-                    );
-                    return;
+                     ScaffoldMessenger.of(dialogContext).showSnackBar(
+                       const SnackBar(content: Text('Por favor, selecione a hora de entrada.')),
+                     );
+                     return;
                   }
 
-                  if (timeLog == null) {
-                    // Criar novo
-                    _studentBloc.add(
-                      CreateManualTimeLogEvent(
-                        userId: _currentUserId!,
-                        logDate: selectedDate,
-                        checkInTime: selectedCheckInTime!,
-                        checkOutTime: selectedCheckOutTime,
-                        description: _descriptionController.text.trim(),
-                      ),
-                    );
-                  } else {
-                    // Editar existente
+                  if (timeLog == null) { // Criar novo
+                    _studentBloc.add(CreateManualTimeLogEvent(
+                      userId: _currentUserId!,
+                      logDate: selectedDate,
+                      checkInTime: selectedCheckInTime!,
+                      checkOutTime: selectedCheckOutTime,
+                      description: _descriptionController.text.trim(),
+                    ));
+                  } else { // Editar existente
                     // A lógica de atualização no BLoC precisa ser capaz de lidar com campos parciais
                     // ou este evento precisa enviar a entidade TimeLogEntity completa.
                     // Por agora, vamos assumir que o evento UpdateManualTimeLogEvent pode lidar com isso.
-                    _studentBloc.add(
-                      UpdateManualTimeLogEvent(
-                        timeLogId: timeLog.id,
-                        logDate: selectedDate,
-                        checkInTime: selectedCheckInTime,
-                        checkOutTime: selectedCheckOutTime,
-                        description: _descriptionController.text.trim(),
-                      ),
-                    );
+                    _studentBloc.add(UpdateManualTimeLogEvent(
+                      timeLogId: timeLog.id,
+                      logDate: selectedDate,
+                      checkInTime: selectedCheckInTime,
+                      checkOutTime: selectedCheckOutTime,
+                      description: _descriptionController.text.trim(),
+                    ));
                   }
                   Navigator.of(dialogContext).pop();
                 }
@@ -274,9 +235,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Confirmar Remoção'),
-          content: const Text(
-            'Tem a certeza que deseja remover este registo de tempo? Esta ação não pode ser desfeita.',
-          ),
+          content: const Text('Tem a certeza que deseja remover este registo de tempo? Esta ação não pode ser desfeita.'),
           actions: <Widget>[
             TextButton(
               child: const Text(AppStrings.cancel),
@@ -289,9 +248,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
               type: AppButtonType.text, // Ou um botão com cor de erro
               foregroundColor: Theme.of(context).colorScheme.error,
               onPressed: () {
-                _studentBloc.add(
-                  DeleteTimeLogRequestedEvent(timeLogId: timeLogId),
-                );
+                _studentBloc.add(DeleteTimeLogRequestedEvent(timeLogId: timeLogId));
                 Navigator.of(dialogContext).pop();
               },
             ),
@@ -300,6 +257,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -321,36 +279,27 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
           if (state is StudentOperationFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
+              ..showSnackBar(SnackBar(
                   content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error,
-                ),
-              );
-          } else if (state is StudentTimeLogOperationSuccess ||
-              state is StudentTimeLogDeleteSuccess) {
+                  backgroundColor: theme.colorScheme.error));
+          } else if (state is StudentTimeLogOperationSuccess || state is StudentTimeLogDeleteSuccess) {
             String message = 'Operação realizada com sucesso!';
-            if (state is StudentTimeLogOperationSuccess)
-              message = state.message;
+            if (state is StudentTimeLogOperationSuccess) message = state.message;
             if (state is StudentTimeLogDeleteSuccess) message = state.message;
 
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
+              ..showSnackBar(SnackBar(
                   content: Text(message),
-                  backgroundColor: AppColors.success,
-                ),
-              );
+                  backgroundColor: AppColors.success));
             _refreshTimeLogs(); // Recarrega a lista após sucesso
           }
         },
         builder: (context, state) {
           if (state is StudentLoading && state is! StudentTimeLogsLoadSuccess) {
-            if (_studentBloc.state is! StudentTimeLogsLoadSuccess) {
-              // Evita loading sobre lista antiga
-              return const LoadingIndicator();
-            }
+             if (_studentBloc.state is! StudentTimeLogsLoadSuccess) { // Evita loading sobre lista antiga
+                return const LoadingIndicator();
+             }
           }
 
           if (state is StudentTimeLogsLoadSuccess) {
@@ -359,22 +308,15 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.history_toggle_off_outlined,
-                      size: 60,
-                      color: theme.hintColor,
-                    ),
+                    Icon(Icons.history_toggle_off_outlined, size: 60, color: theme.hintColor),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Nenhum registo de tempo encontrado.',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    const Text('Nenhum registo de tempo encontrado.', style: TextStyle(fontSize: 16)),
                     const SizedBox(height: 16),
                     AppButton(
                       text: 'Adicionar Primeiro Registo',
                       onPressed: () => _showAddEditTimeLogDialog(),
                       icon: Icons.add_circle_outline,
-                    ),
+                    )
                   ],
                 ),
               );
@@ -392,11 +334,10 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
               ),
             );
           }
-          if (state is StudentOperationFailure &&
-              _studentBloc.state is! StudentTimeLogsLoadSuccess) {
-            return _buildErrorStatePage(context, state.message);
+          if (state is StudentOperationFailure && _studentBloc.state is! StudentTimeLogsLoadSuccess) {
+             return _buildErrorStatePage(context, state.message);
           }
-          // Fallback para loading ou estado inicial
+           // Fallback para loading ou estado inicial
           return const LoadingIndicator();
         },
       ),
@@ -446,19 +387,14 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
   Widget _buildTimeLogCard(BuildContext context, TimeLogEntity log) {
     final theme = Theme.of(context);
     final String checkInStr = _formatTimeOfDay(log.checkInTime);
-    final String checkOutStr = log.checkOutTime != null
-        ? _formatTimeOfDay(log.checkOutTime!)
-        : 'Pendente';
-    final String hoursStr = log.hoursLogged != null
-        ? '${log.hoursLogged!.toStringAsFixed(1)}h'
-        : '-';
+    final String checkOutStr = log.checkOutTime != null ? _formatTimeOfDay(log.checkOutTime!) : 'Pendente';
+    final String hoursStr = log.hoursLogged != null ? '${log.hoursLogged!.toStringAsFixed(1)}h' : '-';
 
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
-        onTap: () =>
-            _showAddEditTimeLogDialog(timeLog: log), // Permite editar ao tocar
+        onTap: () => _showAddEditTimeLogDialog(timeLog: log), // Permite editar ao tocar
         borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -467,9 +403,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: log.approved
-                      ? AppColors.success.withAlpha(30)
-                      : theme.colorScheme.secondaryContainer,
+                  color: log.approved ? AppColors.success.withAlpha(30) : theme.colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -479,20 +413,13 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                       DateFormat('dd', 'pt_BR').format(log.logDate),
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: log.approved
-                            ? AppColors.success
-                            : theme.colorScheme.onSecondaryContainer,
+                        color: log.approved ? AppColors.success : theme.colorScheme.onSecondaryContainer,
                       ),
                     ),
                     Text(
-                      DateFormat(
-                        'MMM',
-                        'pt_BR',
-                      ).format(log.logDate).toUpperCase(),
+                      DateFormat('MMM', 'pt_BR').format(log.logDate).toUpperCase(),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: log.approved
-                            ? AppColors.success
-                            : theme.colorScheme.onSecondaryContainer,
+                        color: log.approved ? AppColors.success : theme.colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ],
@@ -505,18 +432,13 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                   children: [
                     Text(
                       'Entrada: $checkInStr  |  Saída: $checkOutStr',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                     ),
-                    if (log.description != null &&
-                        log.description!.isNotEmpty) ...[
+                    if (log.description != null && log.description!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         log.description!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.hintColor,
-                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -525,30 +447,22 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                     Row(
                       children: [
                         Icon(
-                          log.approved
-                              ? Icons.check_circle
-                              : Icons.hourglass_empty,
-                          color: log.approved
-                              ? AppColors.success
-                              : AppColors.warning,
+                          log.approved ? Icons.check_circle : Icons.hourglass_empty,
+                          color: log.approved ? AppColors.success : AppColors.warning,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           log.approved ? 'Aprovado' : 'Pendente',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: log.approved
-                                ? AppColors.success
-                                : AppColors.warning,
+                            color: log.approved ? AppColors.success : AppColors.warning,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const Spacer(),
-                        Text(
+                         Text(
                           'Total: $hoursStr',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -567,20 +481,11 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(
                     value: 'edit',
-                    child: ListTile(
-                      leading: Icon(Icons.edit_outlined),
-                      title: Text('Editar'),
-                    ),
+                    child: ListTile(leading: Icon(Icons.edit_outlined), title: Text('Editar')),
                   ),
                   const PopupMenuItem<String>(
                     value: 'delete',
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.delete_outline,
-                        color: AppColors.error,
-                      ),
-                      title: Text('Remover'),
-                    ),
+                    child: ListTile(leading: Icon(Icons.delete_outline, color: AppColors.error), title: Text('Remover')),
                   ),
                 ],
               ),

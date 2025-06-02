@@ -7,17 +7,13 @@ import '../../../core/errors/app_exceptions.dart';
 
 abstract class IContractSupabaseDatasource {
   /// Cria um novo contrato na tabela 'contracts'.
-  Future<Map<String, dynamic>> createContractData(
-    Map<String, dynamic> contractData,
-  );
+  Future<Map<String, dynamic>> createContractData(Map<String, dynamic> contractData);
 
   /// Obtém um contrato específico pelo seu ID.
   Future<Map<String, dynamic>?> getContractDataById(String contractId);
 
   /// Obtém todos os contratos para um estudante específico.
-  Future<List<Map<String, dynamic>>> getContractsDataForStudent(
-    String studentId,
-  );
+  Future<List<Map<String, dynamic>>> getContractsDataForStudent(String studentId);
 
   /// Obtém todos os contratos, opcionalmente filtrados.
   Future<List<Map<String, dynamic>>> getAllContractsData({
@@ -27,10 +23,7 @@ abstract class IContractSupabaseDatasource {
   });
 
   /// Atualiza um contrato existente.
-  Future<Map<String, dynamic>> updateContractData(
-    String contractId,
-    Map<String, dynamic> dataToUpdate,
-  );
+  Future<Map<String, dynamic>> updateContractData(String contractId, Map<String, dynamic> dataToUpdate);
 
   /// Remove um contrato.
   Future<void> deleteContractData(String contractId);
@@ -42,9 +35,7 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
   ContractSupabaseDatasource(this._supabaseClient);
 
   @override
-  Future<Map<String, dynamic>> createContractData(
-    Map<String, dynamic> contractData,
-  ) async {
+  Future<Map<String, dynamic>> createContractData(Map<String, dynamic> contractData) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -55,9 +46,7 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao criar contrato: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao criar contrato: ${e.toString()}');
     }
   }
 
@@ -73,29 +62,23 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao obter contrato: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao obter contrato: ${e.toString()}');
     }
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getContractsDataForStudent(
-    String studentId,
-  ) async {
+  Future<List<Map<String, dynamic>>> getContractsDataForStudent(String studentId) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
-          .select()
+          .select<List<Map<String, dynamic>>>()
           .eq('student_id', studentId)
           .order('start_date', ascending: false);
       return response;
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao obter contratos do estudante: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao obter contratos do estudante: ${e.toString()}');
     }
   }
 
@@ -108,7 +91,7 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
     try {
       var query = _supabaseClient
           .from('contracts')
-          .select()
+          .select<List<Map<String, dynamic>>>()
           // Exemplo de join se você quiser buscar o nome do estudante/supervisor
           // .select('*, student:students(full_name), supervisor:supervisors(full_name)')
           .order('created_at', ascending: false);
@@ -120,10 +103,7 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
         query = query.eq('supervisor_id', supervisorId);
       }
       if (status != null && status.isNotEmpty) {
-        query = query.eq(
-          'status',
-          status,
-        ); // Assume que 'status' é o nome da coluna e o valor é string
+        query = query.eq('status', status); // Assume que 'status' é o nome da coluna e o valor é string
       }
 
       final response = await query;
@@ -131,17 +111,13 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao obter todos os contratos: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao obter todos os contratos: ${e.toString()}');
     }
   }
 
   @override
   Future<Map<String, dynamic>> updateContractData(
-    String contractId,
-    Map<String, dynamic> dataToUpdate,
-  ) async {
+      String contractId, Map<String, dynamic> dataToUpdate) async {
     try {
       // O trigger 'trigger_set_timestamp' deve cuidar do 'updated_at'.
       final response = await _supabaseClient
@@ -154,22 +130,21 @@ class ContractSupabaseDatasource implements IContractSupabaseDatasource {
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao atualizar contrato: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao atualizar contrato: ${e.toString()}');
     }
   }
 
   @override
   Future<void> deleteContractData(String contractId) async {
     try {
-      await _supabaseClient.from('contracts').delete().eq('id', contractId);
+      await _supabaseClient
+          .from('contracts')
+          .delete()
+          .eq('id', contractId);
     } on PostgrestException catch (e) {
       throw e;
     } catch (e) {
-      throw ServerException(
-        'Erro inesperado ao remover contrato: ${e.toString()}',
-      );
+      throw ServerException('Erro inesperado ao remover contrato: ${e.toString()}');
     }
   }
 }

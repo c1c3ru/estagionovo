@@ -1,9 +1,7 @@
 // lib/data/models/student_model.dart
 import 'package:equatable/equatable.dart';
-import 'dart:math';
-
-import 'package:estagio/core/enum/class_shift.dart';
-import 'package:estagio/core/enum/internship_shift.dart'; // Para min e max nos getters calculados
+import 'dart:math'; // Para min e max nos getters calculados
+import 'enums.dart'; // Importa os enums
 
 class StudentModel extends Equatable {
   final String id; // UUID PRIMARY KEY REFERENCES users(id)
@@ -62,58 +60,48 @@ class StudentModel extends Equatable {
 
   bool get isOnTrack {
     // Uma lógica simplificada para isOnTrack. Pode ser mais complexa.
-    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now()))
-      return true;
-    if (contractEndDate.isBefore(DateTime.now()))
-      return totalHoursCompleted >= totalHoursRequired;
+    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now())) return true;
+    if (contractEndDate.isBefore(DateTime.now())) return totalHoursCompleted >= totalHoursRequired;
 
     final totalDays = contractEndDate.difference(contractStartDate).inDays;
     if (totalDays <= 0) return true;
 
     final daysElapsed = DateTime.now().difference(contractStartDate).inDays;
     final effectiveDaysElapsed = min(max(daysElapsed, 0), totalDays);
-    final expectedProgress =
-        (effectiveDaysElapsed / totalDays) * totalHoursRequired;
+    final expectedProgress = (effectiveDaysElapsed / totalDays) * totalHoursRequired;
     return totalHoursCompleted >= expectedProgress;
   }
 
   int get daysRemainingInContract {
-    final now = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
-    final end = DateTime(
-      contractEndDate.year,
-      contractEndDate.month,
-      contractEndDate.day,
-    );
+    final now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final end = DateTime(contractEndDate.year, contractEndDate.month, contractEndDate.day);
     if (end.isBefore(now)) return 0;
     return end.difference(now).inDays;
   }
 
+
   @override
   List<Object?> get props => [
-    id,
-    fullName,
-    registrationNumber,
-    course,
-    advisorName,
-    isMandatoryInternship,
-    classShift,
-    internshipShift1,
-    internshipShift2,
-    birthDate,
-    contractStartDate,
-    contractEndDate,
-    totalHoursRequired,
-    totalHoursCompleted,
-    weeklyHoursTarget,
-    profilePictureUrl,
-    phoneNumber,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        fullName,
+        registrationNumber,
+        course,
+        advisorName,
+        isMandatoryInternship,
+        classShift,
+        internshipShift1,
+        internshipShift2,
+        birthDate,
+        contractStartDate,
+        contractEndDate,
+        totalHoursRequired,
+        totalHoursCompleted,
+        weeklyHoursTarget,
+        profilePictureUrl,
+        phoneNumber,
+        createdAt,
+        updatedAt,
+      ];
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
     return StudentModel(
@@ -124,21 +112,16 @@ class StudentModel extends Equatable {
       advisorName: json['advisor_name'] as String,
       isMandatoryInternship: json['is_mandatory_internship'] as bool? ?? false,
       classShift: ClassShift.fromString(json['class_shift'] as String?),
-      internshipShift1: InternshipShift.fromString(
-        json['internship_shift_1'] as String?,
-      ),
+      internshipShift1: InternshipShift.fromString(json['internship_shift_1'] as String?),
       internshipShift2: json['internship_shift_2'] != null
           ? InternshipShift.fromString(json['internship_shift_2'] as String?)
           : null,
       birthDate: DateTime.parse(json['birth_date'] as String),
       contractStartDate: DateTime.parse(json['contract_start_date'] as String),
       contractEndDate: DateTime.parse(json['contract_end_date'] as String),
-      totalHoursRequired:
-          (json['total_hours_required'] as num?)?.toDouble() ?? 0.0,
-      totalHoursCompleted:
-          (json['total_hours_completed'] as num?)?.toDouble() ?? 0.0,
-      weeklyHoursTarget:
-          (json['weekly_hours_target'] as num?)?.toDouble() ?? 0.0,
+      totalHoursRequired: (json['total_hours_required'] as num?)?.toDouble() ?? 0.0,
+      totalHoursCompleted: (json['total_hours_completed'] as num?)?.toDouble() ?? 0.0,
+      weeklyHoursTarget: (json['weekly_hours_target'] as num?)?.toDouble() ?? 0.0,
       profilePictureUrl: json['profile_picture_url'] as String?,
       phoneNumber: json['phone_number'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -159,15 +142,9 @@ class StudentModel extends Equatable {
       'class_shift': classShift.value,
       'internship_shift_1': internshipShift1.value,
       'internship_shift_2': internshipShift2?.value,
-      'birth_date': birthDate.toIso8601String().substring(
-        0,
-        10,
-      ), // Formato YYYY-MM-DD para DATE
-      'contract_start_date': contractStartDate.toIso8601String().substring(
-        0,
-        10,
-      ),
-      'contract_end_date': contractEndDate.toIso8601String().substring(0, 10),
+      'birth_date': birthDate.toIso8601String().substring(0,10), // Formato YYYY-MM-DD para DATE
+      'contract_start_date': contractStartDate.toIso8601String().substring(0,10),
+      'contract_end_date': contractEndDate.toIso8601String().substring(0,10),
       'total_hours_required': totalHoursRequired,
       'total_hours_completed': totalHoursCompleted,
       'weekly_hours_target': weeklyHoursTarget,
@@ -209,25 +186,18 @@ class StudentModel extends Equatable {
       registrationNumber: registrationNumber ?? this.registrationNumber,
       course: course ?? this.course,
       advisorName: advisorName ?? this.advisorName,
-      isMandatoryInternship:
-          isMandatoryInternship ?? this.isMandatoryInternship,
+      isMandatoryInternship: isMandatoryInternship ?? this.isMandatoryInternship,
       classShift: classShift ?? this.classShift,
       internshipShift1: internshipShift1 ?? this.internshipShift1,
-      internshipShift2: clearInternshipShift2 == true
-          ? null
-          : internshipShift2 ?? this.internshipShift2,
+      internshipShift2: clearInternshipShift2 == true ? null : internshipShift2 ?? this.internshipShift2,
       birthDate: birthDate ?? this.birthDate,
       contractStartDate: contractStartDate ?? this.contractStartDate,
       contractEndDate: contractEndDate ?? this.contractEndDate,
       totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
       totalHoursCompleted: totalHoursCompleted ?? this.totalHoursCompleted,
       weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
-      profilePictureUrl: clearProfilePictureUrl == true
-          ? null
-          : profilePictureUrl ?? this.profilePictureUrl,
-      phoneNumber: clearPhoneNumber == true
-          ? null
-          : phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: clearProfilePictureUrl == true ? null : profilePictureUrl ?? this.profilePictureUrl,
+      phoneNumber: clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
     );

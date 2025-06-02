@@ -1,54 +1,46 @@
 // lib/core/errors/app_exceptions.dart
 import 'package:equatable/equatable.dart';
 
-abstract class AppFailure extends Equatable {
-  final String message;
-  final dynamic originalException; // Opcional, para rastrear a exceção original
+enum ExceptionType { auth, server, cache, network, validation, unknown }
 
-  const AppFailure({required this.message, this.originalException});
+enum StudentStatus { active, inactive, graduated, suspended }
+
+class AppFailure extends Equatable {
+  final String message;
+  final ExceptionType type;
+  final String? code;
+  final dynamic data;
+
+  const AppFailure({
+    required this.message,
+    required this.type,
+    this.code,
+    this.data,
+  });
 
   @override
-  List<Object?> get props => [message, originalException];
+  List<Object?> get props => [message, type, code, data];
+
+  @override
+  String toString() => 'AppFailure(message: $message, type: $type, code: $code)';
 }
 
-// Falha geral do servidor ou da fonte de dados
-class ServerFailure extends AppFailure {
-  const ServerFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
-}
-
-// Falha específica de autenticação
-class AuthenticationFailure extends AppFailure {
-  const AuthenticationFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
-}
-
-// Falha de validação (ex: entrada do utilizador inválida)
 class ValidationFailure extends AppFailure {
-  const ValidationFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
+  const ValidationFailure(String message, {String? code, dynamic data})
+      : super(
+          message: message,
+          type: ExceptionType.validation,
+          code: code,
+          data: data,
+        );
 }
 
-// Falha de cache (se você usar cache local)
-class CacheFailure extends AppFailure {
-  const CacheFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
-}
+class ServerException implements Exception {
+  final String message;
+  final String? code;
 
-// Falha quando um recurso não é encontrado
-class NotFoundFailure extends AppFailure {
-  const NotFoundFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
-}
+  const ServerException(this.message, {this.code});
 
-// Falha de permissão
-class PermissionFailure extends AppFailure {
-  const PermissionFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
-}
-
-// Para exceções específicas do Supabase que não são AuthException
-class SupabaseServerFailure extends ServerFailure {
-  const SupabaseServerFailure({required String message, dynamic originalException})
-      : super(message: message, originalException: originalException);
+  @override
+  String toString() => 'ServerException: $message';
 }

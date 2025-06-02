@@ -1,8 +1,4 @@
 // lib/features/supervisor/presentation/pages/student_details_page.dart
-import 'package:estagio/core/enum/contract_status.dart';
-import 'package:estagio/domain/entities/contract.dart';
-import 'package:estagio/domain/entities/student.dart';
-import 'package:estagio/domain/entities/time_log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -12,7 +8,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-
+import '../../../../domain/entities/student_entity.dart';
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../../domain/entities/contract_entity.dart';
+import '../../../../data/models/enums.dart'; // Para os enums
 import '../bloc/supervisor_bloc.dart';
 import '../bloc/supervisor_event.dart';
 import '../bloc/supervisor_state.dart';
@@ -20,8 +19,10 @@ import '../bloc/supervisor_state.dart';
 class StudentDetailsPage extends StatefulWidget {
   final String studentId;
 
-  const StudentDetailsPage({Key? key, required this.studentId})
-    : super(key: key);
+  const StudentDetailsPage({
+    Key? key,
+    required this.studentId,
+  }) : super(key: key);
 
   @override
   State<StudentDetailsPage> createState() => _StudentDetailsPageState();
@@ -35,15 +36,11 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     super.initState();
     _supervisorBloc = Modular.get<SupervisorBloc>();
     // Carrega os detalhes do estudante, seus logs e contratos
-    _supervisorBloc.add(
-      LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId),
-    );
+    _supervisorBloc.add(LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId));
   }
 
   Future<void> _refreshDetails() async {
-    _supervisorBloc.add(
-      LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId),
-    );
+    _supervisorBloc.add(LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId));
   }
 
   String _formatTimeOfDay(TimeOfDay? time) {
@@ -71,7 +68,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
   }
 
   Color _getContractStatusColor(ContractStatus status, BuildContext context) {
-    switch (status) {
+     switch (status) {
       case ContractStatus.active:
         return AppColors.statusActive;
       case ContractStatus.pendingApproval:
@@ -86,6 +83,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
         return Theme.of(context).disabledColor;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -105,10 +103,9 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
       body: BlocBuilder<SupervisorBloc, SupervisorState>(
         bloc: _supervisorBloc,
         builder: (context, state) {
-          if (state is SupervisorLoading &&
-              state is! SupervisorStudentDetailsLoadSuccess) {
+          if (state is SupervisorLoading && state is! SupervisorStudentDetailsLoadSuccess) {
             if (_supervisorBloc.state is! SupervisorStudentDetailsLoadSuccess) {
-              return const LoadingIndicator();
+                 return const LoadingIndicator();
             }
           }
 
@@ -121,19 +118,13 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                 children: [
                   _buildProfileHeader(context, student),
                   const SizedBox(height: 20),
-                  _buildSectionTitle(
-                    context,
-                    'Informações do Contrato Principal',
-                  ),
+                  _buildSectionTitle(context, 'Informações do Contrato Principal'),
                   if (state.contracts.isNotEmpty)
-                    _buildContractInfoCard(
-                      context,
-                      state.contracts.first,
-                    ) // Mostra o primeiro contrato como exemplo
+                     _buildContractInfoCard(context, state.contracts.first) // Mostra o primeiro contrato como exemplo
                   else
                     const Text('Nenhum contrato ativo encontrado.'),
                   const SizedBox(height: 20),
-                  _buildSectionTitle(context, 'Progresso e Horas'),
+                   _buildSectionTitle(context, 'Progresso e Horas'),
                   _buildProgressSection(context, student),
                   const SizedBox(height: 20),
                   _buildSectionTitle(context, 'Registos de Tempo Recentes'),
@@ -143,9 +134,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                     text: 'Editar Perfil do Estudante',
                     icon: Icons.edit_outlined,
                     onPressed: () {
-                      Modular.to.pushNamed(
-                        '/supervisor/student-edit/${student.id}',
-                      );
+                      Modular.to.pushNamed('/supervisor/student-edit/${student.id}');
                     },
                     type: AppButtonType.outlined,
                   ),
@@ -162,18 +151,11 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: theme.colorScheme.error,
-                    ),
+                    Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
                     const SizedBox(height: 16),
                     Text(state.message, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
-                    AppButton(
-                      text: AppStrings.tryAgain,
-                      onPressed: _refreshDetails,
-                    ),
+                    AppButton(text: AppStrings.tryAgain, onPressed: _refreshDetails),
                   ],
                 ),
               ),
@@ -187,13 +169,9 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
 
   Widget _buildProfileHeader(BuildContext context, StudentEntity student) {
     final theme = Theme.of(context);
-    final bool isActiveBasedOnContract =
-        student.contractEndDate.isAfter(DateTime.now()) &&
-        student.contractStartDate.isBefore(DateTime.now());
-    final displayStatus = isActiveBasedOnContract
-        ? StudentStatus.active
-        : StudentStatus.inactive;
-    final displayStatusColor = _getStatusColor(displayStatus, context);
+     final bool isActiveBasedOnContract = student.contractEndDate.isAfter(DateTime.now()) && student.contractStartDate.isBefore(DateTime.now());
+     final displayStatus = isActiveBasedOnContract ? StudentStatus.active : StudentStatus.inactive;
+     final displayStatusColor = _getStatusColor(displayStatus, context);
 
     return Card(
       elevation: 2,
@@ -207,21 +185,13 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                 CircleAvatar(
                   radius: 35,
                   backgroundColor: theme.colorScheme.primaryContainer,
-                  backgroundImage:
-                      student.profilePictureUrl != null &&
-                          student.profilePictureUrl!.isNotEmpty
+                  backgroundImage: student.profilePictureUrl != null && student.profilePictureUrl!.isNotEmpty
                       ? NetworkImage(student.profilePictureUrl!)
                       : null,
-                  child:
-                      student.profilePictureUrl == null ||
-                          student.profilePictureUrl!.isEmpty
+                  child: student.profilePictureUrl == null || student.profilePictureUrl!.isEmpty
                       ? Text(
-                          student.fullName.isNotEmpty
-                              ? student.fullName[0].toUpperCase()
-                              : '?',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
+                          student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
+                          style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
                         )
                       : null,
                 ),
@@ -230,29 +200,17 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        student.fullName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text(student.fullName, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text(student.course, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(
-                            Icons.circle,
-                            size: 10,
-                            color: displayStatusColor,
-                          ),
+                          Icon(Icons.circle, size: 10, color: displayStatusColor),
                           const SizedBox(width: 6),
                           Text(
                             displayStatus.displayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: displayStatusColor,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: theme.textTheme.bodyMedium?.copyWith(color: displayStatusColor, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -262,48 +220,18 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
               ],
             ),
             const Divider(height: 24),
-            _buildInfoRow(
-              context,
-              Icons.badge_outlined,
-              'Matrícula',
-              student.registrationNumber,
-            ),
-            _buildInfoRow(
-              context,
-              Icons.email_outlined,
-              'Email',
-              student.id,
-            ), // Assumindo que o ID do estudante é o email ou o user.email está no StudentEntity
-            _buildInfoRow(
-              context,
-              Icons.phone_outlined,
-              'Telefone',
-              student.phoneNumber ?? 'Não informado',
-            ),
-            _buildInfoRow(
-              context,
-              Icons.cake_outlined,
-              'Nascimento',
-              DateFormat('dd/MM/yyyy').format(student.birthDate),
-            ),
-            _buildInfoRow(
-              context,
-              Icons.supervisor_account_outlined,
-              'Orientador(a)',
-              student.advisorName,
-            ),
+            _buildInfoRow(context, Icons.badge_outlined, 'Matrícula', student.registrationNumber),
+            _buildInfoRow(context, Icons.email_outlined, 'Email', student.id), // Assumindo que o ID do estudante é o email ou o user.email está no StudentEntity
+            _buildInfoRow(context, Icons.phone_outlined, 'Telefone', student.phoneNumber ?? 'Não informado'),
+            _buildInfoRow(context, Icons.cake_outlined, 'Nascimento', DateFormat('dd/MM/yyyy').format(student.birthDate)),
+            _buildInfoRow(context, Icons.supervisor_account_outlined, 'Orientador(a)', student.advisorName),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -311,19 +239,8 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
         children: [
           Icon(icon, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
-          Text(
-            '$label: ',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium,
-              textAlign: TextAlign.end,
-            ),
-          ),
+          Text('$label: ', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+          Expanded(child: Text(value, style: theme.textTheme.bodyMedium, textAlign: TextAlign.end)),
         ],
       ),
     );
@@ -334,9 +251,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: Text(
         title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -355,60 +270,32 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Tipo: ${contract.contractType}',
-                  style: theme.textTheme.titleMedium,
-                ),
+                Text('Tipo: ${contract.contractType}', style: theme.textTheme.titleMedium),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColor.withAlpha(50),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     contract.status.displayName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(color: statusColor, fontWeight: FontWeight.bold),
                   ),
-                ),
+                )
               ],
             ),
             const Divider(height: 16),
-            _buildInfoRow(
-              context,
-              Icons.play_arrow_outlined,
-              'Início',
-              DateFormat('dd/MM/yyyy').format(contract.startDate),
-            ),
-            _buildInfoRow(
-              context,
-              Icons.stop_outlined,
-              'Término',
-              DateFormat('dd/MM/yyyy').format(contract.endDate),
-            ),
-            if (contract.description != null &&
-                contract.description!.isNotEmpty)
-              _buildInfoRow(
-                context,
-                Icons.description_outlined,
-                'Descrição',
-                contract.description!,
-              ),
-            if (contract.documentUrl != null &&
-                contract.documentUrl!.isNotEmpty)
+            _buildInfoRow(context, Icons.play_arrow_outlined, 'Início', DateFormat('dd/MM/yyyy').format(contract.startDate)),
+            _buildInfoRow(context, Icons.stop_outlined, 'Término', DateFormat('dd/MM/yyyy').format(contract.endDate)),
+            if (contract.description != null && contract.description!.isNotEmpty)
+               _buildInfoRow(context, Icons.description_outlined, 'Descrição', contract.description!),
+            if (contract.documentUrl != null && contract.documentUrl!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: AppButton(
                   text: 'Ver Documento',
                   icon: Icons.link_outlined,
-                  onPressed: () {
-                    /* TODO: Abrir URL do documento */
-                  },
+                  onPressed: () { /* TODO: Abrir URL do documento */ },
                   type: AppButtonType.text,
                 ),
               ),
@@ -418,7 +305,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     );
   }
 
-  Widget _buildProgressSection(BuildContext context, StudentEntity student) {
+   Widget _buildProgressSection(BuildContext context, StudentEntity student) {
     final theme = Theme.of(context);
     return Card(
       elevation: 1.5,
@@ -433,14 +320,8 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${student.totalHoursCompleted.toStringAsFixed(1)}h completas',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                Text(
-                  '${student.totalHoursRequired.toStringAsFixed(1)}h (Meta)',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                Text('${student.totalHoursCompleted.toStringAsFixed(1)}h completas', style: theme.textTheme.bodyMedium),
+                Text('${student.totalHoursRequired.toStringAsFixed(1)}h (Meta)', style: theme.textTheme.bodyMedium),
               ],
             ),
             const SizedBox(height: 8),
@@ -450,42 +331,23 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                 child: LinearProgressIndicator(
                   value: student.progressPercentage / 100,
                   minHeight: 12,
-                  backgroundColor: theme.colorScheme.primaryContainer.withAlpha(
-                    100,
-                  ),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    theme.colorScheme.primary,
-                  ),
+                  backgroundColor: theme.colorScheme.primaryContainer.withAlpha(100),
+                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
                 ),
               )
             else
               const Text('Meta de horas não definida.'),
             const SizedBox(height: 12),
-            _buildInfoRow(
-              context,
-              Icons.hourglass_empty_outlined,
-              'Horas Restantes',
-              '${student.remainingHours.toStringAsFixed(1)}h',
-            ),
-            _buildInfoRow(
-              context,
-              Icons.track_changes_outlined,
-              'Meta Semanal',
-              '${student.weeklyHoursTarget.toStringAsFixed(1)}h',
-            ),
-            _buildInfoRow(
-              context,
-              student.isOnTrack
-                  ? Icons.thumb_up_outlined
-                  : Icons.warning_amber_outlined,
-              'Em Dia?',
-              student.isOnTrack ? 'Sim' : 'Atenção',
-            ),
+             _buildInfoRow(context, Icons.hourglass_empty_outlined, 'Horas Restantes', '${student.remainingHours.toStringAsFixed(1)}h'),
+             _buildInfoRow(context, Icons.track_changes_outlined, 'Meta Semanal', '${student.weeklyHoursTarget.toStringAsFixed(1)}h'),
+             _buildInfoRow(context, student.isOnTrack ? Icons.thumb_up_outlined : Icons.warning_amber_outlined, 'Em Dia?', student.isOnTrack ? 'Sim' : 'Atenção', ),
+
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildRecentTimeLogs(BuildContext context, List<TimeLogEntity> logs) {
     final theme = Theme.of(context);
@@ -499,53 +361,30 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     final recentLogsToShow = logs.take(3).toList();
 
     return Column(
-      children: recentLogsToShow
-          .map(
-            (log) => Card(
-              elevation: 1,
-              margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: log.approved
-                      ? AppColors.success.withAlpha(40)
-                      : theme.colorScheme.secondaryContainer,
-                  child: Icon(
-                    log.approved
-                        ? Icons.check_circle_outline
-                        : Icons.hourglass_top_outlined,
-                    color: log.approved
-                        ? AppColors.success
-                        : theme.colorScheme.onSecondaryContainer,
-                    size: 20,
-                  ),
-                ),
-                title: Text(
-                  '${DateFormat('dd/MM/yy').format(log.logDate)}: ${_formatTimeOfDay(log.checkInTime)} - ${_formatTimeOfDay(log.checkOutTime)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  log.description ?? 'Sem descrição',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: Text(
-                  '${log.hoursLogged?.toStringAsFixed(1) ?? "-"}h',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: () {
-                  // TODO: Navegar para detalhes do log ou permitir edição/aprovação aqui
-                },
-              ),
+      children: recentLogsToShow.map((log) => Card(
+        elevation: 1,
+        margin: const EdgeInsets.only(bottom: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: log.approved ? AppColors.success.withAlpha(40) : theme.colorScheme.secondaryContainer,
+            child: Icon(
+              log.approved ? Icons.check_circle_outline : Icons.hourglass_top_outlined,
+              color: log.approved ? AppColors.success : theme.colorScheme.onSecondaryContainer,
+              size: 20,
             ),
-          )
-          .toList(),
+          ),
+          title: Text(
+            '${DateFormat('dd/MM/yy').format(log.logDate)}: ${_formatTimeOfDay(log.checkInTime)} - ${_formatTimeOfDay(log.checkOutTime)}',
+            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+          ),
+          subtitle: Text(log.description ?? 'Sem descrição', maxLines: 1, overflow: TextOverflow.ellipsis),
+          trailing: Text('${log.hoursLogged?.toStringAsFixed(1) ?? "-"}h', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+          onTap: () {
+            // TODO: Navegar para detalhes do log ou permitir edição/aprovação aqui
+          },
+        ),
+      )).toList(),
     );
   }
 }

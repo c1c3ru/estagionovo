@@ -1,52 +1,54 @@
-// lib/domain/entities/user_entity.dart
+
 import 'package:equatable/equatable.dart';
-// Importa o enum UserRole da camada de dados.
-// Se preferir uma separação mais estrita, você pode definir um UserRoleEntity aqui.
-import '../../data/models/enums.dart';
+import '../../core/enum/user_role.dart';
 
 class UserEntity extends Equatable {
   final String id;
+  final String fullName;
   final String email;
   final UserRole role;
-  final bool isActive;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool isEmailVerified;
 
   const UserEntity({
     required this.id,
+    required this.fullName,
     required this.email,
     required this.role,
-    required this.isActive,
-    required this.createdAt,
+    this.createdAt,
     this.updatedAt,
+    this.isEmailVerified = false,
   });
 
   @override
   List<Object?> get props => [
         id,
+        fullName,
         email,
         role,
-        isActive,
         createdAt,
         updatedAt,
+        isEmailVerified,
       ];
 
   UserEntity copyWith({
     String? id,
+    String? fullName,
     String? email,
     UserRole? role,
-    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? clearUpdatedAt,
+    bool? isEmailVerified,
   }) {
     return UserEntity(
       id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       role: role ?? this.role,
-      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
     );
   }
 }

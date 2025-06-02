@@ -1,5 +1,4 @@
 // lib/core/utils/date_utils.dart
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Adicione intl ao pubspec.yaml
 
 class DateUtil {
@@ -25,13 +24,7 @@ class DateUtil {
   static String formatTimeOfDay(TimeOfDay? timeOfDay) {
     if (timeOfDay == null) return '';
     final now = DateTime.now();
-    final dt = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      timeOfDay.hour,
-      timeOfDay.minute,
-    );
+    final dt = DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
     return DateFormat('HH:mm').format(dt);
   }
 
@@ -49,6 +42,7 @@ class DateUtil {
     return null;
   }
 
+
   /// Retorna a diferença de dias entre duas datas, ignorando a hora.
   static int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);
@@ -59,9 +53,7 @@ class DateUtil {
   /// Verifica se uma data é hoje.
   static bool isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+    return date.year == now.year && date.month == now.month && date.day == now.day;
   }
 
   /// Retorna o início da semana (Domingo ou Segunda, dependendo da localidade).

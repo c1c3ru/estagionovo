@@ -1,7 +1,6 @@
 // lib/features/auth/presentation/bloc/auth_event.dart
 import 'package:equatable/equatable.dart';
-import 'package:estagio/core/enum/user_role.dart';
-import 'package:estagio/domain/entities/user.dart';
+import '../../../../core/enums/user_role.dart'; // Ajuste o caminho se o UserRole estiver em core/enums
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -31,14 +30,14 @@ class RegisterSupervisorEvent extends AuthEvent {
 
   @override
   List<Object?> get props => [
-    fullName,
-    email,
-    password,
-    siapeRegistration,
-    phoneNumber,
-    department,
-    position,
-  ];
+        fullName,
+        email,
+        password,
+        siapeRegistration,
+        phoneNumber,
+        department,
+        position,
+      ];
 }
 
 /// Evento disparado ao tentar fazer login.
@@ -46,7 +45,10 @@ class LoginSubmittedEvent extends AuthEvent {
   final String email;
   final String password;
 
-  const LoginSubmittedEvent({required this.email, required this.password});
+  const LoginSubmittedEvent({
+    required this.email,
+    required this.password,
+  });
 
   @override
   List<Object?> get props => [email, password];

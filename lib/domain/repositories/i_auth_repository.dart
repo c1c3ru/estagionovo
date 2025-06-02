@@ -1,8 +1,8 @@
 // lib/domain/repositories/i_auth_repository.dart
 import 'package:dartz/dartz.dart'; // Para Either (tratamento de erro funcional)
-import 'package:estagio/core/enum/user_role.dart';
-import 'package:estagio/domain/entities/user.dart';
+import '../entities/user_entity.dart';
 import '../../core/errors/app_exceptions.dart'; // Supondo que você terá exceções personalizadas
+import '../../data/models/enums.dart'; // Para UserRole
 
 // Parâmetros para login
 class LoginParams {
@@ -64,9 +64,7 @@ abstract class IAuthRepository {
   Future<Either<AppFailure, UserEntity?>> getCurrentUser();
 
   /// Atualiza o perfil do utilizador.
-  Future<Either<AppFailure, UserEntity>> updateUserProfile(
-    UpdateProfileParams params,
-  );
+  Future<Either<AppFailure, UserEntity>> updateUserProfile(UpdateProfileParams params);
 
   /// Ouve as mudanças no estado de autenticação.
   /// Emite UserEntity quando autenticado, null quando desautenticado.

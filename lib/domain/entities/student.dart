@@ -1,11 +1,8 @@
 // lib/domain/entities/student_entity.dart
 import 'package:equatable/equatable.dart';
-import 'dart:math';
-
-import 'package:estagio/core/enum/class_shift.dart';
-import 'package:estagio/core/enum/internship_shift.dart';
-import 'package:estagio/core/enum/user_role.dart'; // Para min e max nos getters calculados
+import 'dart:math'; // Para min e max nos getters calculados
 // Importa os enums da camada de dados.
+import '../../data/models/enums.dart';
 
 class StudentEntity extends Equatable {
   final String id;
@@ -29,6 +26,7 @@ class StudentEntity extends Equatable {
   final DateTime? updatedAt;
   // Adicionando o UserRole aqui, pois um estudante é um tipo de usuário
   final UserRole role;
+
 
   const StudentEntity({
     required this.id,
@@ -66,59 +64,48 @@ class StudentEntity extends Equatable {
   }
 
   bool get isOnTrack {
-    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now()))
-      return true;
-    if (contractEndDate.isBefore(DateTime.now()))
-      return totalHoursCompleted >= totalHoursRequired;
+    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now())) return true;
+    if (contractEndDate.isBefore(DateTime.now())) return totalHoursCompleted >= totalHoursRequired;
 
     final totalDays = contractEndDate.difference(contractStartDate).inDays;
     if (totalDays <= 0) return true;
 
     final daysElapsed = DateTime.now().difference(contractStartDate).inDays;
     final effectiveDaysElapsed = min(max(daysElapsed, 0), totalDays);
-    final expectedProgress =
-        (effectiveDaysElapsed / totalDays) * totalHoursRequired;
+    final expectedProgress = (effectiveDaysElapsed / totalDays) * totalHoursRequired;
     return totalHoursCompleted >= expectedProgress;
   }
 
   int get daysRemainingInContract {
-    final now = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-    );
-    final end = DateTime(
-      contractEndDate.year,
-      contractEndDate.month,
-      contractEndDate.day,
-    );
+    final now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final end = DateTime(contractEndDate.year, contractEndDate.month, contractEndDate.day);
     if (end.isBefore(now)) return 0;
     return end.difference(now).inDays;
   }
 
   @override
   List<Object?> get props => [
-    id,
-    fullName,
-    registrationNumber,
-    course,
-    advisorName,
-    isMandatoryInternship,
-    classShift,
-    internshipShift1,
-    internshipShift2,
-    birthDate,
-    contractStartDate,
-    contractEndDate,
-    totalHoursRequired,
-    totalHoursCompleted,
-    weeklyHoursTarget,
-    profilePictureUrl,
-    phoneNumber,
-    createdAt,
-    updatedAt,
-    role,
-  ];
+        id,
+        fullName,
+        registrationNumber,
+        course,
+        advisorName,
+        isMandatoryInternship,
+        classShift,
+        internshipShift1,
+        internshipShift2,
+        birthDate,
+        contractStartDate,
+        contractEndDate,
+        totalHoursRequired,
+        totalHoursCompleted,
+        weeklyHoursTarget,
+        profilePictureUrl,
+        phoneNumber,
+        createdAt,
+        updatedAt,
+        role,
+      ];
 
   StudentEntity copyWith({
     String? id,
@@ -152,25 +139,18 @@ class StudentEntity extends Equatable {
       registrationNumber: registrationNumber ?? this.registrationNumber,
       course: course ?? this.course,
       advisorName: advisorName ?? this.advisorName,
-      isMandatoryInternship:
-          isMandatoryInternship ?? this.isMandatoryInternship,
+      isMandatoryInternship: isMandatoryInternship ?? this.isMandatoryInternship,
       classShift: classShift ?? this.classShift,
       internshipShift1: internshipShift1 ?? this.internshipShift1,
-      internshipShift2: clearInternshipShift2 == true
-          ? null
-          : internshipShift2 ?? this.internshipShift2,
+      internshipShift2: clearInternshipShift2 == true ? null : internshipShift2 ?? this.internshipShift2,
       birthDate: birthDate ?? this.birthDate,
       contractStartDate: contractStartDate ?? this.contractStartDate,
       contractEndDate: contractEndDate ?? this.contractEndDate,
       totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
       totalHoursCompleted: totalHoursCompleted ?? this.totalHoursCompleted,
       weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
-      profilePictureUrl: clearProfilePictureUrl == true
-          ? null
-          : profilePictureUrl ?? this.profilePictureUrl,
-      phoneNumber: clearPhoneNumber == true
-          ? null
-          : phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: clearProfilePictureUrl == true ? null : profilePictureUrl ?? this.profilePictureUrl,
+      phoneNumber: clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
       role: role ?? this.role,
