@@ -1,4 +1,5 @@
 // lib/features/auth/presentation/widgets/register_form.dart
+import 'package:estagio/core/enum/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -46,12 +47,14 @@ class _RegisterFormState extends State<RegisterForm> {
 
   void _submitRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      _authBloc.add(RegisterSubmittedEvent(
-        fullName: _fullNameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        role: _selectedRole,
-      ));
+      _authBloc.add(
+        RegisterSubmittedEvent(
+          fullName: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          role: _selectedRole,
+        ),
+      );
     }
   }
 
@@ -80,7 +83,9 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
             );
           // Opcional: Redirecionar para login ou uma página de "verifique seu email"
-          Modular.to.popAndPushNamed('/auth/login'); // Volta para o login após registo
+          Modular.to.popAndPushNamed(
+            '/auth/login',
+          ); // Volta para o login após registo
         }
       },
       child: Form(
@@ -93,7 +98,8 @@ class _RegisterFormState extends State<RegisterForm> {
               labelText: AppStrings.fullName,
               hintText: 'Seu nome completo',
               prefixIcon: Icons.person_outline,
-              validator: (value) => Validators.required(value, fieldName: 'Nome completo'),
+              validator: (value) =>
+                  Validators.required(value, fieldName: 'Nome completo'),
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
             ),
@@ -124,7 +130,8 @@ class _RegisterFormState extends State<RegisterForm> {
               hintText: 'Confirme sua senha',
               prefixIcon: Icons.lock_outline,
               obscureText: true,
-              validator: (value) => Validators.confirmPassword(_passwordController.text, value),
+              validator: (value) =>
+                  Validators.confirmPassword(_passwordController.text, value),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submitRegister(),
             ),
@@ -133,17 +140,24 @@ class _RegisterFormState extends State<RegisterForm> {
               value: _selectedRole,
               decoration: InputDecoration(
                 labelText: AppStrings.selectRole,
-                prefixIcon: Icon(Icons.badge_outlined, color: theme.inputDecorationTheme.prefixIconColor),
+                prefixIcon: Icon(
+                  Icons.badge_outlined,
+                  color: theme.inputDecorationTheme.prefixIconColor,
+                ),
                 border: theme.inputDecorationTheme.border,
               ),
               items: UserRole.values
-                  .where((role) => role != UserRole.unknown && role != UserRole.admin) // Não permite registar como admin ou unknown
+                  .where(
+                    (role) =>
+                        role != UserRole.unknown && role != UserRole.admin,
+                  ) // Não permite registar como admin ou unknown
                   .map((UserRole role) {
-                return DropdownMenuItem<UserRole>(
-                  value: role,
-                  child: Text(role.displayName),
-                );
-              }).toList(),
+                    return DropdownMenuItem<UserRole>(
+                      value: role,
+                      child: Text(role.displayName),
+                    );
+                  })
+                  .toList(),
               onChanged: (UserRole? newValue) {
                 setState(() {
                   if (newValue != null) {
@@ -151,7 +165,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   }
                 });
               },
-              validator: (value) => value == null || value == UserRole.unknown ? 'Selecione um perfil válido' : null,
+              validator: (value) => value == null || value == UserRole.unknown
+                  ? 'Selecione um perfil válido'
+                  : null,
             ),
             const SizedBox(height: 24),
             BlocBuilder<AuthBloc, AuthState>(

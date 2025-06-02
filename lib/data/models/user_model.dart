@@ -1,11 +1,12 @@
 // lib/data/models/user_model.dart
 import 'package:equatable/equatable.dart';
-import 'enums.dart'; // Importa os enums definidos anteriormente
+import 'package:estagio/core/enum/user_role.dart';
 
 class UserModel extends Equatable {
   final String id; // UUID PRIMARY KEY REFERENCES auth.users (id)
   final String email; // VARCHAR NOT NULL UNIQUE
-  final UserRole role; // VARCHAR NOT NULL CHECK (role IN ('student', 'supervisor', 'admin'))
+  final UserRole
+  role; // VARCHAR NOT NULL CHECK (role IN ('student', 'supervisor', 'admin'))
   final bool isActive; // BOOLEAN DEFAULT TRUE
   final DateTime createdAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
   final DateTime? updatedAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -20,14 +21,7 @@ class UserModel extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        id,
-        email,
-        role,
-        isActive,
-        createdAt,
-        updatedAt,
-      ];
+  List<Object?> get props => [id, email, role, isActive, createdAt, updatedAt];
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(

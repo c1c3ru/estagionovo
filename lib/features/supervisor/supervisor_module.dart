@@ -1,4 +1,9 @@
 // lib/features/supervisor/supervisor_module.dart
+import 'package:estagio/features/supervisor/bloc/supervisor_bloc.dart';
+import 'package:estagio/features/supervisor/pages/student_details_page.dart';
+import 'package:estagio/features/supervisor/pages/student_edit_page.dart';
+import 'package:estagio/features/supervisor/pages/supervisor_dashboard_page.dart';
+import 'package:estagio/features/supervisor/pages/supervisor_time_approval_page.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
@@ -42,12 +47,9 @@ import '../../domain/usecases/contract/delete_contract_usecase.dart';
 import '../../domain/usecases/auth/register_usecase.dart';
 
 // BLoC
-import 'presentation/bloc/supervisor_bloc.dart';
 
 // Pages
-import 'presentation/pages/supervisor_dashboard_page.dart';
-import 'presentation/pages/student_details_page.dart'; // Presumindo que esta página existe
-import 'presentation/pages/student_edit_page.dart';   // Presumindo que esta página existe
+
 // import 'presentation/pages/supervisor_time_approval_page.dart'; // Se houver uma página dedicada
 
 class SupervisorModule extends Module {
@@ -55,90 +57,152 @@ class SupervisorModule extends Module {
   void binds(Injector i) {
     // --- Datasources ---
     // SupabaseClient é obtido do AppModule
-    i.add<ISupervisorSupabaseDatasource>(() => SupervisorSupabaseDatasource(i.get<SupabaseClient>()));
+    i.add<ISupervisorSupabaseDatasource>(
+      () => SupervisorSupabaseDatasource(i.get<SupabaseClient>()),
+    );
     // Student, TimeLog, Contract e Auth datasources já devem estar registados no AppModule se forem globais,
     // ou podem ser registados aqui se forem escopados para este módulo (menos comum para datasources).
     // Para este exemplo, vamos assumir que podem ser obtidos do injetor pai (AppModule)
     // ou que os repositórios que os usam já os recebem.
     // Se não estiverem no AppModule, registe-os aqui:
     if (!i.isRegistered<IStudentSupabaseDatasource>()) {
-      i.add<IStudentSupabaseDatasource>(() => StudentSupabaseDatasource(i.get<SupabaseClient>()));
+      i.add<IStudentSupabaseDatasource>(
+        () => StudentSupabaseDatasource(i.get<SupabaseClient>()),
+      );
     }
     if (!i.isRegistered<ITimeLogSupabaseDatasource>()) {
-      i.add<ITimeLogSupabaseDatasource>(() => TimeLogSupabaseDatasource(i.get<SupabaseClient>()));
+      i.add<ITimeLogSupabaseDatasource>(
+        () => TimeLogSupabaseDatasource(i.get<SupabaseClient>()),
+      );
     }
     if (!i.isRegistered<IContractSupabaseDatasource>()) {
-      i.add<IContractSupabaseDatasource>(() => ContractSupabaseDatasource(i.get<SupabaseClient>()));
+      i.add<IContractSupabaseDatasource>(
+        () => ContractSupabaseDatasource(i.get<SupabaseClient>()),
+      );
     }
     // AuthDatasource para o RegisterUsecase
-     if (!i.isRegistered<IAuthSupabaseDatasource>()) {
-      i.add<IAuthSupabaseDatasource>(() => AuthSupabaseDatasource(i.get<SupabaseClient>()));
+    if (!i.isRegistered<IAuthSupabaseDatasource>()) {
+      i.add<IAuthSupabaseDatasource>(
+        () => AuthSupabaseDatasource(i.get<SupabaseClient>()),
+      );
     }
-
 
     // --- Repositories ---
     // IAuthRepository para o RegisterUsecase
     if (!i.isRegistered<IAuthRepository>()) {
-        i.add<IAuthRepository>(() => AuthRepository(i.get<IAuthSupabaseDatasource>()));
+      i.add<IAuthRepository>(
+        () => AuthRepository(i.get<IAuthSupabaseDatasource>()),
+      );
     }
     // IStudentRepository, ITimeLogRepository, IContractRepository
     // Se o SupervisorRepository não encapsular todas estas operações, registe-os.
     // Com base nas dependências do SupervisorBloc, parece que precisamos de todos eles.
     if (!i.isRegistered<IStudentRepository>()) {
-      i.add<IStudentRepository>(() => StudentRepository(i.get<IStudentSupabaseDatasource>(), i.get<ITimeLogSupabaseDatasource>()));
+      i.add<IStudentRepository>(
+        () => StudentRepository(
+          i.get<IStudentSupabaseDatasource>(),
+          i.get<ITimeLogSupabaseDatasource>(),
+        ),
+      );
     }
     if (!i.isRegistered<ITimeLogRepository>()) {
-      i.add<ITimeLogRepository>(() => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()));
+      i.add<ITimeLogRepository>(
+        () => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()),
+      );
     }
     if (!i.isRegistered<IContractRepository>()) {
-      i.add<IContractRepository>(() => ContractRepository(i.get<IContractSupabaseDatasource>()));
+      i.add<IContractRepository>(
+        () => ContractRepository(i.get<IContractSupabaseDatasource>()),
+      );
     }
 
-    i.add<ISupervisorRepository>(() => SupervisorRepository(
-          i.get<ISupervisorSupabaseDatasource>(),
-          i.get<IStudentSupabaseDatasource>(), // SupervisorRepository usa StudentDatasource
-          i.get<ITimeLogSupabaseDatasource>(),   // SupervisorRepository usa TimeLogDatasource
-          i.get<IContractSupabaseDatasource>(), // SupervisorRepository usa ContractDatasource
-        ));
-
+    i.add<ISupervisorRepository>(
+      () => SupervisorRepository(
+        i.get<ISupervisorSupabaseDatasource>(),
+        i
+            .get<
+              IStudentSupabaseDatasource
+            >(), // SupervisorRepository usa StudentDatasource
+        i
+            .get<
+              ITimeLogSupabaseDatasource
+            >(), // SupervisorRepository usa TimeLogDatasource
+        i
+            .get<
+              IContractSupabaseDatasource
+            >(), // SupervisorRepository usa ContractDatasource
+      ),
+    );
 
     // --- Usecases ---
     // Auth Usecase
     i.add<RegisterUsecase>(() => RegisterUsecase(i.get<IAuthRepository>()));
 
     // Supervisor Usecases
-    i.add<GetSupervisorDetailsUsecase>(() => GetSupervisorDetailsUsecase(i.get<ISupervisorRepository>()));
-    i.add<GetAllStudentsForSupervisorUsecase>(() => GetAllStudentsForSupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<GetStudentDetailsForSupervisorUsecase>(() => GetStudentDetailsForSupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<CreateStudentBySupervisorUsecase>(() => CreateStudentBySupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<UpdateStudentBySupervisorUsecase>(() => UpdateStudentBySupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<DeleteStudentBySupervisorUsecase>(() => DeleteStudentBySupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<GetAllTimeLogsForSupervisorUsecase>(() => GetAllTimeLogsForSupervisorUsecase(i.get<ISupervisorRepository>()));
-    i.add<ApproveOrRejectTimeLogUsecase>(() => ApproveOrRejectTimeLogUsecase(i.get<ISupervisorRepository>()));
+    i.add<GetSupervisorDetailsUsecase>(
+      () => GetSupervisorDetailsUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<GetAllStudentsForSupervisorUsecase>(
+      () => GetAllStudentsForSupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<GetStudentDetailsForSupervisorUsecase>(
+      () =>
+          GetStudentDetailsForSupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<CreateStudentBySupervisorUsecase>(
+      () => CreateStudentBySupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<UpdateStudentBySupervisorUsecase>(
+      () => UpdateStudentBySupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<DeleteStudentBySupervisorUsecase>(
+      () => DeleteStudentBySupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<GetAllTimeLogsForSupervisorUsecase>(
+      () => GetAllTimeLogsForSupervisorUsecase(i.get<ISupervisorRepository>()),
+    );
+    i.add<ApproveOrRejectTimeLogUsecase>(
+      () => ApproveOrRejectTimeLogUsecase(i.get<ISupervisorRepository>()),
+    );
 
     // Contract Usecases
-    i.add<GetAllContractsUsecase>(() => GetAllContractsUsecase(i.get<IContractRepository>())); // Usa IContractRepository
-    i.add<CreateContractUsecase>(() => CreateContractUsecase(i.get<IContractRepository>()));
-    i.add<UpdateContractUsecase>(() => UpdateContractUsecase(i.get<IContractRepository>()));
-    i.add<DeleteContractUsecase>(() => DeleteContractUsecase(i.get<IContractRepository>()));
-
+    i.add<GetAllContractsUsecase>(
+      () => GetAllContractsUsecase(i.get<IContractRepository>()),
+    ); // Usa IContractRepository
+    i.add<CreateContractUsecase>(
+      () => CreateContractUsecase(i.get<IContractRepository>()),
+    );
+    i.add<UpdateContractUsecase>(
+      () => UpdateContractUsecase(i.get<IContractRepository>()),
+    );
+    i.add<DeleteContractUsecase>(
+      () => DeleteContractUsecase(i.get<IContractRepository>()),
+    );
 
     // --- BLoC ---
-    i.add<SupervisorBloc>(() => SupervisorBloc(
-          getSupervisorDetailsUsecase: i.get<GetSupervisorDetailsUsecase>(),
-          getAllStudentsForSupervisorUsecase: i.get<GetAllStudentsForSupervisorUsecase>(),
-          getStudentDetailsForSupervisorUsecase: i.get<GetStudentDetailsForSupervisorUsecase>(),
-          createStudentBySupervisorUsecase: i.get<CreateStudentBySupervisorUsecase>(),
-          updateStudentBySupervisorUsecase: i.get<UpdateStudentBySupervisorUsecase>(),
-          deleteStudentBySupervisorUsecase: i.get<DeleteStudentBySupervisorUsecase>(),
-          getAllTimeLogsForSupervisorUsecase: i.get<GetAllTimeLogsForSupervisorUsecase>(),
-          approveOrRejectTimeLogUsecase: i.get<ApproveOrRejectTimeLogUsecase>(),
-          getAllContractsUsecase: i.get<GetAllContractsUsecase>(),
-          createContractUsecase: i.get<CreateContractUsecase>(),
-          updateContractUsecase: i.get<UpdateContractUsecase>(),
-          deleteContractUsecase: i.get<DeleteContractUsecase>(),
-          registerAuthUserUsecase: i.get<RegisterUsecase>(),
-        ));
+    i.add<SupervisorBloc>(
+      () => SupervisorBloc(
+        getSupervisorDetailsUsecase: i.get<GetSupervisorDetailsUsecase>(),
+        getAllStudentsForSupervisorUsecase: i
+            .get<GetAllStudentsForSupervisorUsecase>(),
+        getStudentDetailsForSupervisorUsecase: i
+            .get<GetStudentDetailsForSupervisorUsecase>(),
+        createStudentBySupervisorUsecase: i
+            .get<CreateStudentBySupervisorUsecase>(),
+        updateStudentBySupervisorUsecase: i
+            .get<UpdateStudentBySupervisorUsecase>(),
+        deleteStudentBySupervisorUsecase: i
+            .get<DeleteStudentBySupervisorUsecase>(),
+        getAllTimeLogsForSupervisorUsecase: i
+            .get<GetAllTimeLogsForSupervisorUsecase>(),
+        approveOrRejectTimeLogUsecase: i.get<ApproveOrRejectTimeLogUsecase>(),
+        getAllContractsUsecase: i.get<GetAllContractsUsecase>(),
+        createContractUsecase: i.get<CreateContractUsecase>(),
+        updateContractUsecase: i.get<UpdateContractUsecase>(),
+        deleteContractUsecase: i.get<DeleteContractUsecase>(),
+        registerAuthUserUsecase: i.get<RegisterUsecase>(),
+      ),
+    );
   }
 
   @override
@@ -155,7 +219,8 @@ class SupervisorModule extends Module {
     // Rota para ver detalhes de um estudante específico (ex: /supervisor/student-details/:studentId)
     r.child(
       '/student-details/:studentId',
-      child: (_) => StudentDetailsPage(studentId: r.args.params['studentId'] as String),
+      child: (_) =>
+          StudentDetailsPage(studentId: r.args.params['studentId'] as String),
       transition: TransitionType.rightToLeft,
     );
 
@@ -163,20 +228,22 @@ class SupervisorModule extends Module {
     // Ou para criar um novo estudante (ex: /supervisor/student-create)
     r.child(
       '/student-edit/:studentId', // Para edição
-      child: (_) => StudentEditPage(studentId: r.args.params['studentId'] as String),
+      child: (_) =>
+          StudentEditPage(studentId: r.args.params['studentId'] as String),
       transition: TransitionType.rightToLeft,
     );
     r.child(
       '/student-create', // Para criação
-      child: (_) => const StudentEditPage(), // StudentEditPage pode lidar com criação se studentId for nulo
+      child: (_) =>
+          const StudentEditPage(), // StudentEditPage pode lidar com criação se studentId for nulo
       transition: TransitionType.rightToLeft,
     );
 
     // Rota para a página de aprovação de horas (se for uma página separada)
-    // r.child(
-    //   '/time-approvals',
-    //   child: (_) => const SupervisorTimeApprovalPage(),
-    //   transition: TransitionType.fadeIn,
-    // );
+    r.child(
+      '/time-approvals',
+      child: (_) => const SupervisorTimeApprovalPage(),
+      transition: TransitionType.fadeIn,
+    );
   }
 }

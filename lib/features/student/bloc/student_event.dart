@@ -1,11 +1,12 @@
 // lib/features/student/presentation/bloc/student_event.dart
 import 'package:equatable/equatable.dart';
+import 'package:estagio/core/enum/class_shift.dart';
 import 'package:flutter/material.dart'; // Para TimeOfDay
 // Importe o enum ClassShift se for permitir a edição dele
-import '../../../../data/models/enums.dart'; // Para ClassShift
 
 // Parâmetros para atualizar perfil do estudante, específicos para o evento
-class UpdateStudentProfileEventParams extends Equatable { // Adicionado Equatable
+class UpdateStudentProfileEventParams extends Equatable {
+  // Adicionado Equatable
   final String? fullName;
   final String? registrationNumber;
   final String? course;
@@ -30,19 +31,19 @@ class UpdateStudentProfileEventParams extends Equatable { // Adicionado Equatabl
   });
 
   @override
-  List<Object?> get props => [ // Adicionado props
-        fullName,
-        registrationNumber,
-        course,
-        advisorName,
-        isMandatoryInternship,
-        profilePictureUrl,
-        phoneNumber,
-        birthDate,
-        classShift,
-      ];
+  List<Object?> get props => [
+    // Adicionado props
+    fullName,
+    registrationNumber,
+    course,
+    advisorName,
+    isMandatoryInternship,
+    profilePictureUrl,
+    phoneNumber,
+    birthDate,
+    classShift,
+  ];
 }
-
 
 abstract class StudentEvent extends Equatable {
   const StudentEvent();
@@ -66,7 +67,10 @@ class UpdateStudentProfileInfoEvent extends StudentEvent {
   final String userId; // ID do estudante cujo perfil está a ser atualizado
   final UpdateStudentProfileEventParams params;
 
-  const UpdateStudentProfileInfoEvent({required this.userId, required this.params});
+  const UpdateStudentProfileInfoEvent({
+    required this.userId,
+    required this.params,
+  });
 
   @override
   List<Object?> get props => [userId, params];
@@ -86,7 +90,8 @@ class StudentCheckInEvent extends StudentEvent {
 /// Evento para realizar check-out.
 class StudentCheckOutEvent extends StudentEvent {
   final String userId;
-  final String activeTimeLogId; // ID do log de tempo que foi iniciado no check-in
+  final String
+  activeTimeLogId; // ID do log de tempo que foi iniciado no check-in
   final String? description;
 
   const StudentCheckOutEvent({
@@ -133,7 +138,13 @@ class CreateManualTimeLogEvent extends StudentEvent {
   });
 
   @override
-  List<Object?> get props => [userId, logDate, checkInTime, checkOutTime, description];
+  List<Object?> get props => [
+    userId,
+    logDate,
+    checkInTime,
+    checkOutTime,
+    description,
+  ];
 }
 
 /// Evento para atualizar um registo de tempo manual existente.
@@ -153,7 +164,13 @@ class UpdateManualTimeLogEvent extends StudentEvent {
   });
 
   @override
-  List<Object?> get props => [timeLogId, logDate, checkInTime, checkOutTime, description];
+  List<Object?> get props => [
+    timeLogId,
+    logDate,
+    checkInTime,
+    checkOutTime,
+    description,
+  ];
 }
 
 /// Evento para remover um registo de tempo.

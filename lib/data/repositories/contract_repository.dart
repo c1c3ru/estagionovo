@@ -1,12 +1,12 @@
 // lib/data/repositories/contract_repository.dart
 import 'package:dartz/dartz.dart';
+import 'package:estagio/core/enum/contract_status.dart';
+import 'package:estagio/domain/entities/contract.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../../core/errors/app_exceptions.dart';
-import '../../domain/entities/contract_entity.dart';
 import '../../domain/repositories/i_contract_repository.dart'; // Contém UpsertContractParams
 import '../datasources/supabase/contract_datasource.dart';
-import '../models/enums.dart'; // Para ContractStatus
 
 class ContractRepository implements IContractRepository {
   final IContractSupabaseDatasource _contractDatasource;
@@ -33,7 +33,10 @@ class ContractRepository implements IContractRepository {
     );
   }
 
-  Map<String, dynamic> _mapUpsertParamsToData(UpsertContractParams params, {bool isCreating = false}) {
+  Map<String, dynamic> _mapUpsertParamsToData(
+    UpsertContractParams params, {
+    bool isCreating = false,
+  }) {
     final Map<String, dynamic> data = {
       'student_id': params.studentId,
       'supervisor_id': params.supervisorId,
@@ -52,52 +55,115 @@ class ContractRepository implements IContractRepository {
     return data;
   }
 
-
   @override
-  Future<Either<AppFailure, ContractEntity>> createContract(UpsertContractParams params) async {
+  Future<Either<AppFailure, ContractEntity>> createContract(
+    UpsertContractParams params,
+  ) async {
     try {
       final dataToCreate = _mapUpsertParamsToData(params, isCreating: true);
-      final newContractData = await _contractDatasource.createContractData(dataToCreate);
+      final newContractData = await _contractDatasource.createContractData(
+        dataToCreate,
+      );
       return Right(_mapDataToContractEntity(newContractData));
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao criar contrato: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message: 'Erro do Supabase ao criar contrato: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao criar contrato: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message: 'Erro desconhecido ao criar contrato: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<AppFailure, ContractEntity>> getContractById(String contractId) async {
+  Future<Either<AppFailure, ContractEntity>> getContractById(
+    String contractId,
+  ) async {
     try {
-      final contractData = await _contractDatasource.getContractDataById(contractId);
+      final contractData = await _contractDatasource.getContractDataById(
+        contractId,
+      );
       if (contractData != null) {
         return Right(_mapDataToContractEntity(contractData));
       } else {
-        return Left(NotFoundFailure(message: 'Contrato não encontrado com ID: $contractId'));
+        return Left(
+          NotFoundFailure(
+            message: 'Contrato não encontrado com ID: $contractId',
+          ),
+        );
       }
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao obter contrato: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message: 'Erro do Supabase ao obter contrato: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao obter contrato: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message: 'Erro desconhecido ao obter contrato: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<AppFailure, List<ContractEntity>>> getContractsForStudent(String studentId) async {
+  Future<Either<AppFailure, List<ContractEntity>>> getContractsForStudent(
+    String studentId,
+  ) async {
     try {
-      final contractsData = await _contractDatasource.getContractsDataForStudent(studentId);
-      final contractEntities = contractsData.map((data) => _mapDataToContractEntity(data)).toList();
+      final contractsData = await _contractDatasource
+          .getContractsDataForStudent(studentId);
+      final contractEntities = contractsData
+          .map((data) => _mapDataToContractEntity(data))
+          .toList();
       return Right(contractEntities);
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao obter contratos do estudante: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message:
+              'Erro do Supabase ao obter contratos do estudante: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao obter contratos do estudante: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message:
+              'Erro desconhecido ao obter contratos do estudante: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 
@@ -113,32 +179,74 @@ class ContractRepository implements IContractRepository {
         supervisorId: supervisorId,
         status: status?.value, // Passa o valor string do enum
       );
-      final contractEntities = contractsData.map((data) => _mapDataToContractEntity(data)).toList();
+      final contractEntities = contractsData
+          .map((data) => _mapDataToContractEntity(data))
+          .toList();
       return Right(contractEntities);
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao obter todos os contratos: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message: 'Erro do Supabase ao obter todos os contratos: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao obter todos os contratos: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message:
+              'Erro desconhecido ao obter todos os contratos: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<AppFailure, ContractEntity>> updateContract(UpsertContractParams params) async {
+  Future<Either<AppFailure, ContractEntity>> updateContract(
+    UpsertContractParams params,
+  ) async {
     try {
       if (params.id == null) {
-        return Left(ValidationFailure(message: 'ID do contrato é obrigatório para atualização.'));
+        return Left(
+          ValidationFailure(
+            message: 'ID do contrato é obrigatório para atualização.',
+          ),
+        );
       }
       final dataToUpdate = _mapUpsertParamsToData(params, isCreating: false);
-      final updatedContractData = await _contractDatasource.updateContractData(params.id!, dataToUpdate);
+      final updatedContractData = await _contractDatasource.updateContractData(
+        params.id!,
+        dataToUpdate,
+      );
       return Right(_mapDataToContractEntity(updatedContractData));
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao atualizar contrato: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message: 'Erro do Supabase ao atualizar contrato: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao atualizar contrato: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message: 'Erro desconhecido ao atualizar contrato: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 
@@ -148,11 +256,26 @@ class ContractRepository implements IContractRepository {
       await _contractDatasource.deleteContractData(contractId);
       return const Right(null);
     } on PostgrestException catch (e) {
-      return Left(SupabaseServerFailure(message: 'Erro do Supabase ao remover contrato: ${e.message}', originalException: e));
+      return Left(
+        SupabaseServerFailure(
+          message: 'Erro do Supabase ao remover contrato: ${e.message}',
+          originalException: e,
+        ),
+      );
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, originalException: e.originalException));
+      return Left(
+        ServerFailure(
+          message: e.message,
+          originalException: e.originalException,
+        ),
+      );
     } catch (e) {
-      return Left(ServerFailure(message: 'Erro desconhecido ao remover contrato: ${e.toString()}', originalException: e));
+      return Left(
+        ServerFailure(
+          message: 'Erro desconhecido ao remover contrato: ${e.toString()}',
+          originalException: e,
+        ),
+      );
     }
   }
 }

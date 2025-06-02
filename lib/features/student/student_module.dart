@@ -1,4 +1,8 @@
 // lib/features/student/student_module.dart
+import 'package:estagio/features/student/bloc/student_bloc.dart';
+import 'package:estagio/features/student/pages/student_home_page.dart';
+import 'package:estagio/features/student/pages/student_profile_page.dart';
+import 'package:estagio/features/student/pages/student_time_log_page.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
@@ -20,7 +24,8 @@ import '../../domain/repositories/i_contract_repository.dart';
 // Usecases
 // Student Usecases
 import '../../domain/usecases/student/get_student_details_usecase.dart';
-import '../../domain/usecases/student/update_student_profile_usecase.dart';
+import '../../domain/usecases/student/update_student_profile_usecase.dart'
+    hide GetStudentDetailsUsecase;
 import '../../domain/usecases/student/check_in_usecase.dart';
 import '../../domain/usecases/student/check_out_usecase.dart';
 // TimeLog Usecases (usados pelo StudentBloc, podem ser do Student ou TimeLog)
@@ -33,26 +38,23 @@ import '../../domain/usecases/contract/get_contracts_for_student_usecase.dart';
 // Adicione aqui o usecase para GetActiveTimeLogForStudentUsecase se for criá-lo
 // import '../../domain/usecases/time_log/get_active_time_log_for_student_usecase.dart';
 
-
-// BLoC
-import 'presentation/bloc/student_bloc.dart';
-
-// Pages
-import 'presentation/pages/student_home_page.dart'; // Renomeado para student_home_page
-import 'presentation/pages/student_time_log_page.dart'; // Para a lista de logs e criação manual
-import 'presentation/pages/student_profile_page.dart';
 // A check_in_out_page pode ser parte da student_home_page ou uma página separada.
 // Se for separada, importe-a: import 'presentation/pages/check_in_out_page.dart';
-
 
 class StudentModule extends Module {
   @override
   void binds(Injector i) {
     // Datasources
     // SupabaseClient é obtido do AppModule (ou de onde estiver registrado globalmente)
-    i.add<IStudentSupabaseDatasource>(() => StudentSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<ITimeLogSupabaseDatasource>(() => TimeLogSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<IContractSupabaseDatasource>(() => ContractSupabaseDatasource(i.get<SupabaseClient>()));
+    i.add<IStudentSupabaseDatasource>(
+      () => StudentSupabaseDatasource(i.get<SupabaseClient>()),
+    );
+    i.add<ITimeLogSupabaseDatasource>(
+      () => TimeLogSupabaseDatasource(i.get<SupabaseClient>()),
+    );
+    i.add<IContractSupabaseDatasource>(
+      () => ContractSupabaseDatasource(i.get<SupabaseClient>()),
+    );
 
     // Repositories
     // O StudentRepository pode precisar de múltiplos datasources se as operações estiverem muito interligadas
@@ -65,53 +67,75 @@ class StudentModule extends Module {
     // Se os usecases do StudentBloc usam ITimeLogRepository e IContractRepository diretamente,
     // então estes também precisam ser registrados.
 
-    i.add<IStudentRepository>(() => StudentRepository(
-          i.get<IStudentSupabaseDatasource>(),
-          i.get<ITimeLogSupabaseDatasource>(), // StudentRepository usa TimeLogDatasource
-        ));
+    i.add<IStudentRepository>(
+      () => StudentRepository(
+        i.get<IStudentSupabaseDatasource>(),
+        i
+            .get<
+              ITimeLogSupabaseDatasource
+            >(), // StudentRepository usa TimeLogDatasource
+      ),
+    );
 
     // Registar ITimeLogRepository e IContractRepository se os usecases do StudentBloc
     // dependerem diretamente deles, e não apenas através do IStudentRepository.
     // Com base nos usecases que injetamos no StudentBloc, parece que precisamos deles.
-    i.add<ITimeLogRepository>(() => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()));
-    i.add<IContractRepository>(() => ContractRepository(i.get<IContractSupabaseDatasource>()));
-
+    i.add<ITimeLogRepository>(
+      () => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()),
+    );
+    i.add<IContractRepository>(
+      () => ContractRepository(i.get<IContractSupabaseDatasource>()),
+    );
 
     // Usecases
-    i.add<GetStudentDetailsUsecase>(() => GetStudentDetailsUsecase(i.get<IStudentRepository>()));
-    i.add<UpdateStudentProfileUsecase>(() => UpdateStudentProfileUsecase(i.get<IStudentRepository>()));
+    i.add<GetStudentDetailsUsecase>(
+      () => GetStudentDetailsUsecase(i.get<IStudentRepository>()),
+    );
+    i.add<UpdateStudentProfileUsecase>(
+      () => UpdateStudentProfileUsecase(i.get<IStudentRepository>()),
+    );
     i.add<CheckInUsecase>(() => CheckInUsecase(i.get<IStudentRepository>()));
     i.add<CheckOutUsecase>(() => CheckOutUsecase(i.get<IStudentRepository>()));
 
     // Usecases de TimeLog (usando IStudentRepository ou ITimeLogRepository)
     // Se GetStudentTimeLogsUsecase usa IStudentRepository:
-    i.add<GetStudentTimeLogsUsecase>(() => GetStudentTimeLogsUsecase(i.get<IStudentRepository>()));
+    i.add<GetStudentTimeLogsUsecase>(
+      () => GetStudentTimeLogsUsecase(i.get<IStudentRepository>()),
+    );
     // Se CreateTimeLogUsecase usa IStudentRepository:
-    i.add<CreateTimeLogUsecase>(() => CreateTimeLogUsecase(i.get<IStudentRepository>()));
+    i.add<CreateTimeLogUsecase>(
+      () => CreateTimeLogUsecase(i.get<IStudentRepository>()),
+    );
     // Se UpdateTimeLogUsecase usa IStudentRepository:
-    i.add<UpdateTimeLogUsecase>(() => UpdateTimeLogUsecase(i.get<IStudentRepository>()));
-     // Se DeleteTimeLogUsecase usa IStudentRepository:
-    i.add<DeleteTimeLogUsecase>(() => DeleteTimeLogUsecase(i.get<IStudentRepository>()));
+    i.add<UpdateTimeLogUsecase>(
+      () => UpdateTimeLogUsecase(i.get<IStudentRepository>()),
+    );
+    // Se DeleteTimeLogUsecase usa IStudentRepository:
+    i.add<DeleteTimeLogUsecase>(
+      () => DeleteTimeLogUsecase(i.get<IStudentRepository>()),
+    );
     // i.add<GetActiveTimeLogForStudentUsecase>(() => GetActiveTimeLogForStudentUsecase(i.get<ITimeLogRepository>()));
 
-
     // Usecases de Contrato
-    i.add<GetContractsForStudentUsecase>(() => GetContractsForStudentUsecase(i.get<IContractRepository>()));
-
+    i.add<GetContractsForStudentUsecase>(
+      () => GetContractsForStudentUsecase(i.get<IContractRepository>()),
+    );
 
     // BLoC
-    i.add<StudentBloc>(() => StudentBloc(
-          getStudentDetailsUsecase: i.get<GetStudentDetailsUsecase>(),
-          updateStudentProfileUsecase: i.get<UpdateStudentProfileUsecase>(),
-          checkInUsecase: i.get<CheckInUsecase>(),
-          checkOutUsecase: i.get<CheckOutUsecase>(),
-          getStudentTimeLogsUsecase: i.get<GetStudentTimeLogsUsecase>(),
-          createTimeLogUsecase: i.get<CreateTimeLogUsecase>(),
-          updateTimeLogUsecase: i.get<UpdateTimeLogUsecase>(),
-          deleteTimeLogUsecase: i.get<DeleteTimeLogUsecase>(),
-          // getActiveTimeLogForStudentUsecase: i.get<GetActiveTimeLogForStudentUsecase>(),
-          getContractsForStudentUsecase: i.get<GetContractsForStudentUsecase>(),
-        ));
+    i.add<StudentBloc>(
+      () => StudentBloc(
+        getStudentDetailsUsecase: i.get<GetStudentDetailsUsecase>(),
+        updateStudentProfileUsecase: i.get<UpdateStudentProfileUsecase>(),
+        checkInUsecase: i.get<CheckInUsecase>(),
+        checkOutUsecase: i.get<CheckOutUsecase>(),
+        getStudentTimeLogsUsecase: i.get<GetStudentTimeLogsUsecase>(),
+        createTimeLogUsecase: i.get<CreateTimeLogUsecase>(),
+        updateTimeLogUsecase: i.get<UpdateTimeLogUsecase>(),
+        deleteTimeLogUsecase: i.get<DeleteTimeLogUsecase>(),
+        // getActiveTimeLogForStudentUsecase: i.get<GetActiveTimeLogForStudentUsecase>(),
+        getContractsForStudentUsecase: i.get<GetContractsForStudentUsecase>(),
+      ),
+    );
   }
 
   @override
@@ -123,8 +147,10 @@ class StudentModule extends Module {
     r.child(
       // Modular.initialRoute é '/', então '/student/' já é a rota base.
       // Se quiser /student/dashboard, use '/dashboard'
-      Modular.initialRoute, // Equivalente a '/' dentro deste módulo, resultando em '/student/'
-      child: (_) => const StudentHomePage(), // Renomeado de StudentDashboardPage para StudentHomePage
+      Modular
+          .initialRoute, // Equivalente a '/' dentro deste módulo, resultando em '/student/'
+      child: (_) =>
+          const StudentHomePage(), // Renomeado de StudentDashboardPage para StudentHomePage
       transition: TransitionType.fadeIn,
     );
 

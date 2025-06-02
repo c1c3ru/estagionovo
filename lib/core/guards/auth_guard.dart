@@ -1,13 +1,16 @@
 // lib/core/guards/auth_guard.dart
 import 'dart:async';
+import 'package:estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
 import 'package:flutter_modular/flutter_modular.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../features/auth/presentation/bloc/auth_state.dart' as auth_state; // Usar alias
 
 /// Um RouteGuard que verifica se o utilizador está autenticado.
 /// Se não estiver, redireciona para a rota de login.
 class AuthGuard extends RouteGuard {
-  AuthGuard() : super(redirectTo: '/auth/login'); // Rota para redirecionar se não autenticado
+  AuthGuard()
+    : super(
+        redirectTo: '/auth/login',
+      ); // Rota para redirecionar se não autenticado
 
   @override
   FutureOr<bool> canActivate(String path, ParallelRoute route) {

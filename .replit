@@ -2,3 +2,28 @@ modules = ["cpp-clang14", "bash", "dart-3.5", "dart-2.18"]
 
 [nix]
 channel = "stable-24_05"
+
+[workflows]
+runButton = "Flutter Development"
+
+[[workflows.workflow]]
+name = "Flutter Development"
+author = 14080838
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flutter pub get"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5000"
+
+[[workflows.workflow]]
+name = "Run Tests"
+author = 14080838
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flutter test"

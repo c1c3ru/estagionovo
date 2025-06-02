@@ -1,11 +1,10 @@
 // lib/domain/repositories/i_supervisor_repository.dart
 import 'package:dartz/dartz.dart';
-import '../entities/supervisor_entity.dart';
-import '../entities/student_entity.dart';
-import '../entities/time_log_entity.dart';
-import '../entities/contract_entity.dart';
+import 'package:estagio/domain/entities/contract.dart';
+import 'package:estagio/domain/entities/student.dart';
+import 'package:estagio/domain/entities/supervisor.dart';
+import 'package:estagio/domain/entities/time_log.dart';
 import '../../core/errors/app_exceptions.dart';
-import '../../data/models/enums.dart'; // Para StudentStatus
 
 // Parâmetros para filtrar estudantes
 class FilterStudentsParams {
@@ -19,20 +18,30 @@ class FilterStudentsParams {
 
 abstract class ISupervisorRepository {
   /// Obtém os detalhes do perfil de um supervisor pelo seu ID de utilizador.
-  Future<Either<AppFailure, SupervisorEntity>> getSupervisorDetails(String userId);
+  Future<Either<AppFailure, SupervisorEntity>> getSupervisorDetails(
+    String userId,
+  );
 
   /// Obtém todos os estudantes (geralmente para um supervisor).
   /// Pode incluir paginação ou filtros básicos se necessário.
-  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents(FilterStudentsParams? params);
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents(
+    FilterStudentsParams? params,
+  );
 
   /// Obtém os detalhes de um estudante específico (visão do supervisor).
-  Future<Either<AppFailure, StudentEntity>> getStudentDetailsForSupervisor(String studentId);
+  Future<Either<AppFailure, StudentEntity>> getStudentDetailsForSupervisor(
+    String studentId,
+  );
 
   /// Cria um novo registo de estudante (feito pelo supervisor).
-  Future<Either<AppFailure, StudentEntity>> createStudent(StudentEntity studentData);
+  Future<Either<AppFailure, StudentEntity>> createStudent(
+    StudentEntity studentData,
+  );
 
   /// Atualiza os dados de um estudante (feito pelo supervisor).
-  Future<Either<AppFailure, StudentEntity>> updateStudentBySupervisor(StudentEntity studentData);
+  Future<Either<AppFailure, StudentEntity>> updateStudentBySupervisor(
+    StudentEntity studentData,
+  );
 
   /// Remove um estudante (feito pelo supervisor).
   Future<Either<AppFailure, void>> deleteStudent(String studentId);
@@ -52,11 +61,17 @@ abstract class ISupervisorRepository {
   });
 
   /// Obtém todos os contratos.
-  Future<Either<AppFailure, List<ContractEntity>>> getAllContracts(String? studentId);
+  Future<Either<AppFailure, List<ContractEntity>>> getAllContracts(
+    String? studentId,
+  );
 
   /// Cria um novo contrato.
-  Future<Either<AppFailure, ContractEntity>> createContract(ContractEntity contractData);
+  Future<Either<AppFailure, ContractEntity>> createContract(
+    ContractEntity contractData,
+  );
 
   /// Atualiza um contrato existente.
-  Future<Either<AppFailure, ContractEntity>> updateContract(ContractEntity contractData);
+  Future<Either<AppFailure, ContractEntity>> updateContract(
+    ContractEntity contractData,
+  );
 }

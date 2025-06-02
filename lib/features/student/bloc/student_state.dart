@@ -1,8 +1,8 @@
 // lib/features/student/presentation/bloc/student_state.dart
 import 'package:equatable/equatable.dart';
-import '../../../../domain/entities/student_entity.dart';
-import '../../../../domain/entities/time_log_entity.dart';
-import '../../../../domain/entities/contract_entity.dart'; // Se o dashboard mostrar info de contrato
+import 'package:estagio/domain/entities/contract.dart';
+import 'package:estagio/domain/entities/student.dart';
+import 'package:estagio/domain/entities/time_log.dart';
 
 // Estrutura para agrupar estatísticas de tempo, se necessário
 class StudentTimeStats extends Equatable {
@@ -19,7 +19,12 @@ class StudentTimeStats extends Equatable {
   });
 
   @override
-  List<Object?> get props => [hoursThisWeek, hoursThisMonth, recentLogs, activeTimeLog];
+  List<Object?> get props => [
+    hoursThisWeek,
+    hoursThisMonth,
+    recentLogs,
+    activeTimeLog,
+  ];
 
   StudentTimeStats copyWith({
     double? hoursThisWeek,
@@ -32,11 +37,12 @@ class StudentTimeStats extends Equatable {
       hoursThisWeek: hoursThisWeek ?? this.hoursThisWeek,
       hoursThisMonth: hoursThisMonth ?? this.hoursThisMonth,
       recentLogs: recentLogs ?? this.recentLogs,
-      activeTimeLog: clearActiveTimeLog == true ? null : activeTimeLog ?? this.activeTimeLog,
+      activeTimeLog: clearActiveTimeLog == true
+          ? null
+          : activeTimeLog ?? this.activeTimeLog,
     );
   }
 }
-
 
 abstract class StudentState extends Equatable {
   const StudentState();
@@ -101,7 +107,10 @@ class StudentTimeLogOperationSuccess extends StudentState {
   final TimeLogEntity timeLog; // O log que foi criado/atualizado
   final String message;
 
-  const StudentTimeLogOperationSuccess({required this.timeLog, required this.message});
+  const StudentTimeLogOperationSuccess({
+    required this.timeLog,
+    required this.message,
+  });
 
   @override
   List<Object?> get props => [timeLog, message];
@@ -110,18 +119,22 @@ class StudentTimeLogOperationSuccess extends StudentState {
 /// Estado de sucesso para remoção de log de tempo.
 class StudentTimeLogDeleteSuccess extends StudentState {
   final String message;
-  const StudentTimeLogDeleteSuccess({this.message = 'Registo de tempo removido com sucesso.'});
-   @override
+  const StudentTimeLogDeleteSuccess({
+    this.message = 'Registo de tempo removido com sucesso.',
+  });
+  @override
   List<Object?> get props => [message];
 }
-
 
 /// Estado de sucesso na atualização do perfil do estudante.
 class StudentProfileUpdateSuccess extends StudentState {
   final StudentEntity updatedStudent;
   final String message;
 
-  const StudentProfileUpdateSuccess({required this.updatedStudent, this.message = 'Perfil atualizado com sucesso!'});
+  const StudentProfileUpdateSuccess({
+    required this.updatedStudent,
+    this.message = 'Perfil atualizado com sucesso!',
+  });
 
   @override
   List<Object?> get props => [updatedStudent, message];

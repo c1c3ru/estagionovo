@@ -1,7 +1,7 @@
 // lib/domain/usecases/auth/get_current_user_usecase.dart
 import 'package:dartz/dartz.dart';
+import 'package:estagio/domain/entities/user.dart';
 import '../../../core/errors/app_exceptions.dart';
-import '../../entities/user_entity.dart';
 import '../../repositories/i_auth_repository.dart';
 
 class GetCurrentUserUsecase {

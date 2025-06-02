@@ -1,13 +1,13 @@
 // lib/features/supervisor/presentation/bloc/supervisor_bloc.dart
 import 'dart:async';
+import 'package:estagio/core/enum/user_role.dart';
+import 'package:estagio/domain/entities/contract.dart';
+import 'package:estagio/domain/entities/student.dart';
+import 'package:estagio/domain/entities/time_log.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/app_exceptions.dart';
-import '../../../../domain/entities/student_entity.dart';
-import '../../../../domain/entities/supervisor_entity.dart';
-import '../../../../domain/entities/time_log_entity.dart';
-import '../../../../domain/entities/contract_entity.dart';
 
 // Usecases de Supervisor
 import '../../../../domain/usecases/supervisor/get_supervisor_details_usecase.dart';
@@ -27,10 +27,12 @@ import '../../../../domain/usecases/contract/delete_contract_usecase.dart'; // S
 
 // Usecases de Auth (para criar o utilizador auth antes de criar o perfil de estudante)
 import '../../../../domain/usecases/auth/register_usecase.dart';
-import '../../../../domain/repositories/i_auth_repository.dart' show RegisterParams; // Para RegisterParams
-import '../../../../domain/repositories/i_supervisor_repository.dart' show FilterStudentsParams; // Para FilterStudentsParams
-import '../../../../domain/repositories/i_contract_repository.dart' show UpsertContractParams; // Para UpsertContractParams
-
+import '../../../../domain/repositories/i_auth_repository.dart'
+    show RegisterParams; // Para RegisterParams
+import '../../../../domain/repositories/i_supervisor_repository.dart'
+    show FilterStudentsParams; // Para FilterStudentsParams
+import '../../../../domain/repositories/i_contract_repository.dart'
+    show UpsertContractParams; // Para UpsertContractParams
 
 import 'supervisor_event.dart';
 import 'supervisor_state.dart';
@@ -41,7 +43,8 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
   // Usecases de Supervisor
   final GetSupervisorDetailsUsecase _getSupervisorDetailsUsecase;
   final GetAllStudentsForSupervisorUsecase _getAllStudentsForSupervisorUsecase;
-  final GetStudentDetailsForSupervisorUsecase _getStudentDetailsForSupervisorUsecase;
+  final GetStudentDetailsForSupervisorUsecase
+  _getStudentDetailsForSupervisorUsecase;
   final CreateStudentBySupervisorUsecase _createStudentBySupervisorUsecase;
   final UpdateStudentBySupervisorUsecase _updateStudentBySupervisorUsecase;
   final DeleteStudentBySupervisorUsecase _deleteStudentBySupervisorUsecase;
@@ -57,38 +60,43 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
   // Usecase de Auth (para registar o utilizador auth do estudante)
   final RegisterUsecase _registerAuthUserUsecase;
 
-
   SupervisorBloc({
     required GetSupervisorDetailsUsecase getSupervisorDetailsUsecase,
-    required GetAllStudentsForSupervisorUsecase getAllStudentsForSupervisorUsecase,
-    required GetStudentDetailsForSupervisorUsecase getStudentDetailsForSupervisorUsecase,
+    required GetAllStudentsForSupervisorUsecase
+    getAllStudentsForSupervisorUsecase,
+    required GetStudentDetailsForSupervisorUsecase
+    getStudentDetailsForSupervisorUsecase,
     required CreateStudentBySupervisorUsecase createStudentBySupervisorUsecase,
     required UpdateStudentBySupervisorUsecase updateStudentBySupervisorUsecase,
     required DeleteStudentBySupervisorUsecase deleteStudentBySupervisorUsecase,
-    required GetAllTimeLogsForSupervisorUsecase getAllTimeLogsForSupervisorUsecase,
+    required GetAllTimeLogsForSupervisorUsecase
+    getAllTimeLogsForSupervisorUsecase,
     required ApproveOrRejectTimeLogUsecase approveOrRejectTimeLogUsecase,
     required GetAllContractsUsecase getAllContractsUsecase,
     required CreateContractUsecase createContractUsecase,
     required UpdateContractUsecase updateContractUsecase,
     required DeleteContractUsecase deleteContractUsecase,
     required RegisterUsecase registerAuthUserUsecase,
-  })  : _getSupervisorDetailsUsecase = getSupervisorDetailsUsecase,
-        _getAllStudentsForSupervisorUsecase = getAllStudentsForSupervisorUsecase,
-        _getStudentDetailsForSupervisorUsecase = getStudentDetailsForSupervisorUsecase,
-        _createStudentBySupervisorUsecase = createStudentBySupervisorUsecase,
-        _updateStudentBySupervisorUsecase = updateStudentBySupervisorUsecase,
-        _deleteStudentBySupervisorUsecase = deleteStudentBySupervisorUsecase,
-        _getAllTimeLogsForSupervisorUsecase = getAllTimeLogsForSupervisorUsecase,
-        _approveOrRejectTimeLogUsecase = approveOrRejectTimeLogUsecase,
-        _getAllContractsUsecase = getAllContractsUsecase,
-        _createContractUsecase = createContractUsecase,
-        _updateContractUsecase = updateContractUsecase,
-        _deleteContractUsecase = deleteContractUsecase,
-        _registerAuthUserUsecase = registerAuthUserUsecase,
-        super(const SupervisorInitial()) {
+  }) : _getSupervisorDetailsUsecase = getSupervisorDetailsUsecase,
+       _getAllStudentsForSupervisorUsecase = getAllStudentsForSupervisorUsecase,
+       _getStudentDetailsForSupervisorUsecase =
+           getStudentDetailsForSupervisorUsecase,
+       _createStudentBySupervisorUsecase = createStudentBySupervisorUsecase,
+       _updateStudentBySupervisorUsecase = updateStudentBySupervisorUsecase,
+       _deleteStudentBySupervisorUsecase = deleteStudentBySupervisorUsecase,
+       _getAllTimeLogsForSupervisorUsecase = getAllTimeLogsForSupervisorUsecase,
+       _approveOrRejectTimeLogUsecase = approveOrRejectTimeLogUsecase,
+       _getAllContractsUsecase = getAllContractsUsecase,
+       _createContractUsecase = createContractUsecase,
+       _updateContractUsecase = updateContractUsecase,
+       _deleteContractUsecase = deleteContractUsecase,
+       _registerAuthUserUsecase = registerAuthUserUsecase,
+       super(const SupervisorInitial()) {
     on<LoadSupervisorDashboardDataEvent>(_onLoadSupervisorDashboardData);
     on<FilterStudentsEvent>(_onFilterStudents);
-    on<LoadStudentDetailsForSupervisorEvent>(_onLoadStudentDetailsForSupervisor);
+    on<LoadStudentDetailsForSupervisorEvent>(
+      _onLoadStudentDetailsForSupervisor,
+    );
     on<CreateStudentBySupervisorEvent>(_onCreateStudentBySupervisor);
     on<UpdateStudentBySupervisorEvent>(_onUpdateStudentBySupervisor);
     on<DeleteStudentBySupervisorEvent>(_onDeleteStudentBySupervisor);
@@ -104,7 +112,11 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     LoadSupervisorDashboardDataEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(const SupervisorLoading(loadingMessage: 'A carregar dados do dashboard...'));
+    emit(
+      const SupervisorLoading(
+        loadingMessage: 'A carregar dados do dashboard...',
+      ),
+    );
     try {
       // TODO: Obter ID do supervisor logado (do AuthBloc ou de um parâmetro do evento)
       // String supervisorId = "obter_id_do_supervisor_logado";
@@ -113,7 +125,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       // supervisorProfileResult.fold((l) => null, (r) => supervisorProfile = r);
 
       // 1. Buscar todos os estudantes (sem filtro inicial)
-      final studentsResult = await _getAllStudentsForSupervisorUsecase.call(null);
+      final studentsResult = await _getAllStudentsForSupervisorUsecase.call(
+        null,
+      );
       List<StudentEntity> students = [];
       await studentsResult.fold(
         (failure) => throw failure,
@@ -121,7 +135,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       );
 
       // 2. Buscar todos os contratos (para o Gantt ou visão geral)
-      final contractsResult = await _getAllContractsUsecase.call(const GetAllContractsParams()); // Sem filtros
+      final contractsResult = await _getAllContractsUsecase.call(
+        const GetAllContractsParams(),
+      ); // Sem filtros
       List<ContractEntity> contracts = [];
       await contractsResult.fold(
         (failure) => throw failure,
@@ -130,9 +146,19 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
 
       // 3. Calcular estatísticas
       final now = DateTime.now();
-      final activeStudents = students.where((s) => s.role == UserRole.student && s.contractEndDate.isAfter(now)).length; // Simplificado: ativos se contrato não terminou
+      final activeStudents = students
+          .where(
+            (s) => s.role == UserRole.student && s.contractEndDate.isAfter(now),
+          )
+          .length; // Simplificado: ativos se contrato não terminou
       final inactiveStudents = students.length - activeStudents; // Simplificado
-      final expiringContractsSoon = contracts.where((c) => c.endDate.isAfter(now) && c.endDate.isBefore(now.add(const Duration(days: 30)))).length;
+      final expiringContractsSoon = contracts
+          .where(
+            (c) =>
+                c.endDate.isAfter(now) &&
+                c.endDate.isBefore(now.add(const Duration(days: 30))),
+          )
+          .length;
 
       final stats = SupervisorDashboardStats(
         totalStudents: students.length,
@@ -141,16 +167,25 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
         expiringContractsSoon: expiringContractsSoon,
       );
 
-      emit(SupervisorDashboardLoadSuccess(
-        // supervisorProfile: supervisorProfile,
-        students: students,
-        contracts: contracts,
-        stats: stats,
-        showGanttView: (state is SupervisorDashboardLoadSuccess) ? (state as SupervisorDashboardLoadSuccess).showGanttView : false,
-      ));
+      emit(
+        SupervisorDashboardLoadSuccess(
+          // supervisorProfile: supervisorProfile,
+          students: students,
+          contracts: contracts,
+          stats: stats,
+          showGanttView: (state is SupervisorDashboardLoadSuccess)
+              ? (state as SupervisorDashboardLoadSuccess).showGanttView
+              : false,
+        ),
+      );
     } catch (e) {
-      emit(SupervisorOperationFailure(
-          message: e is AppFailure ? e.message : 'Erro ao carregar dados do dashboard.'));
+      emit(
+        SupervisorOperationFailure(
+          message: e is AppFailure
+              ? e.message
+              : 'Erro ao carregar dados do dashboard.',
+        ),
+      );
     }
   }
 
@@ -177,11 +212,15 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
           // Isso é menos provável, pois o filtro geralmente é aplicado sobre dados existentes.
           // Por segurança, poderia chamar LoadSupervisorDashboardDataEvent ou emitir um estado parcial.
           // Para simplificar, assumimos que o dashboard já foi carregado uma vez.
-           emit(SupervisorDashboardLoadSuccess( // Estado parcial, pode precisar de mais dados
-            students: filteredStudents,
-            contracts: [], // Ou buscar contratos novamente
-            stats: const SupervisorDashboardStats(), // Ou buscar stats novamente
-          ));
+          emit(
+            SupervisorDashboardLoadSuccess(
+              // Estado parcial, pode precisar de mais dados
+              students: filteredStudents,
+              contracts: [], // Ou buscar contratos novamente
+              stats:
+                  const SupervisorDashboardStats(), // Ou buscar stats novamente
+            ),
+          );
         }
       },
     );
@@ -191,37 +230,54 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     LoadStudentDetailsForSupervisorEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(const SupervisorLoading(loadingMessage: 'A carregar detalhes do estudante...'));
+    emit(
+      const SupervisorLoading(
+        loadingMessage: 'A carregar detalhes do estudante...',
+      ),
+    );
     try {
-      final studentResult = await _getStudentDetailsForSupervisorUsecase.call(event.studentId);
+      final studentResult = await _getStudentDetailsForSupervisorUsecase.call(
+        event.studentId,
+      );
       final StudentEntity student = await studentResult.fold(
         (failure) => throw failure,
         (s) => s,
       );
 
-      final timeLogsResult = await _getAllTimeLogsForSupervisorUsecase.call(studentId: event.studentId, pendingApprovalOnly: null); // Todos os logs do estudante
+      final timeLogsResult = await _getAllTimeLogsForSupervisorUsecase.call(
+        studentId: event.studentId,
+        pendingApprovalOnly: null,
+      ); // Todos os logs do estudante
       List<TimeLogEntity> timeLogs = [];
       await timeLogsResult.fold(
         (failure) => throw failure,
         (tl) => timeLogs = tl,
       );
 
-      final contractsResult = await _getAllContractsUsecase.call(GetAllContractsParams(studentId: event.studentId));
+      final contractsResult = await _getAllContractsUsecase.call(
+        GetAllContractsParams(studentId: event.studentId),
+      );
       List<ContractEntity> contracts = [];
       await contractsResult.fold(
         (failure) => throw failure,
         (c) => contracts = c,
       );
 
-      emit(SupervisorStudentDetailsLoadSuccess(
-        student: student,
-        timeLogs: timeLogs,
-        contracts: contracts,
-      ));
-
+      emit(
+        SupervisorStudentDetailsLoadSuccess(
+          student: student,
+          timeLogs: timeLogs,
+          contracts: contracts,
+        ),
+      );
     } catch (e) {
-       emit(SupervisorOperationFailure(
-          message: e is AppFailure ? e.message : 'Erro ao carregar detalhes do estudante.'));
+      emit(
+        SupervisorOperationFailure(
+          message: e is AppFailure
+              ? e.message
+              : 'Erro ao carregar detalhes do estudante.',
+        ),
+      );
     }
   }
 
@@ -232,18 +288,28 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(const SupervisorLoading(loadingMessage: 'A criar estudante...'));
 
     // Passo 1: Registar o utilizador no Supabase Auth
-    final authResult = await _registerAuthUserUsecase.call(RegisterParams(
-      email: event.initialEmail,
-      password: event.initialPassword,
-      fullName: event.studentData.fullName, // O nome completo também vai para o user_metadata do auth
-      role: UserRole.student, // A role é sempre estudante aqui
-    ));
+    final authResult = await _registerAuthUserUsecase.call(
+      RegisterParams(
+        email: event.initialEmail,
+        password: event.initialPassword,
+        fullName: event
+            .studentData
+            .fullName, // O nome completo também vai para o user_metadata do auth
+        role: UserRole.student, // A role é sempre estudante aqui
+      ),
+    );
 
     await authResult.fold(
       (failure) async {
-        emit(SupervisorOperationFailure(message: 'Falha ao criar utilizador de autenticação: ${failure.message}'));
+        emit(
+          SupervisorOperationFailure(
+            message:
+                'Falha ao criar utilizador de autenticação: ${failure.message}',
+          ),
+        );
       },
-      (authUserEntity) async { // authUserEntity é o UserEntity do utilizador auth criado
+      (authUserEntity) async {
+        // authUserEntity é o UserEntity do utilizador auth criado
         try {
           // Passo 2: Criar o perfil de estudante na tabela 'students'
           // A StudentEntity do evento já deve ter o ID do authUserEntity
@@ -252,21 +318,38 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
               ? event.studentData
               : event.studentData.copyWith(id: authUserEntity.id);
 
-          final studentProfileResult = await _createStudentBySupervisorUsecase.call(studentToCreate);
+          final studentProfileResult = await _createStudentBySupervisorUsecase
+              .call(studentToCreate);
 
           studentProfileResult.fold(
             (profileFailure) {
               // TODO: Considerar apagar o utilizador auth se a criação do perfil falhar (rollback)
-              emit(SupervisorOperationFailure(message: 'Utilizador auth criado, mas falha ao criar perfil de estudante: ${profileFailure.message}'));
+              emit(
+                SupervisorOperationFailure(
+                  message:
+                      'Utilizador auth criado, mas falha ao criar perfil de estudante: ${profileFailure.message}',
+                ),
+              );
             },
             (createdStudent) {
-              emit(SupervisorOperationSuccess(message: 'Estudante criado com sucesso!', entity: createdStudent));
+              emit(
+                SupervisorOperationSuccess(
+                  message: 'Estudante criado com sucesso!',
+                  entity: createdStudent,
+                ),
+              );
               // Recarregar dados do dashboard para refletir o novo estudante
               add(const LoadSupervisorDashboardDataEvent());
             },
           );
         } catch (e) {
-           emit(SupervisorOperationFailure(message: e is AppFailure ? e.message : 'Erro ao criar perfil de estudante.'));
+          emit(
+            SupervisorOperationFailure(
+              message: e is AppFailure
+                  ? e.message
+                  : 'Erro ao criar perfil de estudante.',
+            ),
+          );
         }
       },
     );
@@ -277,12 +360,21 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     Emitter<SupervisorState> emit,
   ) async {
     emit(const SupervisorLoading(loadingMessage: 'A atualizar estudante...'));
-    final result = await _updateStudentBySupervisorUsecase.call(event.studentData);
+    final result = await _updateStudentBySupervisorUsecase.call(
+      event.studentData,
+    );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (updatedStudent) {
-        emit(SupervisorOperationSuccess(message: 'Estudante atualizado com sucesso!', entity: updatedStudent));
-        add(const LoadSupervisorDashboardDataEvent()); // Recarrega para atualizar a lista
+        emit(
+          SupervisorOperationSuccess(
+            message: 'Estudante atualizado com sucesso!',
+            entity: updatedStudent,
+          ),
+        );
+        add(
+          const LoadSupervisorDashboardDataEvent(),
+        ); // Recarrega para atualizar a lista
       },
     );
   }
@@ -295,11 +387,17 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     // AVISO: Remover um estudante pode exigir a remoção do utilizador no Supabase Auth também.
     // O DeleteStudentBySupervisorUsecase e seu repositório precisam lidar com isso.
     // Se ele apenas remove da tabela 'students', o utilizador auth ainda existirá.
-    final result = await _deleteStudentBySupervisorUsecase.call(event.studentId);
+    final result = await _deleteStudentBySupervisorUsecase.call(
+      event.studentId,
+    );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (_) {
-        emit(const SupervisorOperationSuccess(message: 'Estudante removido com sucesso!'));
+        emit(
+          const SupervisorOperationSuccess(
+            message: 'Estudante removido com sucesso!',
+          ),
+        );
         add(const LoadSupervisorDashboardDataEvent()); // Recarrega
       },
     );
@@ -309,14 +407,19 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     LoadAllTimeLogsForApprovalEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(const SupervisorLoading(loadingMessage: 'A carregar registos de tempo...'));
+    emit(
+      const SupervisorLoading(
+        loadingMessage: 'A carregar registos de tempo...',
+      ),
+    );
     final result = await _getAllTimeLogsForSupervisorUsecase.call(
       studentId: event.studentIdFilter,
       pendingApprovalOnly: event.pendingOnly,
     );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
-      (timeLogs) => emit(SupervisorTimeLogsForApprovalLoadSuccess(timeLogs: timeLogs)),
+      (timeLogs) =>
+          emit(SupervisorTimeLogsForApprovalLoadSuccess(timeLogs: timeLogs)),
     );
   }
 
@@ -335,23 +438,33 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (updatedTimeLog) {
-        emit(SupervisorOperationSuccess(
-          message: event.approved ? 'Registo de tempo aprovado!' : 'Registo de tempo rejeitado.',
-          entity: updatedTimeLog,
-        ));
+        emit(
+          SupervisorOperationSuccess(
+            message: event.approved
+                ? 'Registo de tempo aprovado!'
+                : 'Registo de tempo rejeitado.',
+            entity: updatedTimeLog,
+          ),
+        );
         // Recarregar a lista de logs para aprovação para refletir a mudança
         // Ou, se o estado atual for SupervisorTimeLogsForApprovalLoadSuccess, atualizá-lo.
         if (state is SupervisorTimeLogsForApprovalLoadSuccess) {
-          final currentLogs = (state as SupervisorTimeLogsForApprovalLoadSuccess).timeLogs;
-          final newLogs = currentLogs.map((log) => log.id == updatedTimeLog.id ? updatedTimeLog : log).toList();
+          final currentLogs =
+              (state as SupervisorTimeLogsForApprovalLoadSuccess).timeLogs;
+          final newLogs = currentLogs
+              .map((log) => log.id == updatedTimeLog.id ? updatedTimeLog : log)
+              .toList();
           // Se for aprovado/rejeitado e a lista for só de pendentes, pode ser removido
-          if ( (state as SupervisorTimeLogsForApprovalLoadSuccess).props.contains(true) && updatedTimeLog.approved) { // Assumindo que pendingOnly é um prop ou estado
-             newLogs.removeWhere((log) => log.id == updatedTimeLog.id);
+          if ((state as SupervisorTimeLogsForApprovalLoadSuccess).props
+                  .contains(true) &&
+              updatedTimeLog.approved) {
+            // Assumindo que pendingOnly é um prop ou estado
+            newLogs.removeWhere((log) => log.id == updatedTimeLog.id);
           }
           emit(SupervisorTimeLogsForApprovalLoadSuccess(timeLogs: newLogs));
         } else {
           // Se não, apenas dispara o evento para recarregar a lista de aprovações
-           add(const LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
+          add(const LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
         }
       },
     );
@@ -366,19 +479,23 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       GetAllContractsParams(
         studentId: event.studentIdFilter,
         status: event.statusFilter,
-      )
+      ),
     );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (contracts) {
         // Se o estado atual for o dashboard, atualiza os contratos lá
         if (state is SupervisorDashboardLoadSuccess) {
-          emit((state as SupervisorDashboardLoadSuccess).copyWith(contracts: contracts));
+          emit(
+            (state as SupervisorDashboardLoadSuccess).copyWith(
+              contracts: contracts,
+            ),
+          );
         } else {
           // Se não, emite um estado específico para contratos (se houver uma página só de contratos)
           emit(SupervisorContractsLoadSuccess(contracts: contracts));
         }
-      }
+      },
     );
   }
 
@@ -397,15 +514,21 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
         endDate: event.contractData.endDate,
         description: event.contractData.description,
         documentUrl: event.contractData.documentUrl,
-        createdBy: event.createdBySupervisorId, // ID do supervisor que está a criar
-      )
+        createdBy:
+            event.createdBySupervisorId, // ID do supervisor que está a criar
+      ),
     );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (newContract) {
-        emit(SupervisorOperationSuccess(message: 'Contrato criado com sucesso!', entity: newContract));
+        emit(
+          SupervisorOperationSuccess(
+            message: 'Contrato criado com sucesso!',
+            entity: newContract,
+          ),
+        );
         add(const LoadSupervisorDashboardDataEvent()); // Recarrega o dashboard
-      }
+      },
     );
   }
 
@@ -414,7 +537,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     Emitter<SupervisorState> emit,
   ) async {
     emit(const SupervisorLoading(loadingMessage: 'A atualizar contrato...'));
-     final result = await _updateContractUsecase.call(
+    final result = await _updateContractUsecase.call(
       UpsertContractParams(
         id: event.contractData.id, // ID do contrato a ser atualizado
         studentId: event.contractData.studentId,
@@ -425,15 +548,21 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
         endDate: event.contractData.endDate,
         description: event.contractData.description,
         documentUrl: event.contractData.documentUrl,
-        createdBy: event.updatedBySupervisorId, // Quem está a atualizar (pode ser diferente do created_by original)
-      )
+        createdBy: event
+            .updatedBySupervisorId, // Quem está a atualizar (pode ser diferente do created_by original)
+      ),
     );
     result.fold(
       (failure) => emit(SupervisorOperationFailure(message: failure.message)),
       (updatedContract) {
-        emit(SupervisorOperationSuccess(message: 'Contrato atualizado com sucesso!', entity: updatedContract));
+        emit(
+          SupervisorOperationSuccess(
+            message: 'Contrato atualizado com sucesso!',
+            entity: updatedContract,
+          ),
+        );
         add(const LoadSupervisorDashboardDataEvent()); // Recarrega o dashboard
-      }
+      },
     );
   }
 

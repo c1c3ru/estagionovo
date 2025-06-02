@@ -45,6 +45,8 @@ class AppTextField extends StatefulWidget {
     this.textInputAction,
     this.maxLines = 1,
     this.minLines,
+    required bool readOnly,
+    required Future<Null> Function() onTap,
   }) : super(key: key);
 
   @override
@@ -86,13 +88,22 @@ class _AppTextFieldState extends State<AppTextField> {
         labelStyle: theme.inputDecorationTheme.labelStyle,
         hintStyle: theme.inputDecorationTheme.hintStyle,
         prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: theme.inputDecorationTheme.prefixIconColor)
+            ? Icon(
+                widget.prefixIcon,
+                color: theme.inputDecorationTheme.prefixIconColor,
+              )
             : null,
-        suffixIcon: widget.obscureText // Se for campo de senha, mostra ícone para alternar visibilidade
+        suffixIcon:
+            widget
+                .obscureText // Se for campo de senha, mostra ícone para alternar visibilidade
             ? IconButton(
                 icon: Icon(
-                  _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                  color: theme.inputDecorationTheme.prefixIconColor, // Reutilizando cor do prefixo
+                  _obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  color: theme
+                      .inputDecorationTheme
+                      .prefixIconColor, // Reutilizando cor do prefixo
                 ),
                 onPressed: () {
                   setState(() {
@@ -101,11 +112,14 @@ class _AppTextFieldState extends State<AppTextField> {
                 },
               )
             : (widget.suffixIcon != null
-                ? IconButton(
-                    icon: Icon(widget.suffixIcon, color: theme.inputDecorationTheme.prefixIconColor),
-                    onPressed: widget.onSuffixIconPressed,
-                  )
-                : null),
+                  ? IconButton(
+                      icon: Icon(
+                        widget.suffixIcon,
+                        color: theme.inputDecorationTheme.prefixIconColor,
+                      ),
+                      onPressed: widget.onSuffixIconPressed,
+                    )
+                  : null),
         border: theme.inputDecorationTheme.border,
         enabledBorder: theme.inputDecorationTheme.enabledBorder,
         focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -113,8 +127,13 @@ class _AppTextFieldState extends State<AppTextField> {
         focusedErrorBorder: theme.inputDecorationTheme.focusedErrorBorder,
         disabledBorder: theme.inputDecorationTheme.disabledBorder,
         filled: true, // Para que a fillColor tenha efeito
-        fillColor: widget.enabled ? theme.inputDecorationTheme.fillColor : AppColors.greyLight.withOpacity(0.3),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+        fillColor: widget.enabled
+            ? theme.inputDecorationTheme.fillColor
+            : AppColors.greyLight.withOpacity(0.3),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16.0,
+          horizontal: 12.0,
+        ),
       ),
     );
   }
