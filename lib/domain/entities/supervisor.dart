@@ -6,6 +6,7 @@ import '../../data/models/enums.dart';
 class SupervisorEntity extends Equatable {
   final String id;
   final String fullName;
+  final String siapeRegistration;
   final String? department;
   final String? position;
   final String? jobCode;
@@ -19,6 +20,7 @@ class SupervisorEntity extends Equatable {
   const SupervisorEntity({
     required this.id,
     required this.fullName,
+    required this.siapeRegistration,
     this.department,
     this.position,
     this.jobCode,
@@ -33,6 +35,7 @@ class SupervisorEntity extends Equatable {
   List<Object?> get props => [
         id,
         fullName,
+        siapeRegistration,
         department,
         position,
         jobCode,
@@ -46,6 +49,7 @@ class SupervisorEntity extends Equatable {
   SupervisorEntity copyWith({
     String? id,
     String? fullName,
+    String? siapeRegistration,
     String? department,
     bool? clearDepartment,
     String? position,
@@ -64,6 +68,7 @@ class SupervisorEntity extends Equatable {
     return SupervisorEntity(
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
+      siapeRegistration: siapeRegistration ?? this.siapeRegistration,
       department: clearDepartment == true ? null : department ?? this.department,
       position: clearPosition == true ? null : position ?? this.position,
       jobCode: clearJobCode == true ? null : jobCode ?? this.jobCode,

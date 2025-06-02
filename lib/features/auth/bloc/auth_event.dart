@@ -9,6 +9,37 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class RegisterSupervisorEvent extends AuthEvent {
+  final String fullName;
+  final String email;
+  final String password;
+  final String siapeRegistration;
+  final String? phoneNumber;
+  final String? department;
+  final String? position;
+
+  const RegisterSupervisorEvent({
+    required this.fullName,
+    required this.email,
+    required this.password,
+    required this.siapeRegistration,
+    this.phoneNumber,
+    this.department,
+    this.position,
+  });
+
+  @override
+  List<Object?> get props => [
+        fullName,
+        email,
+        password,
+        siapeRegistration,
+        phoneNumber,
+        department,
+        position,
+      ];
+}
+
 /// Evento disparado ao tentar fazer login.
 class LoginSubmittedEvent extends AuthEvent {
   final String email;

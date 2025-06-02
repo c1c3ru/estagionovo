@@ -15,8 +15,8 @@ class AppStrings {
   static const String next = 'Próximo';
   static const String previous = 'Anterior';
   static const String submit = 'Submeter';
-  static const String requiredField = 'Campo obrigatório';
-  static const String invalidEmail = 'Email inválido';
+  static const String requiredField = 'Este campo é obrigatório.';
+  static const String invalidEmail = 'Email inválido.';
   static const String passwordTooShort = 'A senha deve ter pelo menos 6 caracteres';
 
   // Autenticação
@@ -37,6 +37,16 @@ class AppStrings {
   static const String registrationSuccessMessage = 'Conta criada com sucesso. Verifique o seu email para confirmação.';
   static const String passwordResetEmailSent = 'Instruções para redefinir a senha enviadas para o seu email.';
   static const String logoutConfirmation = 'Tem a certeza que deseja sair?';
+
+  // Mensagens relacionadas à matrícula SIAPE
+  static const String siapeRequired = 'Matrícula SIAPE é obrigatória.';
+  static const String siapeInvalid = 'Matrícula SIAPE deve ter exatamente 7 dígitos.';
+  static const String siapeAlreadyExists = 'Esta matrícula SIAPE já está em uso.';
+  static const String siapeOnlyNumbers = 'Matrícula SIAPE deve conter apenas números.';
+  static const String siapeRegistration = 'Matrícula SIAPE';
+  static const String siapeHint = 'Digite sua matrícula SIAPE (7 dígitos)';
+  static const String unauthorizedSupervisor = 'Apenas funcionários com matrícula SIAPE podem se cadastrar como supervisores.';
+
 
   // Dashboard (Geral)
   static const String dashboard = 'Dashboard';
@@ -76,9 +86,38 @@ class AppStrings {
   static const String applyFilters = 'Aplicar';
   static const String clearFilters = 'Limpar';
 
+    // Roles/Funções
+  static const String student = 'Estudante';
+  static const String supervisor = 'Supervisor';
+  static const String admin = 'Administrador';
+
+
   // Comum
   static const String settings = 'Configurações';
   static const String helpAndFeedback = 'Ajuda e Feedback';
+  static const String registerSupervisorPage = 'Cadastro de Supervisor';
+
+
+  // Status
+  static const String active = 'Ativo';
+  static const String inactive = 'Inativo';
+  static const String pending = 'Pendente';
+  static const String approved = 'Aprovado';
+  static const String rejected = 'Rejeitado';
+
+  // Mensagens de carregamento
+  static const String loading = 'Carregando...';
+  static const String saving = 'Salvando...';
+  static const String processing = 'Processando...';
+
+  // Mensagens de erro de rede/conectividade
+  static const String networkError = 'Erro de conexão. Verifique sua internet.';
+  static const String serverError = 'Erro no servidor. Tente novamente mais tarde.';
+  static const String unknownError = 'Erro desconhecido. Tente novamente.';
+
+  // Mensagens de confirmação
+  static const String confirmDelete = 'Tem certeza que deseja excluir?';
+  static const String confirmLogout = 'Tem certeza que deseja sair?';
 
   // Previne instanciação
   AppStrings._();

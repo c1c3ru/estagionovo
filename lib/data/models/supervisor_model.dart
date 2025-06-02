@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 class SupervisorModel extends Equatable {
   final String id; // UUID PRIMARY KEY REFERENCES users(id)
   final String fullName; // VARCHAR NOT NULL
+  final String siapeRegistration; // VARCHAR(7) NOT NULL - Matrícula SIAPE obrigatória
   final String? department; // VARCHAR
   final String? position; // VARCHAR
   final String? jobCode; // VARCHAR(50)
@@ -15,6 +16,7 @@ class SupervisorModel extends Equatable {
   const SupervisorModel({
     required this.id,
     required this.fullName,
+    required this.siapeRegistration,
     this.department,
     this.position,
     this.jobCode,
@@ -28,6 +30,7 @@ class SupervisorModel extends Equatable {
   List<Object?> get props => [
         id,
         fullName,
+        siapeRegistration,
         department,
         position,
         jobCode,
@@ -41,6 +44,7 @@ class SupervisorModel extends Equatable {
     return SupervisorModel(
       id: json['id'] as String,
       fullName: json['full_name'] as String,
+      siapeRegistration: json['siape_registration'] as String,
       department: json['department'] as String?,
       position: json['position'] as String?,
       jobCode: json['job_code'] as String?,
@@ -57,6 +61,7 @@ class SupervisorModel extends Equatable {
     return {
       'id': id,
       'full_name': fullName,
+      'siape_registration': siapeRegistration,
       'department': department,
       'position': position,
       'job_code': jobCode,
@@ -70,6 +75,7 @@ class SupervisorModel extends Equatable {
   SupervisorModel copyWith({
     String? id,
     String? fullName,
+    String? siapeRegistration,
     String? department,
     bool? clearDepartment,
     String? position,
@@ -87,6 +93,7 @@ class SupervisorModel extends Equatable {
     return SupervisorModel(
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
+      siapeRegistration: siapeRegistration ?? this.siapeRegistration,
       department: clearDepartment == true ? null : department ?? this.department,
       position: clearPosition == true ? null : position ?? this.position,
       jobCode: clearJobCode == true ? null : jobCode ?? this.jobCode,
