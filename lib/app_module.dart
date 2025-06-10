@@ -1,6 +1,8 @@
 // lib/app_module.dart
 import 'package:estagio/core/enum/user_role.dart';
 import 'package:estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:estagio/features/auth/bloc/auth_state.dart'
+    as auth_feature_state;
 import 'package:flutter/material.dart'; // ADICIONADO PARA WIDGETS
 import 'package:flutter_bloc/flutter_bloc.dart'; // ADICIONADO PARA BLOCBUILDER
 import 'package:flutter_modular/flutter_modular.dart';
@@ -153,7 +155,7 @@ class AppModule extends Module {
 
 // Widget simples para redirecionamento inicial baseado no estado de autenticação
 class InitialRedirectWidget extends StatelessWidget {
-  const InitialRedirectWidget({Key? key}) : super(key: key);
+  const InitialRedirectWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -169,28 +171,28 @@ class InitialRedirectWidget extends StatelessWidget {
       // Usando o alias para o AuthState da feature
       bloc: authBloc,
       builder: (context, state) {
-        if (state is auth_feature_state.Authenticated) {
+        if (state is auth_feature_state.AuthSuccess) {
           // Usando o alias
           // Utilizador autenticado, redireciona com base no papel
           switch (state.userRole) {
             // userRole do estado AuthSuccess
             case UserRole.student:
-              Modular.to.replaceAllNamed('/student/');
+              Modular.to.navigate('/student/');
               break;
             case UserRole.supervisor:
-              Modular.to.replaceAllNamed('/supervisor/');
+              Modular.to.navigate('/supervisor/');
               break;
             case UserRole.admin:
-              Modular.to.replaceAllNamed(
+              Modular.to.navigate(
                   '/supervisor/'); // Admin pode ir para supervisor por agora
               break;
             default:
-              Modular.to.replaceAllNamed('/auth/login');
+              Modular.to.navigate('/auth/login');
           }
-        } else if (state is auth_feature_state.Unauthenticated ||
+        } else if (state is auth_feature_state.AuthUnauthenticated ||
             state is auth_feature_state.AuthFailure) {
           // Usando o alias
-          Modular.to.replaceAllNamed('/auth/login');
+          Modular.to.navigate('/auth/login');
         }
         // Enquanto AuthInitial ou AuthLoading, mostra um indicador
         return const Scaffold(body: Center(child: CircularProgressIndicator()));

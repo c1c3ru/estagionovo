@@ -22,16 +22,15 @@ class AppFailure extends Equatable {
   List<Object?> get props => [message, type, code, data];
 
   @override
-  String toString() => 'AppFailure(message: $message, type: $type, code: $code)';
+  String toString() =>
+      'AppFailure(message: $message, type: $type, code: $code)';
 }
 
 class ValidationFailure extends AppFailure {
-  const ValidationFailure(String message, {String? code, dynamic data})
+  const ValidationFailure(String message, {super.code, super.data})
       : super(
           message: message,
           type: ExceptionType.validation,
-          code: code,
-          data: data,
         );
 }
 
@@ -40,6 +39,8 @@ class ServerException implements Exception {
   final String? code;
 
   const ServerException(this.message, {this.code});
+
+  get originalException => null;
 
   @override
   String toString() => 'ServerException: $message';

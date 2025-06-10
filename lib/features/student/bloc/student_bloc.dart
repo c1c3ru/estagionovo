@@ -1,8 +1,6 @@
 // lib/features/student/presentation/bloc/student_bloc.dart
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart'; // Para TimeOfDay
 
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../domain/entities/student_entity.dart';
@@ -21,20 +19,16 @@ import '../../../../domain/usecases/student/create_time_log_usecase.dart';
 import '../../../../domain/usecases/student/update_time_log_usecase.dart';
 import '../../../../domain/usecases/student/delete_time_log_usecase.dart';
 // Usecase para buscar log ativo (precisaria ser definido no domínio e repositório)
-// import '../../../../domain/usecases/time_log/get_active_time_log_for_student_usecase.dart';
-
 
 // Usecases de Contrato
 import '../../../../domain/usecases/contract/get_contracts_for_student_usecase.dart';
 
 // Repositório (para os parâmetros dos usecases)
-import '../../../../domain/repositories/i_student_repository.dart' show UpdateStudentProfileParams;
-// import '../../../../domain/repositories/i_time_log_repository.dart' show UpdateTimeLogParams; // Se usar params de ITimeLogRepo
+import '../../../../domain/repositories/i_student_repository.dart'
+    show UpdateStudentProfileParams;
 
 import 'student_event.dart';
 import 'student_state.dart';
-import '../../../../data/models/enums.dart'; // Para ClassShift no handler
-
 
 // Importe o logger se for usar
 // import '../../../../core/utils/logger_utils.dart';
@@ -49,7 +43,6 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   // Usecases de TimeLog
   final GetStudentTimeLogsUsecase _getStudentTimeLogsUsecase;
   final CreateTimeLogUsecase _createTimeLogUsecase;
-  final UpdateTimeLogUsecase _updateTimeLogUsecase;
   final DeleteTimeLogUsecase _deleteTimeLogUsecase;
   // final GetActiveTimeLogForStudentUsecase _getActiveTimeLogForStudentUsecase; // Para buscar log ativo
 
@@ -73,7 +66,6 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         _checkOutUsecase = checkOutUsecase,
         _getStudentTimeLogsUsecase = getStudentTimeLogsUsecase,
         _createTimeLogUsecase = createTimeLogUsecase,
-        _updateTimeLogUsecase = updateTimeLogUsecase,
         _deleteTimeLogUsecase = deleteTimeLogUsecase,
         // _getActiveTimeLogForStudentUsecase = getActiveTimeLogForStudentUsecase,
         _getContractsForStudentUsecase = getContractsForStudentUsecase,
@@ -96,7 +88,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     emit(const StudentLoading());
     try {
       // 1. Buscar detalhes do estudante
-      final studentDetailsResult = await _getStudentDetailsUsecase.call(event.userId);
+      final studentDetailsResult =
+          await _getStudentDetailsUsecase.call(event.userId);
       final StudentEntity student = await studentDetailsResult.fold(
         (failure) => throw failure, // Lança para o catch do BLoC
         (student) => student,
@@ -106,7 +99,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       // (Exemplo: últimos 5 logs e horas da semana atual)
       final now = DateTime.now();
       final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-      final endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+      final endOfWeek = startOfWeek
+          .add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
 
       final timeLogsResult = await _getStudentTimeLogsUsecase.call(
         studentId: event.userId,
@@ -116,7 +110,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       );
 
       List<TimeLogEntity> allLogsThisWeek = [];
-      await timeLogsResult.fold(
+      timeLogsResult.fold(
         (failure) => throw failure,
         (logs) => allLogsThisWeek = logs,
       );
@@ -129,10 +123,12 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       List<TimeLogEntity> recentLogs = allLogsThisWeek.take(5).toList();
 
       // 3. Buscar contratos do estudante
-      final contractsResult = await _getContractsForStudentUsecase.call(event.userId);
+      final contractsResult =
+          await _getContractsForStudentUsecase.call(event.userId);
       List<ContractEntity> contracts = [];
-      await contractsResult.fold(
-        (failure) => throw failure, // Ou tratar de forma diferente se contratos não forem críticos
+      contractsResult.fold(
+        (failure) =>
+            throw failure, // Ou tratar de forma diferente se contratos não forem críticos
         (contractList) => contracts = contractList,
       );
 
@@ -140,14 +136,15 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       // Para isso, o GetStudentTimeLogsUsecase pode ser adaptado ou um novo usecase/método no repo.
       // Assumindo que getStudentTimeLogs pode retornar logs sem checkout_time.
       TimeLogEntity? activeTimeLog;
-      final allTimeLogsResult = await _getStudentTimeLogsUsecase.call(studentId: event.userId);
-      await allTimeLogsResult.fold(
-          (failure) { /* não faz nada, continua sem active log */},
-          (logs) {
-            activeTimeLog = logs.firstWhere((log) => log.checkOutTime == null, orElse: () => null as TimeLogEntity);
-          }
-      );
-
+      final allTimeLogsResult =
+          await _getStudentTimeLogsUsecase.call(studentId: event.userId);
+      allTimeLogsResult.fold((failure) {
+        /* não faz nada, continua sem active log */
+      }, (logs) {
+        // ignore: cast_from_null_always_fails
+        activeTimeLog = logs.firstWhere((log) => log.checkOutTime == null,
+            orElse: () => null as TimeLogEntity);
+      });
 
       emit(StudentDashboardLoadSuccess(
         student: student,
@@ -161,7 +158,9 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     } catch (e) {
       // logger.e('Erro ao carregar dados do dashboard do estudante', error: e);
       emit(StudentOperationFailure(
-          message: e is AppFailure ? e.message : 'Erro desconhecido ao carregar dados do dashboard.'));
+          message: e is AppFailure
+              ? e.message
+              : 'Erro desconhecido ao carregar dados do dashboard.'));
     }
   }
 
@@ -171,7 +170,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   ) async {
     emit(const StudentLoading());
     final result = await _updateStudentProfileUsecase.call(
-      UpdateStudentProfileParams( // Usando o Params do repositório
+      UpdateStudentProfileParams(
+        // Usando o Params do repositório
         studentId: event.userId,
         fullName: event.params.fullName,
         registrationNumber: event.params.registrationNumber,
@@ -180,7 +180,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         isMandatoryInternship: event.params.isMandatoryInternship,
         profilePictureUrl: event.params.profilePictureUrl,
         phoneNumber: event.params.phoneNumber,
-        birthDate: event.params.birthDate,     // Adicionado
+        birthDate: event.params.birthDate, // Adicionado
         classShift: event.params.classShift, // Adicionado
       ),
     );
@@ -209,15 +209,17 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     result.fold(
       (failure) => emit(StudentOperationFailure(message: failure.message)),
       (timeLog) {
-        emit(StudentTimeLogOperationSuccess(timeLog: timeLog, message: 'Check-in realizado com sucesso!'));
+        emit(StudentTimeLogOperationSuccess(
+            timeLog: timeLog, message: 'Check-in realizado com sucesso!'));
         // Se o dashboard estiver carregado, atualiza o activeTimeLog
         if (state is StudentDashboardLoadSuccess) {
           final dashboardState = state as StudentDashboardLoadSuccess;
           emit(dashboardState.copyWith(
-            timeStats: dashboardState.timeStats.copyWith(activeTimeLog: timeLog)
-          ));
-        } else if (state is ActiveTimeLogFetched) { // Se um estado específico de log ativo existir
-            emit(ActiveTimeLogFetched(activeTimeLog: timeLog));
+              timeStats:
+                  dashboardState.timeStats.copyWith(activeTimeLog: timeLog)));
+        } else if (state is ActiveTimeLogFetched) {
+          // Se um estado específico de log ativo existir
+          emit(ActiveTimeLogFetched(activeTimeLog: timeLog));
         }
       },
     );
@@ -236,15 +238,16 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     result.fold(
       (failure) => emit(StudentOperationFailure(message: failure.message)),
       (timeLog) {
-        emit(StudentTimeLogOperationSuccess(timeLog: timeLog, message: 'Check-out realizado com sucesso!'));
-         // Se o dashboard estiver carregado, limpa o activeTimeLog
+        emit(StudentTimeLogOperationSuccess(
+            timeLog: timeLog, message: 'Check-out realizado com sucesso!'));
+        // Se o dashboard estiver carregado, limpa o activeTimeLog
         if (state is StudentDashboardLoadSuccess) {
           final dashboardState = state as StudentDashboardLoadSuccess;
           emit(dashboardState.copyWith(
-            timeStats: dashboardState.timeStats.copyWith(clearActiveTimeLog: true)
-          ));
+              timeStats:
+                  dashboardState.timeStats.copyWith(clearActiveTimeLog: true)));
         } else if (state is ActiveTimeLogFetched) {
-            emit(const ActiveTimeLogFetched(activeTimeLog: null));
+          emit(const ActiveTimeLogFetched(activeTimeLog: null));
         }
       },
     );
@@ -280,7 +283,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     );
     result.fold(
       (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (timeLog) => emit(StudentTimeLogOperationSuccess(timeLog: timeLog, message: 'Registo de tempo criado com sucesso!')),
+      (timeLog) => emit(StudentTimeLogOperationSuccess(
+          timeLog: timeLog, message: 'Registo de tempo criado com sucesso!')),
     );
   }
 
@@ -303,7 +307,9 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     // Vamos assumir que o evento precisaria ser redesenhado para passar o TimeLogEntity original,
     // ou que a UI que dispara este evento já tem a entidade.
     // Por agora, esta funcionalidade não pode ser completada sem mais informações ou refatoração.
-     emit(const StudentOperationFailure(message: 'Atualização de log manual: buscar log original antes de atualizar não implementado neste BLoC.'));
+    emit(const StudentOperationFailure(
+        message:
+            'Atualização de log manual: buscar log original antes de atualizar não implementado neste BLoC.'));
   }
 
   Future<void> _onDeleteTimeLogRequested(
@@ -322,13 +328,16 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     FetchActiveTimeLogEvent event,
     Emitter<StudentState> emit,
   ) async {
-    final result = await _getStudentTimeLogsUsecase.call(studentId: event.userId);
-    await result.fold(
+    final result =
+        await _getStudentTimeLogsUsecase.call(studentId: event.userId);
+    result.fold(
       (failure) => emit(StudentOperationFailure(message: failure.message)),
       (logs) {
         TimeLogEntity? activeLog;
         try {
-          activeLog = logs.firstWhere((log) => log.checkOutTime == null, orElse: () => null as TimeLogEntity);
+          activeLog = logs.firstWhere((log) => log.checkOutTime == null,
+              // ignore: cast_from_null_always_fails
+              orElse: () => null as TimeLogEntity);
         } catch (e) {
           activeLog = null;
         }
@@ -336,8 +345,8 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         if (state is StudentDashboardLoadSuccess) {
           final dashboardState = state as StudentDashboardLoadSuccess;
           emit(dashboardState.copyWith(
-            timeStats: dashboardState.timeStats.copyWith(activeTimeLog: activeLog)
-          ));
+              timeStats:
+                  dashboardState.timeStats.copyWith(activeTimeLog: activeLog)));
         }
       },
     );

@@ -5,12 +5,17 @@ import 'package:lottie/lottie.dart'; // Adicione lottie: ^versao ao seu pubspec.
 class LottieAssetPaths {
   // Defina os caminhos para os seus ficheiros Lottie JSON aqui
   // Certifique-se que estes ficheiros existem na sua pasta assets/animations/
-  static const String emptyState = 'assets/animations/empty_state_animation.json';
-  static const String loadingDots = 'assets/animations/loading_dots_animation.json';
-  static const String successCheck = 'assets/animations/success_check_animation.json';
-  static const String errorCross = 'assets/animations/error_cross_animation.json';
+  static const String emptyState =
+      'assets/animations/empty_state_animation.json';
+  static const String loadingDots =
+      'assets/animations/loading_dots_animation.json';
+  static const String successCheck =
+      'assets/animations/success_check_animation.json';
+  static const String errorCross =
+      'assets/animations/error_cross_animation.json';
   static const String confetti = 'assets/animations/confetti_animation.json';
-  static const String pageNotFound = 'assets/animations/404_not_found_animation.json';
+  static const String pageNotFound =
+      'assets/animations/404_not_found_animation.json';
   // Adicione mais conforme necessário
 
   // Previne instanciação
@@ -29,7 +34,7 @@ class AppLottieAnimation extends StatelessWidget {
   final Animation<double>? controller; // Para controlo externo da animação
 
   const AppLottieAnimation({
-    Key? key,
+    super.key,
     required this.assetPath,
     this.width,
     this.height,
@@ -38,7 +43,7 @@ class AppLottieAnimation extends StatelessWidget {
     this.animate = true,
     this.delegates,
     this.controller,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +66,8 @@ class AppLottieAnimation extends StatelessWidget {
           child: Icon(
             Icons.broken_image_outlined,
             color: Theme.of(context).disabledColor,
-            size: width ?? height ?? 50, // Usa a dimensão fornecida ou um padrão
+            size:
+                width ?? height ?? 50, // Usa a dimensão fornecida ou um padrão
           ),
         );
       },
@@ -72,7 +78,7 @@ class AppLottieAnimation extends StatelessWidget {
 // Exemplos de widgets pré-configurados
 class EmptyStateAnimation extends StatelessWidget {
   final double size;
-  const EmptyStateAnimation({Key? key, this.size = 150}) : super(key: key);
+  const EmptyStateAnimation({super.key, this.size = 150});
 
   @override
   Widget build(BuildContext context) {
@@ -88,13 +94,16 @@ class EmptyStateAnimation extends StatelessWidget {
 class SuccessAnimation extends StatelessWidget {
   final double size;
   final VoidCallback? onLoaded; // Callback quando a animação é carregada
-  final VoidCallback? onComplete; // Callback quando a animação termina (se não repetir)
+  final VoidCallback?
+      onComplete; // Callback quando a animação termina (se não repetir)
 
-  const SuccessAnimation({Key? key, this.size = 100, this.onLoaded, this.onComplete}) : super(key: key);
+  const SuccessAnimation(
+      {super.key, this.size = 100, this.onLoaded, this.onComplete});
 
   @override
   Widget build(BuildContext context) {
-    return Lottie.asset( // Usando Lottie.asset diretamente para aceder ao controller
+    return Lottie.asset(
+      // Usando Lottie.asset diretamente para aceder ao controller
       LottieAssetPaths.successCheck,
       width: size,
       height: size,
@@ -102,7 +111,9 @@ class SuccessAnimation extends StatelessWidget {
       onLoaded: (composition) {
         onLoaded?.call();
       },
-      controller: useAnimationController(onComplete: onComplete), // Exemplo de uso de um controller
+      controller: useAnimationController(
+          onComplete: onComplete,
+          context: context), // Exemplo de uso de um controller
     );
   }
 }
@@ -117,8 +128,10 @@ AnimationController useAnimationController({
   // Este é um exemplo muito simplificado e não segue as melhores práticas para hooks.
   // Numa aplicação real, use um pacote de hooks ou um StatefulWidget para gerir o controller.
   // Apenas para ilustração de como passar um controller.
+
+  final tickerProvider = NavigatorState();
   final controller = AnimationController(
-    vsync: Localizations.of(context) as TickerProvider, // Isto não é ideal, precisa de um TickerProviderStateMixin
+    vsync: tickerProvider,
     duration: duration,
   );
   if (onComplete != null) {
@@ -131,4 +144,3 @@ AnimationController useAnimationController({
   // controller.dispose() precisaria ser chamado.
   return controller;
 }
-

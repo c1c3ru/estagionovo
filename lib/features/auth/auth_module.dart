@@ -1,4 +1,7 @@
 // lib/features/auth/auth_module.dart
+import 'package:estagio/features/auth/pages/forgot_password_page.dart';
+import 'package:estagio/features/auth/pages/login_page.dart';
+import 'package:estagio/features/auth/pages/register_page.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
@@ -18,14 +21,6 @@ import '../../domain/usecases/auth/reset_password_usecase.dart';
 import '../../domain/usecases/auth/update_profile_usecase.dart';
 import '../../domain/usecases/auth/get_auth_state_changes_usecase.dart';
 
-// BLoC
-import 'presentation/bloc/auth_bloc.dart';
-
-// Pages
-import 'presentation/pages/login_page.dart';
-import 'presentation/pages/register_page.dart';
-import 'presentation/pages/forgot_password_page.dart';
-
 class AuthModule extends Module {
   @override
   void binds(Injector i) {
@@ -37,22 +32,27 @@ class AuthModule extends Module {
     // ou podemos instanciar diretamente se a instância global 'supabase' de main.dart for usada.
     // Por agora, vamos obter do injetor do Modular, assumindo que foi registrado no AppModule.
     // Se não, você pode precisar ajustar isso ou passar a instância global.
-    i.add<IAuthSupabaseDatasource>(() => AuthSupabaseDatasource(i.get<SupabaseClient>()));
+    i.add<IAuthSupabaseDatasource>(
+        () => AuthSupabaseDatasource(i.get<SupabaseClient>()));
     // Alternativa se SupabaseClient não estiver no injetor e for global:
     // i.add<IAuthSupabaseDatasource>(() => AuthSupabaseDatasource(Supabase.instance.client));
 
-
     // Repositories
-    i.add<IAuthRepository>(() => AuthRepository(i.get<IAuthSupabaseDatasource>()));
+    i.add<IAuthRepository>(
+        () => AuthRepository(i.get<IAuthSupabaseDatasource>()));
 
     // Usecases
     i.add<LoginUsecase>(() => LoginUsecase(i.get<IAuthRepository>()));
     i.add<RegisterUsecase>(() => RegisterUsecase(i.get<IAuthRepository>()));
     i.add<LogoutUsecase>(() => LogoutUsecase(i.get<IAuthRepository>()));
-    i.add<GetCurrentUserUsecase>(() => GetCurrentUserUsecase(i.get<IAuthRepository>()));
-    i.add<ResetPasswordUsecase>(() => ResetPasswordUsecase(i.get<IAuthRepository>()));
-    i.add<UpdateProfileUsecase>(() => UpdateProfileUsecase(i.get<IAuthRepository>()));
-    i.add<GetAuthStateChangesUsecase>(() => GetAuthStateChangesUsecase(i.get<IAuthRepository>()));
+    i.add<GetCurrentUserUsecase>(
+        () => GetCurrentUserUsecase(i.get<IAuthRepository>()));
+    i.add<ResetPasswordUsecase>(
+        () => ResetPasswordUsecase(i.get<IAuthRepository>()));
+    i.add<UpdateProfileUsecase>(
+        () => UpdateProfileUsecase(i.get<IAuthRepository>()));
+    i.add<GetAuthStateChangesUsecase>(
+        () => GetAuthStateChangesUsecase(i.get<IAuthRepository>()));
 
     // BLoC
     // O AuthBloc é frequentemente um Singleton ou LazySingleton no AppModule para ser acessível globalmente.
@@ -88,7 +88,7 @@ class AuthModule extends Module {
     // Rota para a página de login (ex: /auth/login)
     r.child(
       '/login',
-      child: (_) => LoginPage(
+      child: (_) => const LoginPage(
           // Se AuthBloc não for global, você pode obtê-lo aqui: authBloc: Modular.get<AuthBloc>()
           // ou se for registrado neste módulo: authBloc: Modular.get<AuthBloc>()
           // Mas geralmente as páginas usam BlocProvider ou context.read/watch
@@ -99,14 +99,14 @@ class AuthModule extends Module {
     // Rota para a página de registo (ex: /auth/register)
     r.child(
       '/register',
-      child: (_) => RegisterPage(),
+      child: (_) => const RegisterPage(),
       transition: TransitionType.fadeIn,
     );
 
     // Rota para a página de esquecimento de senha (ex: /auth/forgot-password)
     r.child(
       '/forgot-password',
-      child: (_) => ForgotPasswordPage(),
+      child: (_) => const ForgotPasswordPage(),
       transition: TransitionType.fadeIn,
     );
 

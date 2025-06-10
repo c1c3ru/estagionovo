@@ -1,458 +1,478 @@
-// lib/features/supervisor/presentation/pages/supervisor_dashboard_page.dart
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:estagio/core/enum/user_role.dart';
+import 'package:estagio/domain/entities/student.dart';
+import 'package:estagio/features/supervisor/bloc/supervisor_event.dart';
+import 'package:estagio/features/supervisor/bloc/supervisor_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_modular/flutter_modular.dart';
-import 'package:intl/intl.dart'; // Para formatação de datas, se necessário
-import 'package:lottie/lottie.dart'; // Para animação de lista vazia
+import 'package:dartz/dartz.dart';
 
-// Core
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/errors/app_exceptions.dart';
+import '../../../../domain/entities/student_entity.dart'
+    hide StudentStatus, StudentEntity;
+import '../../../../domain/entities/supervisor_entity.dart';
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../../domain/entities/contract_entity.dart';
 
-// Domain (para FilterStudentsParams e enums se usados diretamente no diálogo)
-import '../../../../domain/repositories/i_supervisor_repository.dart' show FilterStudentsParams;
-import '../../../../data/models/enums.dart'; // Para StudentStatus e ContractStatus
+// Usecases de Supervisor
+import '../../../../domain/usecases/supervisor/get_supervisor_details_usecase.dart';
+import '../../../../domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/get_student_details_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/create_student_by_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/update_student_by_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/delete_student_by_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
 
-// Bloc
-import '../bloc/supervisor_bloc.dart';
-import '../bloc/supervisor_event.dart';
-import '../bloc/supervisor_state.dart';
+// Usecases de Contrato (usados pelo Supervisor)
+import '../../../../domain/usecases/contract/get_all_contracts_usecase.dart';
+import '../../../../domain/usecases/contract/create_contract_usecase.dart';
+import '../../../../domain/usecases/contract/update_contract_usecase.dart';
+import '../../../../domain/usecases/contract/delete_contract_usecase.dart';
 
-// Widgets Compartilhados e Específicos da Feature
-import '../../../shared/widgets/supervisor_app_drawer.dart';
-import '../../../shared/widgets/supervisor_bottom_nav_bar.dart';
-import '../widgets/dashboard_summary_cards.dart'; // A ser criado
-import '../widgets/student_list_widget.dart';     // A ser criado
-import '../widgets/contract_gantt_chart.dart';  // A ser criado
+// Usecases de Auth
+import '../../../../domain/usecases/auth/register_usecase.dart';
+import '../../../../domain/repositories/i_auth_repository.dart'
+    show RegisterParams;
+import '../../../../domain/repositories/i_supervisor_repository.dart'
+    show FilterStudentsParams;
+import '../../../../domain/repositories/i_contract_repository.dart'
+    show UpsertContractParams;
 
-// Charting library (exemplo, substitua pela sua escolha)
-import 'package:syncfusion_flutter_charts/charts.dart';
+class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
+  // Usecases
+  final GetSupervisorDetailsUsecase _getSupervisorDetailsUsecase;
+  final GetAllStudentsForSupervisorUsecase _getAllStudentsForSupervisorUsecase;
+  final GetStudentDetailsForSupervisorUsecase
+      _getStudentDetailsForSupervisorUsecase;
+  final CreateStudentBySupervisorUsecase _createStudentBySupervisorUsecase;
+  final UpdateStudentBySupervisorUsecase _updateStudentBySupervisorUsecase;
+  final DeleteStudentBySupervisorUsecase _deleteStudentBySupervisorUsecase;
+  final GetAllTimeLogsForSupervisorUsecase _getAllTimeLogsForSupervisorUsecase;
+  final ApproveOrRejectTimeLogUsecase _approveOrRejectTimeLogUsecase;
+  final GetAllContractsUsecase _getAllContractsUsecase;
+  final CreateContractUsecase _createContractUsecase;
+  final UpdateContractUsecase _updateContractUsecase;
+  final DeleteContractUsecase _deleteContractUsecase;
+  final RegisterUsecase _registerAuthUserUsecase;
 
-
-class SupervisorDashboardPage extends StatefulWidget {
-  const SupervisorDashboardPage({Key? key}) : super(key: key);
-
-  @override
-  State<SupervisorDashboardPage> createState() => _SupervisorDashboardPageState();
-}
-
-class _SupervisorDashboardPageState extends State<SupervisorDashboardPage> {
-  late SupervisorBloc _supervisorBloc;
-  // Para o diálogo de filtro
-  final _searchNameController = TextEditingController();
-  String? _selectedCourseFilter;
-  StudentStatus? _selectedStatusFilter;
-
-  @override
-  void initState() {
-    super.initState();
-    _supervisorBloc = Modular.get<SupervisorBloc>();
-    // Carrega os dados iniciais do dashboard
-    _supervisorBloc.add(const LoadSupervisorDashboardDataEvent());
+  SupervisorBloc({
+    required GetSupervisorDetailsUsecase getSupervisorDetailsUsecase,
+    required GetAllStudentsForSupervisorUsecase
+        getAllStudentsForSupervisorUsecase,
+    required GetStudentDetailsForSupervisorUsecase
+        getStudentDetailsForSupervisorUsecase,
+    required CreateStudentBySupervisorUsecase createStudentBySupervisorUsecase,
+    required UpdateStudentBySupervisorUsecase updateStudentBySupervisorUsecase,
+    required DeleteStudentBySupervisorUsecase deleteStudentBySupervisorUsecase,
+    required GetAllTimeLogsForSupervisorUsecase
+        getAllTimeLogsForSupervisorUsecase,
+    required ApproveOrRejectTimeLogUsecase approveOrRejectTimeLogUsecase,
+    required GetAllContractsUsecase getAllContractsUsecase,
+    required CreateContractUsecase createContractUsecase,
+    required UpdateContractUsecase updateContractUsecase,
+    required DeleteContractUsecase deleteContractUsecase,
+    required RegisterUsecase registerAuthUserUsecase,
+  })  : _getSupervisorDetailsUsecase = getSupervisorDetailsUsecase,
+        _getAllStudentsForSupervisorUsecase =
+            getAllStudentsForSupervisorUsecase,
+        _getStudentDetailsForSupervisorUsecase =
+            getStudentDetailsForSupervisorUsecase,
+        _createStudentBySupervisorUsecase = createStudentBySupervisorUsecase,
+        _updateStudentBySupervisorUsecase = updateStudentBySupervisorUsecase,
+        _deleteStudentBySupervisorUsecase = deleteStudentBySupervisorUsecase,
+        _getAllTimeLogsForSupervisorUsecase =
+            getAllTimeLogsForSupervisorUsecase,
+        _approveOrRejectTimeLogUsecase = approveOrRejectTimeLogUsecase,
+        _getAllContractsUsecase = getAllContractsUsecase,
+        _createContractUsecase = createContractUsecase,
+        _updateContractUsecase = updateContractUsecase,
+        _deleteContractUsecase = deleteContractUsecase,
+        _registerAuthUserUsecase = registerAuthUserUsecase,
+        super(const SupervisorInitial()) {
+    on<LoadSupervisorDashboardDataEvent>(_onLoadSupervisorDashboardData);
+    on<FilterStudentsEvent>(_onFilterStudents);
+    on<LoadStudentDetailsForSupervisorEvent>(
+        _onLoadStudentDetailsForSupervisor);
+    on<CreateStudentBySupervisorEvent>(_onCreateStudentBySupervisor);
+    on<UpdateStudentBySupervisorEvent>(_onUpdateStudentBySupervisor);
+    on<DeleteStudentBySupervisorEvent>(_onDeleteStudentBySupervisor);
+    on<LoadAllTimeLogsForApprovalEvent>(_onLoadAllTimeLogsForApproval);
+    on<ApproveOrRejectTimeLogEvent>(_onApproveOrRejectTimeLog);
+    on<LoadAllContractsEvent>(_onLoadAllContracts);
+    on<CreateContractBySupervisorEvent>(_onCreateContractBySupervisor);
+    on<UpdateContractBySupervisorEvent>(_onUpdateContractBySupervisor);
+    on<ToggleDashboardViewEvent>(_onToggleDashboardView);
   }
 
-  @override
-  void dispose() {
-    _searchNameController.dispose();
-    super.dispose();
+  Future<void> _onLoadSupervisorDashboardData(
+    LoadSupervisorDashboardDataEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    if (state is! SupervisorDashboardLoadSuccess) {
+      emit(const SupervisorLoading(
+          loadingMessage: 'A carregar dados do dashboard...'));
+    }
+
+    try {
+      final results = await Future.wait([
+        _getAllStudentsForSupervisorUsecase.call(null),
+        _getAllContractsUsecase.call(GetAllContractsParams()),
+        _getAllTimeLogsForSupervisorUsecase.call(pendingApprovalOnly: true),
+      ]);
+
+      final studentsResult =
+          results[0] as Either<AppFailure, List<StudentEntity>>;
+      final List<StudentEntity> students = studentsResult.fold(
+        (failure) => throw failure,
+        (studentList) => studentList,
+      );
+
+      final contractsResult =
+          results[1] as Either<AppFailure, List<ContractEntity>>;
+      final List<ContractEntity> contracts = contractsResult.fold(
+        (failure) => throw failure,
+        (contractList) => contractList,
+      );
+
+      final timeLogsResult =
+          results[2] as Either<AppFailure, List<TimeLogEntity>>;
+      final List<TimeLogEntity> pendingApprovals = timeLogsResult.fold(
+        (failure) => throw failure,
+        (timeLogList) => timeLogList,
+      );
+
+      final now = DateTime.now();
+      final activeStudents =
+          students.where((s) => s.status == StudentStatus.active).length;
+      final inactiveStudents =
+          students.where((s) => s.status == StudentStatus.inactive).length;
+      final expiringContractsSoon = contracts
+          .where((c) =>
+              c.endDate.isAfter(now) &&
+              c.endDate.isBefore(now.add(const Duration(days: 30))))
+          .length;
+
+      final stats = SupervisorDashboardStats(
+        totalStudents: students.length,
+        activeStudents: activeStudents,
+        inactiveStudents: inactiveStudents,
+        expiringContractsSoon: expiringContractsSoon,
+      );
+
+      emit(SupervisorDashboardLoadSuccess(
+        students: students,
+        contracts: contracts,
+        stats: stats,
+        pendingApprovals: pendingApprovals,
+        showGanttView: (state is SupervisorDashboardLoadSuccess)
+            ? (state as SupervisorDashboardLoadSuccess).showGanttView
+            : false,
+      ));
+    } on AppFailure catch (e) {
+      emit(SupervisorOperationFailure(message: e.message));
+    } catch (e) {
+      emit(SupervisorOperationFailure(
+          message:
+              'Ocorreu um erro inesperado ao carregar o dashboard: ${e.toString()}'));
+    }
   }
 
-  Future<void> _refreshDashboard() async {
-    _supervisorBloc.add(const LoadSupervisorDashboardDataEvent());
-  }
-
-  void _showFilterDialog() {
-    // Reseta os campos do diálogo para os filtros atuais aplicados (se houver)
-    // ou para os valores padrão se o estado atual não for o DashboardLoadSuccess.
-    final currentState = _supervisorBloc.state;
+  Future<void> _onFilterStudents(
+    FilterStudentsEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    final currentState = state;
     if (currentState is SupervisorDashboardLoadSuccess) {
-        // TODO: Se os filtros aplicados estiverem guardados no estado do BLoC,
-        // inicialize os controladores/variáveis do diálogo com eles.
-        // Ex: _searchNameController.text = currentState.appliedFilters.name ?? '';
-    }
+      emit(currentState.copyWith(isLoading: true));
 
+      final result =
+          await _getAllStudentsForSupervisorUsecase.call(event.params);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        // Usar StatefulBuilder para permitir que o estado do diálogo seja atualizado (ex: Dropdowns)
-        return StatefulBuilder(builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text('Filtrar Estudantes'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  AppTextField(
-                    controller: _searchNameController,
-                    labelText: 'Nome do Estudante',
-                    prefixIcon: Icons.search,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _selectedCourseFilter,
-                    decoration: const InputDecoration(
-                      labelText: 'Curso',
-                      prefixIcon: Icon(Icons.school_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    hint: const Text('Todos os Cursos'),
-                    isExpanded: true,
-                    items: ['Ciência da Computação', 'Engenharia de Software', 'Sistemas de Informação', 'Direito', 'Administração'] // Exemplo de lista de cursos
-                        .map((course) => DropdownMenuItem(value: course, child: Text(course)))
-                        .toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        _selectedCourseFilter = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<StudentStatus>(
-                    value: _selectedStatusFilter,
-                    decoration: const InputDecoration(
-                      labelText: 'Status do Estudante',
-                      prefixIcon: Icon(Icons.toggle_on_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    hint: const Text('Todos os Status'),
-                    isExpanded: true,
-                    items: StudentStatus.values
-                        .where((status) => status != StudentStatus.unknown) // Não mostrar 'unknown'
-                        .map((status) => DropdownMenuItem(value: status, child: Text(status.displayName)))
-                        .toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        _selectedStatusFilter = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text(AppStrings.clearFilters),
-                onPressed: () {
-                  setDialogState(() {
-                    _searchNameController.clear();
-                    _selectedCourseFilter = null;
-                    _selectedStatusFilter = null;
-                  });
-                  // Dispara o evento de filtro com parâmetros nulos para limpar
-                  _supervisorBloc.add(FilterStudentsEvent(
-                    params: FilterStudentsParams(),
-                  ));
-                  Navigator.of(dialogContext).pop();
-                },
-              ),
-              AppButton(
-                text: AppStrings.applyFilters,
-                onPressed: () {
-                  _supervisorBloc.add(FilterStudentsEvent(
-                    params: FilterStudentsParams(
-                      name: _searchNameController.text.trim().isNotEmpty ? _searchNameController.text.trim() : null,
-                      course: _selectedCourseFilter,
-                      status: _selectedStatusFilter,
-                    ),
-                  ));
-                  Navigator.of(dialogContext).pop();
-                },
-              ),
-            ],
-          );
-        });
-      },
-    );
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.supervisorDashboardTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_alt_outlined),
-            tooltip: 'Filtrar Estudantes',
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_outlined),
-            tooltip: 'Recarregar',
-            onPressed: _refreshDashboard,
-          ),
-        ],
-      ),
-      drawer: const SupervisorAppDrawer(currentIndex: 0), // Ajuste o currentIndex
-      bottomNavigationBar: const SupervisorBottomNavBar(currentIndex: 0), // Ajuste o currentIndex
-      body: BlocConsumer<SupervisorBloc, SupervisorState>(
-        bloc: _supervisorBloc,
-        listener: (context, state) {
-          if (state is SupervisorOperationFailure) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error,
-                ),
-              );
-          } else if (state is SupervisorOperationSuccess) {
-             ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-          }
+      result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (filteredStudents) {
+          emit(currentState.copyWith(
+            students: filteredStudents,
+            isLoading: false,
+            appliedFilters: event.params,
+          ));
         },
-        builder: (context, state) {
-          if (state is SupervisorInitial || (state is SupervisorLoading && state.loadingMessage == null && state is! SupervisorDashboardLoadSuccess) ) {
-             // Mostra loading se for o estado inicial ou um loading genérico sem dados prévios de dashboard
-            if (_supervisorBloc.state is! SupervisorDashboardLoadSuccess) {
-                 return const LoadingIndicator();
-            }
-          }
-
-          if (state is SupervisorLoading && state.loadingMessage != null && _supervisorBloc.state is SupervisorDashboardLoadSuccess) {
-            // Mostra um loading sutil (ex: no AppBar) se já temos dados e uma operação está em curso
-            // Por agora, o RefreshIndicator já cobre isso.
-          }
-
-
-          if (state is SupervisorDashboardLoadSuccess) {
-            return _buildDashboardContent(context, state);
-          }
-
-          if (state is SupervisorOperationFailure && _supervisorBloc.state is! SupervisorDashboardLoadSuccess) {
-             return _buildErrorStatePage(context, state.message);
-          }
-
-          // Fallback para loading se nenhum outro estado corresponder e estivermos à espera do dashboard
-          // ou se o estado for um loading que não é o inicial mas não temos dados de dashboard.
-          return const LoadingIndicator();
-        },
-      ),
-    );
-  }
-
-  Widget _buildErrorStatePage(BuildContext context, String message) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 60, color: theme.colorScheme.error),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.errorOccurred,
-              style: theme.textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: theme.textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            AppButton(
-              text: AppStrings.tryAgain,
-              onPressed: _refreshDashboard,
-              icon: Icons.refresh,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDashboardContent(BuildContext context, SupervisorDashboardLoadSuccess state) {
-    final theme = Theme.of(context);
-    return RefreshIndicator(
-      onRefresh: _refreshDashboard,
-      child: ListView( // Usar ListView para permitir scroll com RefreshIndicator
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // 1. Cartões de Resumo (Widget a ser criado)
-          DashboardSummaryCards(stats: state.stats),
-          const SizedBox(height: 24),
-
-          // 2. Gráfico de Distribuição de Estudantes (Exemplo com SfCircularChart)
-          _buildStudentDistributionChart(context, state.stats),
-          const SizedBox(height: 24),
-
-          // 3. Toggle de Visualização (Lista vs Gantt)
-          _buildViewToggle(context, state.showGanttView),
-          const SizedBox(height: 16),
-
-          // 4. Conteúdo Principal (Lista de Estudantes ou Gráfico de Gantt)
-          if (state.students.isEmpty && !(_supervisorBloc.state is SupervisorLoading))
-            _buildEmptyStudentList(context)
-          else if (state.showGanttView)
-            ContractGanttChart(contracts: state.contracts, students: state.students) // Widget a ser criado
-          else
-            StudentListWidget(students: state.students), // Widget a ser criado
-
-          const SizedBox(height: 24),
-          // TODO: Adicionar secção de Aprovações Pendentes, se desejado aqui
-          // Ex: _buildPendingApprovalsSection(context)
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudentDistributionChart(BuildContext context, SupervisorDashboardStats stats) {
-    final theme = Theme.of(context);
-    final List<ChartData> chartData = [
-      if (stats.activeStudents > 0) ChartData('Ativos', stats.activeStudents.toDouble(), AppColors.statusActive),
-      if (stats.inactiveStudents > 0) ChartData('Inativos', stats.inactiveStudents.toDouble(), AppColors.statusInactive),
-      if (stats.expiringContractsSoon > 0) ChartData('Vencendo', stats.expiringContractsSoon.toDouble(), AppColors.statusPending),
-    ];
-
-    if (chartData.isEmpty && stats.totalStudents == 0) {
-      return const SizedBox.shrink();
+      );
+    } else {
+      add(const LoadSupervisorDashboardDataEvent());
     }
-     if (chartData.isEmpty && stats.totalStudents > 0) {
-      // Caso todos os estudantes não se encaixem nas categorias do gráfico (ex: todos "Concluídos")
-      return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'Total de Estudantes: ${stats.totalStudents}\n(Sem dados para o gráfico de distribuição atual)',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-        ),
+  }
+
+  Future<void> _onApproveOrRejectTimeLog(
+    ApproveOrRejectTimeLogEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is SupervisorDashboardLoadSuccess) {
+      // **IMPROVEMENT**: Optimistically update the UI before making the network call
+      // to provide immediate feedback.
+      final originalApprovals =
+          List<TimeLogEntity>.from(currentState.pendingApprovals);
+      final updatedApprovals = originalApprovals
+        ..removeWhere((log) => log.id == event.timeLogId);
+
+      emit(currentState.copyWith(pendingApprovals: updatedApprovals));
+
+      // **TODO**: Obter o ID do supervisor a partir do seu serviço de autenticação (ex: AuthBloc)
+      // em vez de o passar a partir da UI.
+      const supervisorId = "get-real-supervisor-id-from-auth-service";
+
+      final result = await _approveOrRejectTimeLogUsecase.call(
+        timeLogId: event.timeLogId,
+        approved: event.isApproved,
+        supervisorId: supervisorId,
+      );
+
+      result.fold(
+        (failure) {
+          // If the operation fails, revert the state and show an error.
+          emit(currentState.copyWith(pendingApprovals: originalApprovals));
+          emit(SupervisorOperationFailure(message: failure.message));
+        },
+        (updatedTimeLog) {
+          emit(SupervisorOperationSuccess(
+            message: event.isApproved
+                ? 'Registo de tempo aprovado!'
+                : 'Registo de tempo rejeitado.',
+            entity: updatedTimeLog,
+          ));
+          // The state is already updated, no need to reload the whole dashboard.
+        },
       );
     }
-
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppStrings.studentDistribution, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: SfCircularChart(
-                legend: const Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap, position: LegendPosition.bottom),
-                series: <CircularSeries<ChartData, String>>[
-                  PieSeries<ChartData, String>(
-                    dataSource: chartData,
-                    xValueMapper: (ChartData data, _) => data.x,
-                    yValueMapper: (ChartData data, _) => data.y,
-                    pointColorMapper: (ChartData data, _) => data.color,
-                    dataLabelSettings: const DataLabelSettings(
-                      isVisible: true,
-                      labelPosition: ChartDataLabelPosition.outside,
-                      connectorLineSettings: ConnectorLineSettings(type: ConnectorType.line, length: '10%')
-                    ),
-                    dataLabelMapper: (ChartData data, _) => '${data.x}\n${data.y.toInt()}',
-                    explode: true,
-                    explodeIndex: 0, // Destaca a primeira fatia
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
-  Widget _buildViewToggle(BuildContext context, bool isGanttView) {
-    final theme = Theme.of(context);
-    return ToggleButtons(
-      isSelected: [!isGanttView, isGanttView],
-      onPressed: (index) {
-        _supervisorBloc.add(ToggleDashboardViewEvent(showGanttView: index == 1));
+  void _onToggleDashboardView(
+    ToggleDashboardViewEvent event,
+    Emitter<SupervisorState> emit,
+  ) {
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentDashboardState = state as SupervisorDashboardLoadSuccess;
+      emit(currentDashboardState.copyWith(showGanttView: event.showGanttView));
+    }
+  }
+
+  // --- Other Event Handlers (unchanged) ---
+  Future<void> _onLoadStudentDetailsForSupervisor(
+    LoadStudentDetailsForSupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(
+        loadingMessage: 'A carregar detalhes do estudante...'));
+    try {
+      final studentResult =
+          await _getStudentDetailsForSupervisorUsecase.call(event.studentId);
+      final StudentEntity student = await studentResult.fold(
+        (failure) => throw failure,
+        (s) => s,
+      );
+
+      final timeLogsResult = await _getAllTimeLogsForSupervisorUsecase.call(
+          studentId: event.studentId, pendingApprovalOnly: null);
+      List<TimeLogEntity> timeLogs = [];
+      await timeLogsResult.fold(
+        (failure) => throw failure,
+        (tl) => timeLogs = tl,
+      );
+
+      final contractsResult = await _getAllContractsUsecase
+          .call(GetAllContractsParams(studentId: event.studentId));
+      List<ContractEntity> contracts = [];
+      await contractsResult.fold(
+        (failure) => throw failure,
+        (c) => contracts = c,
+      );
+
+      emit(SupervisorStudentDetailsLoadSuccess(
+        student: student,
+        timeLogs: timeLogs,
+        contracts: contracts,
+      ));
+    } catch (e) {
+      emit(SupervisorOperationFailure(
+          message: e is AppFailure
+              ? e.message
+              : 'Erro ao carregar detalhes do estudante.'));
+    }
+  }
+
+  Future<void> _onCreateStudentBySupervisor(
+    CreateStudentBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A criar estudante...'));
+
+    final authResult = await _registerAuthUserUsecase.call(RegisterParams(
+      email: event.initialEmail,
+      password: event.initialPassword,
+      fullName: event.studentData.fullName,
+      role: UserRole.student,
+    ));
+
+    await authResult.fold(
+      (failure) async {
+        emit(SupervisorOperationFailure(
+            message:
+                'Falha ao criar utilizador de autenticação: ${failure.message}'));
       },
-      borderRadius: BorderRadius.circular(8.0),
-      selectedBorderColor: theme.colorScheme.primary,
-      selectedColor: theme.colorScheme.onPrimary,
-      fillColor: theme.colorScheme.primary,
-      color: theme.colorScheme.primary,
-      constraints: BoxConstraints(minHeight: 40.0, minWidth: (MediaQuery.of(context).size.width - 48) / 2),
-      children: const <Widget>[
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.list_alt), SizedBox(width: 8), Text(AppStrings.studentList)]),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.bar_chart_rounded), SizedBox(width: 8), Text(AppStrings.ganttView)]),
-        ),
-      ],
+      (authUserEntity) async {
+        try {
+          final studentToCreate =
+              event.studentData.copyWith(id: authUserEntity.id);
+
+          final studentProfileResult = await _createStudentBySupervisorUsecase
+              .call(studentToCreate as StudentEntity);
+
+          studentProfileResult.fold(
+            (profileFailure) {
+              emit(SupervisorOperationFailure(
+                  message:
+                      'Utilizador auth criado, mas falha ao criar perfil de estudante: ${profileFailure.message}'));
+            },
+            (createdStudent) {
+              emit(SupervisorOperationSuccess(
+                  message: 'Estudante criado com sucesso!',
+                  entity: createdStudent));
+              add(const LoadSupervisorDashboardDataEvent());
+            },
+          );
+        } catch (e) {
+          emit(SupervisorOperationFailure(
+              message: e is AppFailure
+                  ? e.message
+                  : 'Erro ao criar perfil de estudante.'));
+        }
+      },
     );
   }
 
-  Widget _buildEmptyStudentList(BuildContext context){
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 48.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Lottie.asset(
-              'assets/animations/empty_folder.json', // Use uma animação apropriada
-              width: 150,
-              height: 150,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.noStudentsFound,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tente ajustar os filtros ou adicione novos estudantes.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
-              textAlign: TextAlign.center,
-            ),
-             const SizedBox(height: 24),
-            AppButton(
-              text: 'Adicionar Estudante', // TODO: Implementar ação
-              icon: Icons.add_circle_outline,
-              onPressed: () {
-                 Modular.to.pushNamed('/supervisor/student-create');
-              },
-              type: AppButtonType.outlined,
-            )
-          ],
-        ),
-      ),
+  Future<void> _onUpdateStudentBySupervisor(
+    UpdateStudentBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A atualizar estudante...'));
+    final result = await _updateStudentBySupervisorUsecase
+        .call(event.studentData as StudentEntity);
+    result.fold(
+      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+      (updatedStudent) {
+        emit(SupervisorOperationSuccess(
+            message: 'Estudante atualizado com sucesso!',
+            entity: updatedStudent));
+        add(const LoadSupervisorDashboardDataEvent());
+      },
     );
   }
 
-}
+  Future<void> _onDeleteStudentBySupervisor(
+    DeleteStudentBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A remover estudante...'));
+    final result =
+        await _deleteStudentBySupervisorUsecase.call(event.studentId);
+    result.fold(
+      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+      (_) {
+        emit(const SupervisorOperationSuccess(
+            message: 'Estudante removido com sucesso!'));
+        add(const LoadSupervisorDashboardDataEvent());
+      },
+    );
+  }
 
-// Classe auxiliar para dados do gráfico
-class ChartData {
-  ChartData(this.x, this.y, [this.color]);
-  final String x;
-  final double y;
-  final Color? color;
+  Future<void> _onLoadAllTimeLogsForApproval(
+    LoadAllTimeLogsForApprovalEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(
+        loadingMessage: 'A carregar registos de tempo...'));
+    final result = await _getAllTimeLogsForSupervisorUsecase.call(
+      studentId: event.studentIdFilter,
+      pendingApprovalOnly: event.pendingOnly,
+    );
+    result.fold(
+      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+      (timeLogs) =>
+          emit(SupervisorTimeLogsForApprovalLoadSuccess(timeLogs: timeLogs)),
+    );
+  }
+
+  Future<void> _onLoadAllContracts(
+    LoadAllContractsEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A carregar contratos...'));
+    final result = await _getAllContractsUsecase.call(GetAllContractsParams(
+      studentId: event.studentIdFilter,
+      status: event.statusFilter,
+    ));
+    result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (contracts) {
+      if (state is SupervisorDashboardLoadSuccess) {
+        emit((state as SupervisorDashboardLoadSuccess)
+            .copyWith(contracts: contracts));
+      } else {
+        emit(SupervisorContractsLoadSuccess(contracts: contracts));
+      }
+    });
+  }
+
+  Future<void> _onCreateContractBySupervisor(
+    CreateContractBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A criar contrato...'));
+    final result = await _createContractUsecase.call(UpsertContractParams(
+      studentId: event.contractData.studentId,
+      supervisorId: event.contractData.supervisorId,
+      contractType: event.contractData.contractType,
+      status: event.contractData.status,
+      startDate: event.contractData.startDate,
+      endDate: event.contractData.endDate,
+      description: event.contractData.description,
+      documentUrl: event.contractData.documentUrl,
+      createdBy: event.createdBySupervisorId,
+    ));
+    result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (newContract) {
+      emit(SupervisorOperationSuccess(
+          message: 'Contrato criado com sucesso!', entity: newContract));
+      add(const LoadSupervisorDashboardDataEvent());
+    });
+  }
+
+  Future<void> _onUpdateContractBySupervisor(
+    UpdateContractBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A atualizar contrato...'));
+    final result = await _updateContractUsecase.call(UpsertContractParams(
+      id: event.contractData.id,
+      studentId: event.contractData.studentId,
+      supervisorId: event.contractData.supervisorId,
+      contractType: event.contractData.contractType,
+      status: event.contractData.status,
+      startDate: event.contractData.startDate,
+      endDate: event.contractData.endDate,
+      description: event.contractData.description,
+      documentUrl: event.contractData.documentUrl,
+      createdBy: event.updatedBySupervisorId,
+    ));
+    result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (updatedContract) {
+      emit(SupervisorOperationSuccess(
+          message: 'Contrato atualizado com sucesso!',
+          entity: updatedContract));
+      add(const LoadSupervisorDashboardDataEvent());
+    });
+  }
 }

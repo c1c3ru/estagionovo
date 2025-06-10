@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/bloc/auth_event.dart
 import 'package:equatable/equatable.dart';
-import '../../../../core/enums/user_role.dart'; // Ajuste o caminho se o UserRole estiver em core/enums
+import 'package:estagio/core/enum/user_role.dart';
+import 'package:estagio/domain/entities/user.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();

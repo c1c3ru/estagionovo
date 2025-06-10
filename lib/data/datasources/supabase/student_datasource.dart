@@ -10,10 +10,12 @@ abstract class IStudentSupabaseDatasource {
 
   /// Cria um novo registo de estudante na tabela 'students'.
   /// Geralmente chamado após o registo no Supabase Auth e a criação na tabela 'users'.
-  Future<Map<String, dynamic>> createStudentData(Map<String, dynamic> studentData);
+  Future<Map<String, dynamic>> createStudentData(
+      Map<String, dynamic> studentData);
 
   /// Atualiza os dados de um estudante na tabela 'students'.
-  Future<Map<String, dynamic>> updateStudentData(String userId, Map<String, dynamic> dataToUpdate);
+  Future<Map<String, dynamic>> updateStudentData(
+      String userId, Map<String, dynamic> dataToUpdate);
 
   /// Remove os dados de um estudante da tabela 'students'.
   Future<void> deleteStudentData(String userId);
@@ -42,20 +44,23 @@ class StudentSupabaseDatasource implements IStudentSupabaseDatasource {
           .maybeSingle(); // Retorna null se não encontrar, em vez de erro
 
       return response; // response já é Map<String, dynamic>?
-    } on PostgrestException catch (e) {
+    } on PostgrestException {
       // O repositório tratará PostgrestException e a converterá em AppFailure
-      throw e;
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter dados do estudante: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter dados do estudante: ${e.toString()}');
     }
   }
 
   @override
-  Future<Map<String, dynamic>> createStudentData(Map<String, dynamic> studentData) async {
+  Future<Map<String, dynamic>> createStudentData(
+      Map<String, dynamic> studentData) async {
     try {
       // Garante que o ID está presente nos dados a serem inseridos
       if (studentData['id'] == null) {
-        throw ArgumentError('O ID do estudante é obrigatório para criar o registo em students.');
+        throw ArgumentError(
+            'O ID do estudante é obrigatório para criar o registo em students.');
       }
       final response = await _supabaseClient
           .from('students')
@@ -64,13 +69,13 @@ class StudentSupabaseDatasource implements IStudentSupabaseDatasource {
           .single(); // Retorna o registo inserido
 
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao criar dados do estudante: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao criar dados do estudante: ${e.toString()}');
     }
   }
-
 
   @override
   Future<Map<String, dynamic>> updateStudentData(
@@ -84,30 +89,30 @@ class StudentSupabaseDatasource implements IStudentSupabaseDatasource {
 
       final response = await _supabaseClient
           .from('students')
-          .update(dataToUpdate) // Usar dataToUpdate diretamente se o trigger estiver ativo
+          .update(
+              dataToUpdate) // Usar dataToUpdate diretamente se o trigger estiver ativo
           .eq('id', userId)
           .select()
           .single(); // Retorna o registo atualizado
 
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao atualizar dados do estudante: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao atualizar dados do estudante: ${e.toString()}');
     }
   }
 
   @override
   Future<void> deleteStudentData(String userId) async {
     try {
-      await _supabaseClient
-          .from('students')
-          .delete()
-          .eq('id', userId);
-    } on PostgrestException catch (e) {
-      throw e;
+      await _supabaseClient.from('students').delete().eq('id', userId);
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao remover dados do estudante: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao remover dados do estudante: ${e.toString()}');
     }
   }
 
@@ -118,7 +123,7 @@ class StudentSupabaseDatasource implements IStudentSupabaseDatasource {
     String? statusFilter,
   }) async {
     try {
-      var query = _supabaseClient.from('students').select<List<Map<String, dynamic>>>();
+      var query = _supabaseClient.from('students').select();
 
       if (nameFilter != null && nameFilter.isNotEmpty) {
         query = query.ilike('full_name', '%$nameFilter%');
@@ -138,10 +143,11 @@ class StudentSupabaseDatasource implements IStudentSupabaseDatasource {
 
       final response = await query;
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter todos os estudantes: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter todos os estudantes: ${e.toString()}');
     }
   }
 }

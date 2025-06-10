@@ -1,4 +1,3 @@
-
 // lib/features/auth/widgets/supervisor_register_form.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,14 +59,14 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
           siapeRegistration: _siapeRegistrationController.text.trim(),
-          phoneNumber: _phoneNumberController.text.trim().isEmpty 
-              ? null 
+          phoneNumber: _phoneNumberController.text.trim().isEmpty
+              ? null
               : _phoneNumberController.text.trim(),
-          department: _departmentController.text.trim().isEmpty 
-              ? null 
+          department: _departmentController.text.trim().isEmpty
+              ? null
               : _departmentController.text.trim(),
-          position: _positionController.text.trim().isEmpty 
-              ? null 
+          position: _positionController.text.trim().isEmpty
+              ? null
               : _positionController.text.trim(),
         ),
       );
@@ -84,32 +83,33 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
           Text(
             AppStrings.registerSupervisorPage,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Apenas funcionários com matrícula SIAPE podem se cadastrar como supervisores.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).hintColor,
-            ),
+                  color: Theme.of(context).hintColor,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          
+
           // Nome completo
           AppTextField(
             controller: _fullNameController,
             labelText: AppStrings.fullName,
             keyboardType: TextInputType.name,
             textInputAction: TextInputAction.next,
-            validator: (value) => Validators.required(value, fieldName: 'Nome completo'),
-            prefixIcon: const Icon(Icons.person_outline),
+            validator: (value) =>
+                Validators.required(value, fieldName: 'Nome completo'),
+            prefixIcon: Icons.person_outline,
           ),
           const SizedBox(height: 16),
-          
+
           // Matrícula SIAPE (campo obrigatório)
           AppTextField(
             controller: _siapeRegistrationController,
@@ -123,13 +123,13 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             ],
             validator: Validators.siapeRegistration,
             onChanged: _onSiapeChanged,
-            prefixIcon: const Icon(Icons.badge_outlined),
-            suffixIcon: _isSiapeValid 
+            prefixIcon: Icons.badge_outlined,
+            suffixIcon: _isSiapeValid
                 ? const Icon(Icons.check_circle, color: Colors.green)
                 : null,
           ),
           const SizedBox(height: 16),
-          
+
           // Email
           AppTextField(
             controller: _emailController,
@@ -140,7 +140,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             prefixIcon: const Icon(Icons.email_outlined),
           ),
           const SizedBox(height: 16),
-          
+
           // Telefone (opcional)
           AppTextField(
             controller: _phoneNumberController,
@@ -156,7 +156,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             prefixIcon: const Icon(Icons.phone_outlined),
           ),
           const SizedBox(height: 16),
-          
+
           // Departamento (opcional)
           AppTextField(
             controller: _departmentController,
@@ -166,7 +166,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             prefixIcon: const Icon(Icons.business_outlined),
           ),
           const SizedBox(height: 16),
-          
+
           // Cargo (opcional)
           AppTextField(
             controller: _positionController,
@@ -176,7 +176,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             prefixIcon: const Icon(Icons.work_outline),
           ),
           const SizedBox(height: 16),
-          
+
           // Senha
           AppTextField(
             controller: _passwordController,
@@ -197,18 +197,21 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Confirmar senha
           AppTextField(
             controller: _confirmPasswordController,
             labelText: AppStrings.confirmPassword,
             obscureText: !_isConfirmPasswordVisible,
             textInputAction: TextInputAction.done,
-            validator: (value) => Validators.confirmPassword(_passwordController.text, value),
+            validator: (value) =>
+                Validators.confirmPassword(_passwordController.text, value),
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: IconButton(
               icon: Icon(
-                _isConfirmPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                _isConfirmPasswordVisible
+                    ? Icons.visibility_off
+                    : Icons.visibility,
               ),
               onPressed: () {
                 setState(() {
@@ -219,12 +222,12 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             onFieldSubmitted: (_) => _onRegister(),
           ),
           const SizedBox(height: 24),
-          
+
           // Botão de cadastro
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
               final isLoading = state is AuthLoadingState;
-              
+
               return AppButton(
                 text: AppStrings.register,
                 onPressed: isLoading ? null : _onRegister,

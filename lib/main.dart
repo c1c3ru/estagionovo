@@ -22,7 +22,6 @@ Future<void> main() async {
   // Necessário para DateFormat funcionar corretamente com 'pt_BR'
   await initializeDateFormatting('pt_BR', null);
 
-
   // Configura as orientações de ecrã preferidas.
   // Permite apenas retrato.
   await SystemChrome.setPreferredOrientations([
@@ -33,9 +32,12 @@ Future<void> main() async {
   // Configura a aparência da barra de status (opcional)
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Torna a barra de status transparente
-    statusBarIconBrightness: Brightness.dark, // Ícones escuros para fundos claros
-    systemNavigationBarColor: Colors.white, // Cor da barra de navegação (Android)
-    systemNavigationBarIconBrightness: Brightness.dark, // Ícones da barra de navegação escuros
+    statusBarIconBrightness:
+        Brightness.dark, // Ícones escuros para fundos claros
+    systemNavigationBarColor:
+        Colors.white, // Cor da barra de navegação (Android)
+    systemNavigationBarIconBrightness:
+        Brightness.dark, // Ícones da barra de navegação escuros
   ));
 
   try {
@@ -62,7 +64,7 @@ Future<void> main() async {
     // AppWidget é o widget raiz da aplicação.
     runApp(ModularApp(module: AppModule(), child: const AppWidget()));
   } catch (e, stackTrace) {
-    logger.f('Erro crítico ao inicializar a aplicação: $e', error: e, stackTrace: stackTrace);
+    logger.f('Erro crítico ao inicializar a aplicação: $e', stackTrace);
 
     // Mostra uma UI de fallback em caso de erro crítico na inicialização.
     runApp(

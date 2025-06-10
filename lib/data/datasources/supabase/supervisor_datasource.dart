@@ -8,10 +8,12 @@ abstract class ISupervisorSupabaseDatasource {
 
   /// Cria um novo registo de supervisor na tabela 'supervisors'.
   /// Geralmente chamado após o registo no Supabase Auth e a criação na tabela 'users'.
-  Future<Map<String, dynamic>> createSupervisorData(Map<String, dynamic> supervisorData);
+  Future<Map<String, dynamic>> createSupervisorData(
+      Map<String, dynamic> supervisorData);
 
   /// Atualiza os dados de um supervisor na tabela 'supervisors'.
-  Future<Map<String, dynamic>> updateSupervisorData(String userId, Map<String, dynamic> dataToUpdate);
+  Future<Map<String, dynamic>> updateSupervisorData(
+      String userId, Map<String, dynamic> dataToUpdate);
 
   // Outras operações específicas para supervisores que interagem diretamente com a tabela 'supervisors'
   // podem ser adicionadas aqui. Por exemplo, listar todos os supervisores para um admin.
@@ -32,20 +34,23 @@ class SupervisorSupabaseDatasource implements ISupervisorSupabaseDatasource {
           .maybeSingle(); // Retorna null se não encontrar, em vez de erro
 
       return response;
-    } on PostgrestException catch (e) {
+    } on PostgrestException {
       // O repositório tratará PostgrestException
-      throw e;
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter dados do supervisor: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter dados do supervisor: ${e.toString()}');
     }
   }
 
   @override
-  Future<Map<String, dynamic>> createSupervisorData(Map<String, dynamic> supervisorData) async {
+  Future<Map<String, dynamic>> createSupervisorData(
+      Map<String, dynamic> supervisorData) async {
     try {
       // Garante que o ID está presente nos dados a serem inseridos
       if (supervisorData['id'] == null) {
-        throw ArgumentError('O ID do supervisor é obrigatório para criar o registo em supervisors.');
+        throw ArgumentError(
+            'O ID do supervisor é obrigatório para criar o registo em supervisors.');
       }
       final response = await _supabaseClient
           .from('supervisors')
@@ -54,10 +59,11 @@ class SupervisorSupabaseDatasource implements ISupervisorSupabaseDatasource {
           .single(); // Retorna o registo inserido
 
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao criar dados do supervisor: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao criar dados do supervisor: ${e.toString()}');
     }
   }
 
@@ -74,10 +80,11 @@ class SupervisorSupabaseDatasource implements ISupervisorSupabaseDatasource {
           .single(); // Retorna o registo atualizado
 
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao atualizar dados do supervisor: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao atualizar dados do supervisor: ${e.toString()}');
     }
   }
 }

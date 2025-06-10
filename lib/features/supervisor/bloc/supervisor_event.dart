@@ -4,8 +4,6 @@ import '../../../../domain/entities/student_entity.dart'; // Para passar dados d
 import '../../../../domain/entities/contract_entity.dart'; // Para passar dados de contrato
 import '../../../../domain/repositories/i_supervisor_repository.dart'; // Para FilterStudentsParams
 // Importe UserRole e StudentStatus dos seus enums centrais
-import '../../../../data/models/enums.dart';
-
 
 abstract class SupervisorEvent extends Equatable {
   const SupervisorEvent();
@@ -64,7 +62,8 @@ class CreateStudentBySupervisorEvent extends SupervisorEvent {
 
 /// Evento para o supervisor atualizar os dados de um estudante.
 class UpdateStudentBySupervisorEvent extends SupervisorEvent {
-  final StudentEntity studentData; // Contém o ID do estudante e os campos atualizados
+  final StudentEntity
+      studentData; // Contém o ID do estudante e os campos atualizados
 
   const UpdateStudentBySupervisorEvent({required this.studentData});
 
@@ -87,7 +86,8 @@ class LoadAllTimeLogsForApprovalEvent extends SupervisorEvent {
   final String? studentIdFilter; // Opcional
   final bool pendingOnly;
 
-  const LoadAllTimeLogsForApprovalEvent({this.studentIdFilter, this.pendingOnly = true});
+  const LoadAllTimeLogsForApprovalEvent(
+      {this.studentIdFilter, this.pendingOnly = true});
 
   @override
   List<Object?> get props => [studentIdFilter, pendingOnly];
@@ -105,10 +105,12 @@ class ApproveOrRejectTimeLogEvent extends SupervisorEvent {
     required this.approved,
     required this.supervisorId,
     this.rejectionReason,
+    required bool isApproved,
   });
 
   @override
-  List<Object?> get props => [timeLogId, approved, supervisorId, rejectionReason];
+  List<Object?> get props =>
+      [timeLogId, approved, supervisorId, rejectionReason];
 }
 
 /// Evento para carregar todos os contratos (para visualização ou gestão).
@@ -127,7 +129,8 @@ class CreateContractBySupervisorEvent extends SupervisorEvent {
   final ContractEntity contractData;
   final String createdBySupervisorId; // ID do supervisor que está a criar
 
-  const CreateContractBySupervisorEvent({required this.contractData, required this.createdBySupervisorId});
+  const CreateContractBySupervisorEvent(
+      {required this.contractData, required this.createdBySupervisorId});
 
   @override
   List<Object?> get props => [contractData, createdBySupervisorId];
@@ -136,9 +139,10 @@ class CreateContractBySupervisorEvent extends SupervisorEvent {
 /// Evento para o supervisor atualizar um contrato existente.
 class UpdateContractBySupervisorEvent extends SupervisorEvent {
   final ContractEntity contractData;
-   final String updatedBySupervisorId; // ID do supervisor que está a atualizar
+  final String updatedBySupervisorId; // ID do supervisor que está a atualizar
 
-  const UpdateContractBySupervisorEvent({required this.contractData, required this.updatedBySupervisorId});
+  const UpdateContractBySupervisorEvent(
+      {required this.contractData, required this.updatedBySupervisorId});
 
   @override
   List<Object?> get props => [contractData, updatedBySupervisorId];

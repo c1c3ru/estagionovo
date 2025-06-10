@@ -37,7 +37,8 @@ class SupervisorDashboardStats extends Equatable {
       totalStudents: totalStudents ?? this.totalStudents,
       activeStudents: activeStudents ?? this.activeStudents,
       inactiveStudents: inactiveStudents ?? this.inactiveStudents,
-      expiringContractsSoon: expiringContractsSoon ?? this.expiringContractsSoon,
+      expiringContractsSoon:
+          expiringContractsSoon ?? this.expiringContractsSoon,
     );
   }
 }
@@ -57,19 +58,22 @@ class SupervisorLoading extends SupervisorState {
   final String? loadingMessage; // Mensagem opcional durante o carregamento
   const SupervisorLoading({this.loadingMessage});
 
-   @override
+  @override
   List<Object?> get props => [loadingMessage];
 }
 
 /// Estado quando os dados do dashboard do supervisor são carregados.
 class SupervisorDashboardLoadSuccess extends SupervisorState {
-  final SupervisorEntity? supervisorProfile; // Perfil do supervisor logado (opcional aqui)
+  final SupervisorEntity?
+      supervisorProfile; // Perfil do supervisor logado (opcional aqui)
   final List<StudentEntity> students; // Lista de estudantes (pode ser filtrada)
-  final List<ContractEntity> contracts; // Lista de contratos para o Gantt ou visão geral
+  final List<ContractEntity>
+      contracts; // Lista de contratos para o Gantt ou visão geral
   final SupervisorDashboardStats stats;
   final bool showGanttView; // Para alternar entre lista e Gantt
 
-  const SupervisorDashboardLoadSuccess({
+  const SupervisorDashboardLoadSuccess(
+    List<StudentEntity> students, {
     this.supervisorProfile,
     required this.students,
     required this.contracts,
@@ -78,7 +82,10 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
   });
 
   @override
-  List<Object?> get props => [supervisorProfile, students, contracts, stats, showGanttView];
+  List<Object?> get props =>
+      [supervisorProfile, students, contracts, stats, showGanttView];
+
+  get isLoading => null;
 
   SupervisorDashboardLoadSuccess copyWith({
     SupervisorEntity? supervisorProfile,
@@ -88,11 +95,12 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
     bool? showGanttView,
   }) {
     return SupervisorDashboardLoadSuccess(
+      students ?? this.students,
       supervisorProfile: supervisorProfile ?? this.supervisorProfile,
-      students: students ?? this.students,
       contracts: contracts ?? this.contracts,
       stats: stats ?? this.stats,
       showGanttView: showGanttView ?? this.showGanttView,
+      students: [],
     );
   }
 }
@@ -133,7 +141,6 @@ class SupervisorContractsLoadSuccess extends SupervisorState {
   List<Object?> get props => [contracts];
 }
 
-
 /// Estado de sucesso para operações CRUD (Criar, Atualizar, Remover estudante/contrato, Aprovar log).
 class SupervisorOperationSuccess extends SupervisorState {
   final String message;
@@ -150,6 +157,33 @@ class SupervisorOperationFailure extends SupervisorState {
   final String message;
 
   const SupervisorOperationFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AuthErrorState extends SupervisorState {
+  final String message;
+
+  const AuthErrorState({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AuthSuccessState extends SupervisorState {
+  final String message;
+
+  const AuthSuccessState({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AuthLoadingState extends SupervisorState {
+  final String? message;
+
+  const AuthLoadingState({this.message});
 
   @override
   List<Object?> get props => [message];

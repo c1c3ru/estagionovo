@@ -1,5 +1,4 @@
 // lib/data/datasources/local/cache_manager.dart
-import '../../../core/errors/app_exceptions.dart'; // Para CacheFailure
 
 abstract class ICacheManager {
   /// Salva um dado no cache com uma chave e tempo de expiração opcional.
@@ -31,7 +30,8 @@ class InMemoryCacheManager implements ICacheManager {
   final Map<String, _CacheEntry> _cache = {};
   final Duration defaultCacheDuration;
 
-  InMemoryCacheManager({this.defaultCacheDuration = const Duration(minutes: 15)});
+  InMemoryCacheManager(
+      {this.defaultCacheDuration = const Duration(minutes: 15)});
 
   @override
   Future<void> saveData(String key, dynamic data, {Duration? expiresIn}) async {

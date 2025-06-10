@@ -2,10 +2,12 @@
 
 class AppStrings {
   // Geral
-  static const String appName = 'Gestão de Estágios'; // Ou o nome que você definiu "estagio"
+  static const String appName =
+      'Gestão de Estágios'; // Ou o nome que você definiu "estagio"
   static const String tryAgain = 'Tentar Novamente';
   static const String errorOccurred = 'Ocorreu um erro';
-  static const String anErrorOccurred = 'Ocorreu um erro inesperado. Por favor, tente novamente.';
+  static const String anErrorOccurred =
+      'Ocorreu um erro inesperado. Por favor, tente novamente.';
   static const String success = 'Sucesso';
   static const String loading = 'A carregar...';
   static const String cancel = 'Cancelar';
@@ -17,7 +19,8 @@ class AppStrings {
   static const String submit = 'Submeter';
   static const String requiredField = 'Este campo é obrigatório.';
   static const String invalidEmail = 'Email inválido.';
-  static const String passwordTooShort = 'A senha deve ter pelo menos 6 caracteres';
+  static const String passwordTooShort =
+      'A senha deve ter pelo menos 6 caracteres';
 
   // Autenticação
   static const String login = 'Login';
@@ -34,19 +37,31 @@ class AppStrings {
   static const String admin = 'Administrador';
   static const String loginSuccess = 'Login realizado com sucesso!';
   static const String registrationSuccessTitle = 'Registo Concluído';
-  static const String registrationSuccessMessage = 'Conta criada com sucesso. Verifique o seu email para confirmação.';
-  static const String passwordResetEmailSent = 'Instruções para redefinir a senha enviadas para o seu email.';
+  static const String registrationSuccessMessage =
+      'Conta criada com sucesso. Verifique o seu email para confirmação.';
+  static const String passwordResetEmailSent =
+      'Instruções para redefinir a senha enviadas para o seu email.';
   static const String logoutConfirmation = 'Tem a certeza que deseja sair?';
+  static const String registrationSuccessful = 'Registo realizado com sucesso!';
+  static const String loginFailed =
+      'Falha no login. Verifique suas credenciais.';
+  static const String registrationFailed =
+      'Falha no registo. Por favor, tente novamente.';
+  static const String passwordResetFailed =
+      'Falha ao enviar email de redefinição de senha. Por favor, tente novamente.';
 
   // Mensagens relacionadas à matrícula SIAPE
   static const String siapeRequired = 'Matrícula SIAPE é obrigatória.';
-  static const String siapeInvalid = 'Matrícula SIAPE deve ter exatamente 7 dígitos.';
-  static const String siapeAlreadyExists = 'Esta matrícula SIAPE já está em uso.';
-  static const String siapeOnlyNumbers = 'Matrícula SIAPE deve conter apenas números.';
+  static const String siapeInvalid =
+      'Matrícula SIAPE deve ter exatamente 7 dígitos.';
+  static const String siapeAlreadyExists =
+      'Esta matrícula SIAPE já está em uso.';
+  static const String siapeOnlyNumbers =
+      'Matrícula SIAPE deve conter apenas números.';
   static const String siapeRegistration = 'Matrícula SIAPE';
   static const String siapeHint = 'Digite sua matrícula SIAPE (7 dígitos)';
-  static const String unauthorizedSupervisor = 'Apenas funcionários com matrícula SIAPE podem se cadastrar como supervisores.';
-
+  static const String unauthorizedSupervisor =
+      'Apenas funcionários com matrícula SIAPE podem se cadastrar como supervisores.';
 
   // Dashboard (Geral)
   static const String dashboard = 'Dashboard';
@@ -74,7 +89,8 @@ class AppStrings {
   static const String totalStudents = 'Total';
   static const String activeStudents = 'Ativos';
   static const String inactiveStudents = 'Inativos';
-  static const String expiringContracts = 'Vencendo'; // Para contratos ou estágios
+  static const String expiringContracts =
+      'Vencendo'; // Para contratos ou estágios
   static const String studentDistribution = 'Distribuição de Estagiários';
   static const String studentList = 'Lista de Estudantes';
   static const String ganttView = 'Visualização Gantt';
@@ -88,12 +104,10 @@ class AppStrings {
 
   // User roles (removed duplicates - keeping original definitions)
 
-
   // Comum
   static const String settings = 'Configurações';
   static const String helpAndFeedback = 'Ajuda e Feedback';
   static const String registerSupervisorPage = 'Cadastro de Supervisor';
-
 
   // Status
   static const String active = 'Ativo';
@@ -109,7 +123,8 @@ class AppStrings {
 
   // Mensagens de erro de rede/conectividade
   static const String networkError = 'Erro de conexão. Verifique sua internet.';
-  static const String serverError = 'Erro no servidor. Tente novamente mais tarde.';
+  static const String serverError =
+      'Erro no servidor. Tente novamente mais tarde.';
   static const String unknownError = 'Erro desconhecido. Tente novamente.';
 
   // Mensagens de confirmação

@@ -1,7 +1,7 @@
 // lib/domain/entities/supervisor_entity.dart
 import 'package:equatable/equatable.dart';
+import 'package:estagio/core/enum/user_role.dart';
 // Importa o enum UserRole da camada de dados.
-import '../../data/models/enums.dart';
 
 class SupervisorEntity extends Equatable {
   final String id;
@@ -69,11 +69,15 @@ class SupervisorEntity extends Equatable {
       id: id ?? this.id,
       fullName: fullName ?? this.fullName,
       siapeRegistration: siapeRegistration ?? this.siapeRegistration,
-      department: clearDepartment == true ? null : department ?? this.department,
+      department:
+          clearDepartment == true ? null : department ?? this.department,
       position: clearPosition == true ? null : position ?? this.position,
       jobCode: clearJobCode == true ? null : jobCode ?? this.jobCode,
-      profilePictureUrl: clearProfilePictureUrl == true ? null : profilePictureUrl ?? this.profilePictureUrl,
-      phoneNumber: clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: clearProfilePictureUrl == true
+          ? null
+          : profilePictureUrl ?? this.profilePictureUrl,
+      phoneNumber:
+          clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
       role: role ?? this.role,

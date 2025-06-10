@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import '../../core/enum/user_role.dart';
 
@@ -19,6 +18,9 @@ class UserEntity extends Equatable {
     this.createdAt,
     this.updatedAt,
     this.isEmailVerified = false,
+    required bool isActive,
+    String? profilePictureUrl,
+    String? phoneNumber,
   });
 
   @override
@@ -31,6 +33,12 @@ class UserEntity extends Equatable {
         updatedAt,
         isEmailVerified,
       ];
+
+  get registrationNumber => null;
+
+  get advisorName => null;
+
+  get birthDate => null;
 
   UserEntity copyWith({
     String? id,
@@ -49,6 +57,7 @@ class UserEntity extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      isActive: true,
     );
   }
 }

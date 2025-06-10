@@ -1,23 +1,24 @@
 // lib/core/errors/error_handler.dart
-import 'package:flutter/material.dart'; // Para mostrar SnackBars ou Diálogos
-import 'package:supabase_flutter/supabase_flutter.dart'
-    as supabase_auth; // Para AuthException
-import 'app_exceptions.dart';
-import '../utils/logger_utils.dart'; // Para logar o erro
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase_auth;
+import '../utils/logger_utils.dart';
+
+import 'package:postgrest/postgrest.dart';
+import '../constants/app_strings.dart';
+import '../constants/app_failure.dart';
 
 class ErrorHandler {
-  /// Lida com uma   exceção, loga e opcionalmente mostra uma mensagem ao utilizador.
   static voidhandle(
     dynamic error, {
     StackTrace? stackTrace,
-    String? userFriendlyMessage, // Mensagem para mostrar ao utilizador
+    String? userFriendlyMessage,
     BuildContext?
         context, // Contexto para mostrar UI de erro (SnackBar, Dialog)
   }) {
     logger.e(
       userFriendlyMessage ?? 'Erro não tratado',
-      error: error,
-      stackTrace: stackTrace,
+      error,
+      stackTrace,
     );
 
     if (context != null && userFriendlyMessage != null) {
@@ -36,8 +37,7 @@ class ErrorHandler {
     } else if (error is PostgrestException) {
       // Exceção do banco de dados Supabase
       return SupabaseServerFailure(
-          message: error.message ?? 'Erro no servidor Supabase',
-          originalException: error);
+          message: error.message, originalException: error);
     }
     // Adicione outros tipos de exceção específicos aqui (ex: DioError, SocketException)
     else {

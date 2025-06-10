@@ -17,8 +17,7 @@ class AppTheme {
       cardColor: AppColors.surfaceLight,
       dividerColor: AppColors.greyLight,
       hintColor: AppColors.textSecondaryLight,
-      fontFamily:
-          AppTextStyles._baseTextStyle.fontFamily, // Usa a fonte base definida
+      fontFamily: AppTextStyles.fontFamily,
 
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
@@ -28,10 +27,7 @@ class AppTheme {
         error: AppColors.error,
         onError: AppColors.white,
         surface: AppColors.surfaceLight, // Era backgroundColor
-        onSurface: AppColors.textPrimaryLight, // Era onBackgroundColor
-        background:
-            AppColors.backgroundLight, // Novo campo para cor de fundo principal
-        onBackground: AppColors
+        onSurface: AppColors
             .textPrimaryLight, // Novo campo para texto sobre o fundo principal
       ),
 
@@ -120,7 +116,7 @@ class AppTheme {
         prefixIconColor: AppColors.greyMedium,
       ),
 
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 1.0,
         margin: const EdgeInsets.symmetric(
             vertical: AppConstants.paddingSmall, horizontal: 0),
@@ -129,7 +125,7 @@ class AppTheme {
         ),
       ),
 
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
         ),
@@ -164,7 +160,7 @@ class AppTheme {
       cardColor: AppColors.surfaceDark,
       dividerColor: AppColors.greyDark,
       hintColor: AppColors.textSecondaryDark,
-      fontFamily: AppTextStyles._baseTextStyle.fontFamily,
+      fontFamily: AppTextStyles.fontFamily,
 
       colorScheme: const ColorScheme.dark(
         primary:
@@ -176,8 +172,6 @@ class AppTheme {
         onError: AppColors.black, // Texto sobre o erro
         surface: AppColors.surfaceDark,
         onSurface: AppColors.textPrimaryDark,
-        background: AppColors.backgroundDark,
-        onBackground: AppColors.textPrimaryDark,
       ),
 
       textTheme: TextTheme(
@@ -280,7 +274,7 @@ class AppTheme {
             AppTextStyles.bodyMedium.copyWith(color: AppColors.greyMedium),
         prefixIconColor: AppColors.greyMedium,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 1.0,
         margin: const EdgeInsets.symmetric(
@@ -289,7 +283,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),

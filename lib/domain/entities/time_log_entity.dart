@@ -1,79 +1,85 @@
-
-// lib/domain/entities/time_log_entity.dart
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
+// Enum representing the status of a time log entry.
 enum TimeLogStatus { pending, approved, rejected }
 
+// Represents a time log entry, inheriting from Equatable for value comparison.
 class TimeLogEntity extends Equatable {
   final String id;
   final String studentId;
-  final String? supervisorId;
-  final DateTime checkInTime;
-  final DateTime? checkOutTime;
+  final DateTime logDate;
+  final TimeOfDay checkInTime;
+  final TimeOfDay? checkOutTime;
+
+  // Details
   final String? description;
-  final String? location;
-  final TimeLogStatus status;
-  final String? supervisorNotes;
-  final int? totalMinutes;
+  final double? hoursLogged;
+  final bool approved;
+  final DateTime? approvedAt;
+  final String? supervisorId;
+
+  // Timestamps
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   const TimeLogEntity({
     required this.id,
     required this.studentId,
-    this.supervisorId,
+    required this.logDate,
     required this.checkInTime,
     this.checkOutTime,
     this.description,
-    this.location,
-    this.status = TimeLogStatus.pending,
-    this.supervisorNotes,
-    this.totalMinutes,
+    this.hoursLogged,
+    this.approved = false,
+    this.approvedAt,
+    this.supervisorId,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
   });
 
   @override
   List<Object?> get props => [
         id,
         studentId,
-        supervisorId,
+        logDate,
         checkInTime,
         checkOutTime,
         description,
-        location,
-        status,
-        supervisorNotes,
-        totalMinutes,
+        hoursLogged,
+        approved,
+        approvedAt,
+        supervisorId,
         createdAt,
         updatedAt,
       ];
 
+  // copyWith method to create a new instance with updated fields.
   TimeLogEntity copyWith({
     String? id,
     String? studentId,
-    String? supervisorId,
-    DateTime? checkInTime,
-    DateTime? checkOutTime,
+    DateTime? logDate,
+    TimeOfDay? checkInTime,
+    TimeOfDay? checkOutTime,
     String? description,
-    String? location,
-    TimeLogStatus? status,
-    String? supervisorNotes,
-    int? totalMinutes,
+    double? hoursLogged,
+    bool? approved,
+    DateTime? approvedAt,
+    String? supervisorId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return TimeLogEntity(
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
-      supervisorId: supervisorId ?? this.supervisorId,
+      logDate: logDate ?? this.logDate,
       checkInTime: checkInTime ?? this.checkInTime,
       checkOutTime: checkOutTime ?? this.checkOutTime,
       description: description ?? this.description,
-      location: location ?? this.location,
-      status: status ?? this.status,
-      supervisorNotes: supervisorNotes ?? this.supervisorNotes,
-      totalMinutes: totalMinutes ?? this.totalMinutes,
+      hoursLogged: hoursLogged ?? this.hoursLogged,
+      approved: approved ?? this.approved,
+      approvedAt: approvedAt ?? this.approvedAt,
+      supervisorId: supervisorId ?? this.supervisorId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

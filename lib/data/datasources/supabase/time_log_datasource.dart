@@ -4,7 +4,8 @@ import '../../../core/errors/app_exceptions.dart';
 
 abstract class ITimeLogSupabaseDatasource {
   /// Cria um novo registo de tempo na tabela 'time_logs'.
-  Future<Map<String, dynamic>> createTimeLogData(Map<String, dynamic> timeLogData);
+  Future<Map<String, dynamic>> createTimeLogData(
+      Map<String, dynamic> timeLogData);
 
   /// Obtém um registo de tempo específico pelo seu ID.
   Future<Map<String, dynamic>?> getTimeLogDataById(String timeLogId);
@@ -17,7 +18,8 @@ abstract class ITimeLogSupabaseDatasource {
   });
 
   /// Atualiza um registo de tempo existente.
-  Future<Map<String, dynamic>> updateTimeLogData(String timeLogId, Map<String, dynamic> dataToUpdate);
+  Future<Map<String, dynamic>> updateTimeLogData(
+      String timeLogId, Map<String, dynamic> dataToUpdate);
 
   /// Remove um registo de tempo.
   Future<void> deleteTimeLogData(String timeLogId);
@@ -37,7 +39,8 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
   TimeLogSupabaseDatasource(this._supabaseClient);
 
   @override
-  Future<Map<String, dynamic>> createTimeLogData(Map<String, dynamic> timeLogData) async {
+  Future<Map<String, dynamic>> createTimeLogData(
+      Map<String, dynamic> timeLogData) async {
     try {
       final response = await _supabaseClient
           .from('time_logs')
@@ -45,10 +48,11 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
           .select()
           .single();
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao criar registo de tempo: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao criar registo de tempo: ${e.toString()}');
     }
   }
 
@@ -61,10 +65,11 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
           .eq('id', timeLogId)
           .maybeSingle();
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter registo de tempo: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter registo de tempo: ${e.toString()}');
     }
   }
 
@@ -77,25 +82,27 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
     try {
       var query = _supabaseClient
           .from('time_logs')
-          .select<List<Map<String, dynamic>>>()
+          .select()
           .eq('student_id', studentId)
           .order('log_date', ascending: false) // Mais recentes primeiro
           .order('check_in_time', ascending: false);
 
-
       if (startDate != null) {
-        query = query.gte('log_date', startDate.toIso8601String().substring(0, 10));
+        query =
+            query.gte('log_date', startDate.toIso8601String().substring(0, 10));
       }
       if (endDate != null) {
-        query = query.lte('log_date', endDate.toIso8601String().substring(0, 10));
+        query =
+            query.lte('log_date', endDate.toIso8601String().substring(0, 10));
       }
 
       final response = await query;
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter registos de tempo do estudante: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter registos de tempo do estudante: ${e.toString()}');
     }
   }
 
@@ -111,28 +118,27 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
           .select()
           .single();
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao atualizar registo de tempo: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao atualizar registo de tempo: ${e.toString()}');
     }
   }
 
   @override
   Future<void> deleteTimeLogData(String timeLogId) async {
     try {
-      await _supabaseClient
-          .from('time_logs')
-          .delete()
-          .eq('id', timeLogId);
-    } on PostgrestException catch (e) {
-      throw e;
+      await _supabaseClient.from('time_logs').delete().eq('id', timeLogId);
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao remover registo de tempo: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao remover registo de tempo: ${e.toString()}');
     }
   }
 
-   @override
+  @override
   Future<List<Map<String, dynamic>>> getAllTimeLogsData({
     String? studentId,
     bool? approved,
@@ -142,7 +148,7 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
     try {
       var query = _supabaseClient
           .from('time_logs')
-          .select<List<Map<String, dynamic>>>()
+          .select()
           .order('log_date', ascending: false)
           .order('created_at', ascending: false); // Ou check_in_time
 
@@ -153,18 +159,21 @@ class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
         query = query.eq('approved', approved);
       }
       if (startDate != null) {
-        query = query.gte('log_date', startDate.toIso8601String().substring(0,10));
+        query =
+            query.gte('log_date', startDate.toIso8601String().substring(0, 10));
       }
       if (endDate != null) {
-        query = query.lte('log_date', endDate.toIso8601String().substring(0,10));
+        query =
+            query.lte('log_date', endDate.toIso8601String().substring(0, 10));
       }
 
       final response = await query;
       return response;
-    } on PostgrestException catch (e) {
-      throw e;
+    } on PostgrestException {
+      rethrow;
     } catch (e) {
-      throw ServerException('Erro inesperado ao obter todos os registos de tempo: ${e.toString()}');
+      throw ServerException(
+          'Erro inesperado ao obter todos os registos de tempo: ${e.toString()}');
     }
   }
 }

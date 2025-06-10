@@ -1,11 +1,14 @@
 // lib/core/theme/app_text_styles.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Adicione google_fonts ao pubspec.yaml
-import '../constants/app_colors.dart'; // Para usar as cores da app
+import 'package:google_fonts/google_fonts.dart';
+import '../constants/app_colors.dart';
 
 class AppTextStyles {
-  // Estilo base para ser estendido (opcional)
-  static final TextStyle _baseTextStyle = GoogleFonts.inter( // Exemplo com Inter
+  // getter público para a família da fonte
+  static String? get fontFamily => _baseTextStyle.fontFamily;
+
+  // Estilo base para ser estendido (mantido privado)
+  static final TextStyle _baseTextStyle = GoogleFonts.inter(
     color: AppColors.textPrimaryLight, // Cor padrão para tema claro
   );
 
@@ -97,9 +100,10 @@ class AppTextStyles {
   );
 
   // Adaptação para tema escuro (exemplo, pode ser feito no AppTheme)
-  static TextStyle get bodyMediumDark => bodyMedium.copyWith(color: AppColors.textPrimaryDark);
-  static TextStyle get titleMediumDark => titleMedium.copyWith(color: AppColors.textPrimaryDark);
-
+  static TextStyle get bodyMediumDark =>
+      bodyMedium.copyWith(color: AppColors.textPrimaryDark);
+  static TextStyle get titleMediumDark =>
+      titleMedium.copyWith(color: AppColors.textPrimaryDark);
 
   // Previne instanciação
   AppTextStyles._();

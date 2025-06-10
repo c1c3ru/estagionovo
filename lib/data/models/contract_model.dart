@@ -1,6 +1,6 @@
 // lib/data/models/contract_model.dart
 import 'package:equatable/equatable.dart';
-import 'enums.dart'; // Importa os enums
+import 'package:estagio/core/enum/contract_status.dart';
 
 class ContractModel extends Equatable {
   final String id; // UUID PRIMARY KEY DEFAULT gen_random_uuid()
@@ -12,7 +12,8 @@ class ContractModel extends Equatable {
   final DateTime endDate; // DATE NOT NULL
   final String? description; // TEXT (opcional)
   final String? documentUrl; // TEXT (opcional)
-  final String? createdBy; // UUID REFERENCES auth.users(id) (opcional, quem criou o registro)
+  final String?
+      createdBy; // UUID REFERENCES auth.users(id) (opcional, quem criou o registro)
   final DateTime createdAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
   final DateTime? updatedAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 
@@ -73,8 +74,10 @@ class ContractModel extends Equatable {
       'supervisor_id': supervisorId,
       'contract_type': contractType,
       'status': status.value,
-      'start_date': startDate.toIso8601String().substring(0,10), // Formato YYYY-MM-DD para DATE
-      'end_date': endDate.toIso8601String().substring(0,10),
+      'start_date': startDate
+          .toIso8601String()
+          .substring(0, 10), // Formato YYYY-MM-DD para DATE
+      'end_date': endDate.toIso8601String().substring(0, 10),
       'description': description,
       'document_url': documentUrl,
       'created_by': createdBy,
@@ -105,13 +108,16 @@ class ContractModel extends Equatable {
     return ContractModel(
       id: id ?? this.id,
       studentId: studentId ?? this.studentId,
-      supervisorId: clearSupervisorId == true ? null : supervisorId ?? this.supervisorId,
+      supervisorId:
+          clearSupervisorId == true ? null : supervisorId ?? this.supervisorId,
       contractType: contractType ?? this.contractType,
       status: status ?? this.status,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      description: clearDescription == true ? null : description ?? this.description,
-      documentUrl: clearDocumentUrl == true ? null : documentUrl ?? this.documentUrl,
+      description:
+          clearDescription == true ? null : description ?? this.description,
+      documentUrl:
+          clearDocumentUrl == true ? null : documentUrl ?? this.documentUrl,
       createdBy: clearCreatedBy == true ? null : createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,

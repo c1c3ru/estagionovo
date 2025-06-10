@@ -1,68 +1,49 @@
-name: estagio # Ou o nome do seu projeto, ex: intern_management_app
+name: estagio
 description: Aplicativo de gerenciamento de estagiários e bolsistas.
-# Ao atualizar a versão, atualize também em qualquer outro lugar que ela seja referenciada.
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0' # Dart 3.3+ recomendado para as versões mais recentes dos pacotes
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations: # Para localização, ex: pt_BR no DatePicker
+  flutter_localizations:
     sdk: flutter
 
   # Arquitetura e Gerenciamento de Estado
-  flutter_bloc: ^9.1.1
-  flutter_modular: ^6.3.4 # Conforme mencionado pelo utilizador como a mais recente
+  flutter_bloc: ^8.1.5
+  flutter_modular: ^6.3.4
   equatable: ^2.0.5
-  dartz: ^0.10.1 # Para tratamento de erro funcional (Either)
+  dartz: ^0.10.1
 
   # UI e Componentes Visuais
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   lottie: ^3.1.2
-  flutter_svg: ^2.0.10+1 # Para usar SVGs
-  syncfusion_flutter_charts: ^29.2.7 # Para gráficos (ex: Gantt, Pizza)
-  timeline_tile: ^2.0.0 # Para visualizações de timeline (pode ser útil para histórico)
+  flutter_svg: ^2.0.10+1
+  syncfusion_flutter_charts: ^29.2.10
+  timeline_tile: ^2.0.0
 
   # Backend e Dados
-  supabase_flutter: ^2.5.3 # Cliente Supabase
+  supabase_flutter: ^2.5.3
 
   # Utilitários
-  intl: ^0.20.2 # Para formatação de data/número (necessário para initializeDateFormatting)
-  logger: ^2.3.0 # Para logging
-  shared_preferences: ^2.2.3 # Para armazenamento local simples (PreferencesManager)
-  # image_picker: ^1.1.2 # Se for implementar upload de imagem de perfil
+  intl: ^0.20.2
+  logger: ^2.3.0
+  shared_preferences: ^2.2.3
+  postgrest: ^2.4.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0 # Lints para análise estática
+  flutter_lints: ^4.0.0
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.3
 
-  # Para testes de BLoC, se for adicionar
-  # bloc_test: ^9.1.7
-  # mocktail: ^1.0.3
-
-  # Para geração de código (ex: build_runner para Freezed, Moor/Drift, etc., se usar)
-  # build_runner: ^2.4.11
-  # freezed_annotation: ^2.4.1 # Se usar Freezed para modelos/estados
-  # json_serializable: ^6.8.0 # Se usar json_serializable com Freezed ou para modelos manuais
-
-# Configurações do Flutter
 flutter:
   uses-material-design: true
 
-  # Para usar assets como imagens e animações Lottie
   assets:
-    - assets/images/ # Ex: logos, imagens padrão
-    - assets/animations/ # Ex: ficheiros JSON do Lottie
-    # - assets/fonts/ # Se tiver fontes customizadas
-
-  # Para usar fontes customizadas (exemplo)
-  # fonts:
-  #   - family: MinhaFonteCustomizada
-  #     fonts:
-  #       - asset: assets/fonts/MinhaFonteCustomizada-Regular.ttf
-  #       - asset: assets/fonts/MinhaFonteCustomizada-Bold.ttf
-  #         weight: 700
+    - assets/images/
+    - assets/animations/

@@ -1,5 +1,5 @@
-
 // lib/features/auth/pages/supervisor_register_page.dart
+import 'package:estagio/features/supervisor/bloc/supervisor_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_strings.dart';
@@ -23,11 +23,11 @@ class SupervisorRegisterPage extends StatelessWidget {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthErrorState) {
+          if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).errorColor,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
           } else if (state is AuthSuccessState) {
@@ -57,7 +57,9 @@ class SupervisorRegisterPage extends StatelessWidget {
                       height: 80,
                       width: 80,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withAlpha((0.1 * 255).round()),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -67,12 +69,12 @@ class SupervisorRegisterPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // Formulário de cadastro
                     const SupervisorRegisterForm(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Link para login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -83,15 +85,16 @@ class SupervisorRegisterPage extends StatelessWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacementNamed('/login');
+                            Navigator.of(context)
+                                .pushReplacementNamed('/login');
                           },
                           child: const Text(AppStrings.login),
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Link para cadastro de estudante
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +105,8 @@ class SupervisorRegisterPage extends StatelessWidget {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacementNamed('/register');
+                            Navigator.of(context)
+                                .pushReplacementNamed('/register');
                           },
                           child: const Text('Cadastre-se como estudante'),
                         ),
