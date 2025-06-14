@@ -1,110 +1,139 @@
-// lib/core/theme/app_text_styles.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 
 class AppTextStyles {
-  // getter público para a família da fonte
-  static String? get fontFamily => _baseTextStyle.fontFamily;
-
-  // Estilo base para ser estendido (mantido privado)
-  static final TextStyle _baseTextStyle = GoogleFonts.inter(
-    color: AppColors.textPrimaryLight, // Cor padrão para tema claro
-  );
-
-  // Display
-  static final TextStyle displayLarge = _baseTextStyle.copyWith(
-    fontSize: 57,
-    fontWeight: FontWeight.w400,
-    letterSpacing: -0.25,
-  );
-  static final TextStyle displayMedium = _baseTextStyle.copyWith(
-    fontSize: 45,
-    fontWeight: FontWeight.w400,
-  );
-  static final TextStyle displaySmall = _baseTextStyle.copyWith(
-    fontSize: 36,
-    fontWeight: FontWeight.w400,
-  );
-
-  // Headline
-  static final TextStyle headlineLarge = _baseTextStyle.copyWith(
+  // Headlines
+  static const TextStyle h1 = TextStyle(
     fontSize: 32,
-    fontWeight: FontWeight.w500, // Um pouco mais de peso
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.2,
   );
-  static final TextStyle headlineMedium = _baseTextStyle.copyWith(
+  
+  static const TextStyle h2 = TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.2,
   );
-  static final TextStyle headlineSmall = _baseTextStyle.copyWith(
+  
+  static const TextStyle h3 = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.3,
   );
-
-  // Title
-  static final TextStyle titleLarge = _baseTextStyle.copyWith(
-    fontSize: 22,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.15,
+  
+  static const TextStyle h4 = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.3,
   );
-  static final TextStyle titleMedium = _baseTextStyle.copyWith(
+  
+  static const TextStyle h5 = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.4,
+  );
+  
+  static const TextStyle h6 = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w500, // Material 3 usa w500 para titleMedium
-    letterSpacing: 0.15,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.4,
   );
-  static final TextStyle titleSmall = _baseTextStyle.copyWith(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-  );
-
-  // Body
-  static final TextStyle bodyLarge = _baseTextStyle.copyWith(
+  
+  // Subtitles
+  static const TextStyle subtitle1 = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.5,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textPrimary,
+    height: 1.5,
   );
-  static final TextStyle bodyMedium = _baseTextStyle.copyWith(
+  
+  static const TextStyle subtitle2 = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.25,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textSecondary,
+    height: 1.5,
   );
-  static final TextStyle bodySmall = _baseTextStyle.copyWith(
+  
+  // Body Text
+  static const TextStyle bodyLarge = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textPrimary,
+    height: 1.5,
+  );
+  
+  static const TextStyle bodyMedium = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textPrimary,
+    height: 1.5,
+  );
+  
+  static const TextStyle bodySmall = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.4,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textSecondary,
+    height: 1.4,
   );
-
-  // Label
-  static final TextStyle labelLarge = _baseTextStyle.copyWith(
+  
+  // Button
+  static const TextStyle button = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500, // Material 3 usa w500 para labelLarge
-    letterSpacing: 0.1,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
   );
-  static final TextStyle labelMedium = _baseTextStyle.copyWith(
+  
+  // Caption
+  static const TextStyle caption = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textHint,
+    height: 1.3,
   );
-  static final TextStyle labelSmall = _baseTextStyle.copyWith(
-    fontSize: 11,
+  
+  // Overline
+  static const TextStyle overline = TextStyle(
+    fontSize: 10,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
+    color: AppColors.textHint,
+    height: 1.6,
+    letterSpacing: 1.5,
   );
-
-  // Estilos específicos para botões, etc., podem ser adicionados aqui
-  static final TextStyle button = _baseTextStyle.copyWith(
+  
+  // Special Styles
+  static const TextStyle error = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: AppColors.error,
+    height: 1.3,
+  );
+  
+  static const TextStyle success = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: AppColors.success,
+    height: 1.3,
+  );
+  
+  static const TextStyle warning = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: AppColors.warning,
+    height: 1.3,
+  );
+  
+  static const TextStyle link = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 1.25,
+    fontWeight: FontWeight.normal,
+    color: AppColors.primary,
+    decoration: TextDecoration.underline,
+    height: 1.5,
   );
-
-  // Adaptação para tema escuro (exemplo, pode ser feito no AppTheme)
-  static TextStyle get bodyMediumDark =>
-      bodyMedium.copyWith(color: AppColors.textPrimaryDark);
-  static TextStyle get titleMediumDark =>
-      titleMedium.copyWith(color: AppColors.textPrimaryDark);
-
-  // Previne instanciação
-  AppTextStyles._();
 }
+

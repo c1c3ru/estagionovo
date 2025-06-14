@@ -9,7 +9,7 @@ class FadePageRoute<T> extends PageRouteBuilder<T> {
   FadePageRoute({
     required this.child,
     this.duration = const Duration(milliseconds: 300), // Duração padrão
-    RouteSettings? settings,
+    super.settings,
   }) : super(
           pageBuilder: (
             BuildContext context,
@@ -28,7 +28,6 @@ class FadePageRoute<T> extends PageRouteBuilder<T> {
             child: child,
           ),
           transitionDuration: duration,
-          settings: settings,
         );
 }
 
@@ -40,7 +39,7 @@ class SlideRightPageRoute<T> extends PageRouteBuilder<T> {
   SlideRightPageRoute({
     required this.child,
     this.duration = const Duration(milliseconds: 300),
-    RouteSettings? settings,
+    super.settings,
   }) : super(
           pageBuilder: (context, animation, secondaryAnimation) => child,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -48,7 +47,8 @@ class SlideRightPageRoute<T> extends PageRouteBuilder<T> {
             const end = Offset.zero;
             const curve = Curves.easeOutCubic; // Curva de animação
 
-            final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
             final offsetAnimation = animation.drive(tween);
 
             return SlideTransition(
@@ -57,7 +57,6 @@ class SlideRightPageRoute<T> extends PageRouteBuilder<T> {
             );
           },
           transitionDuration: duration,
-          settings: settings,
         );
 }
 
@@ -69,7 +68,7 @@ class ScalePageRoute<T> extends PageRouteBuilder<T> {
   ScalePageRoute({
     required this.child,
     this.duration = const Duration(milliseconds: 300),
-    RouteSettings? settings,
+    super.settings,
   }) : super(
           pageBuilder: (context, animation, secondaryAnimation) => child,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -77,15 +76,17 @@ class ScalePageRoute<T> extends PageRouteBuilder<T> {
               scale: Tween<double>(
                 begin: 0.8, // Começa com 80% do tamanho
                 end: 1.0,
-              ).chain(CurveTween(curve: Curves.easeOutCubic)).animate(animation),
-              child: FadeTransition( // Adiciona um fade para suavizar
+              )
+                  .chain(CurveTween(curve: Curves.easeOutCubic))
+                  .animate(animation),
+              child: FadeTransition(
+                // Adiciona um fade para suavizar
                 opacity: animation,
                 child: child,
               ),
             );
           },
           transitionDuration: duration,
-          settings: settings,
         );
 }
 

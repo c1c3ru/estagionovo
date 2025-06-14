@@ -1,86 +1,62 @@
-// lib/data/datasources/local/preferences_manager.dart
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/constants/app_constants.dart'; // Para chaves de preferências
+import 'dart:convert';
 
-abstract class IPreferencesManager {
-  Future<bool> saveString(String key, String value);
-  Future<String?> getString(String key);
-  Future<bool> saveBool(String key, bool value);
-  Future<bool?> getBool(String key);
-  Future<bool> saveInt(String key, int value);
-  Future<int?> getInt(String key);
-  Future<bool> remove(String key);
-  Future<bool> clearAll();
+class PreferencesManager {
+  final SharedPreferences _prefs;
 
-  // Exemplo específico para tema
-  Future<bool> saveThemeMode(String themeModeString);
-  Future<String?> getThemeMode();
-}
+  PreferencesManager(this._prefs);
 
-class PreferencesManager implements IPreferencesManager {
-  // Não é necessário injetar SharedPreferences se você sempre obtém a instância.
-  // Mas para testes, poderia ser injetado.
-  // final SharedPreferences _sharedPreferences;
-  // PreferencesManager(this._sharedPreferences);
-
-  Future<SharedPreferences> get _prefs async => SharedPreferences.getInstance();
-
-  @override
-  Future<bool> saveString(String key, String value) async {
-    final prefs = await _prefs;
-    return prefs.setString(key, value);
+  // User Token
+  Future<void> saveUserToken(String token) async {
+    await _prefs.setString('user_token', token);
   }
 
-  @override
-  Future<String?> getString(String key) async {
-    final prefs = await _prefs;
-    return prefs.getString(key);
+  String? getUserToken() {
+    return _prefs.getString('user_token');
   }
 
-  @override
-  Future<bool> saveBool(String key, bool value) async {
-    final prefs = await _prefs;
-    return prefs.setBool(key, value);
+  Future<void> removeUserToken() async {
+    await _prefs.remove('user_token');
   }
 
-  @override
-  Future<bool?> getBool(String key) async {
-    final prefs = await _prefs;
-    return prefs.getBool(key);
+  // User Data
+  Future<void> saveUserData(Map<String, dynamic> userData) async {
+    await _prefs.setString('user_data', jsonEncode(userData));
   }
 
-  @override
-  Future<bool> saveInt(String key, int value) async {
-    final prefs = await _prefs;
-    return prefs.setInt(key, value);
+  Map<String, dynamic>? getUserData() {
+    final userDataString = _prefs.getString('user_data');
+    if (userDataString != null) {
+      return jsonDecode(userDataString) as Map<String, dynamic>;
+    }
+    return null;
   }
 
-  @override
-  Future<int?> getInt(String key) async {
-    final prefs = await _prefs;
-    return prefs.getInt(key);
+  Future<void> removeUserData() async {
+    await _prefs.remove('user_data');
   }
 
-  @override
-  Future<bool> remove(String key) async {
-    final prefs = await _prefs;
-    return prefs.remove(key);
+  // Theme
+  Future<void> saveThemeMode(String themeMode) async {
+    await _prefs.setString('theme_mode', themeMode);
   }
 
-  @override
-  Future<bool> clearAll() async {
-    final prefs = await _prefs;
-    return prefs.clear();
+  String? getThemeMode() {
+    return _prefs.getString('theme_mode');
   }
 
-  // --- Métodos Específicos de Exemplo ---
-  @override
-  Future<bool> saveThemeMode(String themeModeString) async {
-    return saveString(AppConstants.prefsKeyThemeMode, themeModeString);
+  // First Launch
+  Future<void> setFirstLaunch(bool isFirstLaunch) async {
+    await _prefs.setBool('is_first_launch', isFirstLaunch);
   }
 
-  @override
-  Future<String?> getThemeMode() async {
-    return getString(AppConstants.prefsKeyThemeMode);
+  bool isFirstLaunch() {
+    return _prefs.getBool('is_first_launch') ?? true;
+  }
+
+  // Clear All
+  Future<void> clearAll() async {
+    await _prefs.clear();
   }
 }
+

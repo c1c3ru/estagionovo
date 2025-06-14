@@ -3,7 +3,20 @@ import 'package:equatable/equatable.dart';
 
 enum ExceptionType { auth, server, cache, network, validation, unknown }
 
-enum StudentStatus { active, inactive, graduated, suspended }
+enum StudentStatus {
+  active,
+  inactive,
+  graduated,
+  suspended,
+  pending,
+  completed,
+  terminated,
+  unknown;
+
+  String get displayName {
+    return name[0].toUpperCase() + name.substring(1).toLowerCase();
+  }
+}
 
 class AppFailure extends Equatable {
   final String message;

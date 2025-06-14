@@ -1,6 +1,0 @@
-class AssetImages {
-}
-
-class AssetAnimations {
-}
-

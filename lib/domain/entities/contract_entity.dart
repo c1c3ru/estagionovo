@@ -1,106 +1,78 @@
-import 'package:equatable/equatable.dart';
-import '../../core/enum/contract_status.dart';
+import '../../core/enums/contract_status.dart';
 
-// Represents a contract, inheriting from Equatable for value comparison.
-class ContractEntity extends Equatable {
+class ContractEntity {
   final String id;
   final String studentId;
   final String supervisorId;
-  final String? createdBy; // ID of the user who created the contract
-
-  // Company Information
-  final String companyName;
-  final String companyAddress;
-  final String companyCnpj;
-
-  // Contract Details
   final DateTime startDate;
   final DateTime endDate;
-  final int totalHoursRequired;
+  final int weeklyHours;
+  final String company;
+  final String position;
+  final double? salary;
   final ContractStatus status;
-  final String contractType;
   final String? description;
-  final String? documentUrl;
-
-  // Timestamps
   final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   const ContractEntity({
     required this.id,
     required this.studentId,
     required this.supervisorId,
-    this.createdBy,
-    required this.companyName,
-    required this.companyAddress,
-    required this.companyCnpj,
     required this.startDate,
     required this.endDate,
-    required this.totalHoursRequired,
+    required this.weeklyHours,
+    required this.company,
+    required this.position,
+    this.salary,
     required this.status,
-    required this.contractType,
     this.description,
-    this.documentUrl,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
   });
 
-  @override
-  List<Object?> get props => [
-        id,
-        studentId,
-        supervisorId,
-        createdBy,
-        companyName,
-        companyAddress,
-        companyCnpj,
-        startDate,
-        endDate,
-        totalHoursRequired,
-        status,
-        contractType,
-        description,
-        documentUrl,
-        createdAt,
-        updatedAt,
-      ];
+  bool get isActive => status == ContractStatus.active;
+  
+  Duration get totalDuration => endDate.difference(startDate);
+  
+  int get totalExpectedHours {
+    final weeks = totalDuration.inDays / 7;
+    return (weeks * weeklyHours).round();
+  }
 
-  // copyWith method to create a new instance with updated fields.
-  ContractEntity copyWith({
-    String? id,
-    String? studentId,
-    String? supervisorId,
-    String? createdBy,
-    String? companyName,
-    String? companyAddress,
-    String? companyCnpj,
-    DateTime? startDate,
-    DateTime? endDate,
-    int? totalHoursRequired,
-    ContractStatus? status,
-    String? contractType,
-    String? description,
-    String? documentUrl,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return ContractEntity(
-      id: id ?? this.id,
-      studentId: studentId ?? this.studentId,
-      supervisorId: supervisorId ?? this.supervisorId,
-      createdBy: createdBy ?? this.createdBy,
-      companyName: companyName ?? this.companyName,
-      companyAddress: companyAddress ?? this.companyAddress,
-      companyCnpj: companyCnpj ?? this.companyCnpj,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
-      status: status ?? this.status,
-      contractType: contractType ?? this.contractType,
-      description: description ?? this.description,
-      documentUrl: documentUrl ?? this.documentUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ContractEntity &&
+        other.id == id &&
+        other.studentId == studentId &&
+        other.supervisorId == supervisorId &&
+        other.startDate == startDate &&
+        other.endDate == endDate &&
+        other.weeklyHours == weeklyHours &&
+        other.status == status &&
+        other.description == description &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        studentId.hashCode ^
+        supervisorId.hashCode ^
+        startDate.hashCode ^
+        endDate.hashCode ^
+        weeklyHours.hashCode ^
+        status.hashCode ^
+        description.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'ContractEntity(id: $id, studentId: $studentId, supervisorId: $supervisorId, startDate: $startDate, endDate: $endDate, weeklyHours: $weeklyHours, status: $status, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
+

@@ -42,7 +42,7 @@ class ErrorHandler {
     // Adicione outros tipos de exceção específicos aqui (ex: DioError, SocketException)
     else {
       return ServerFailure(
-        message: defaultMessage ?? AppStrings.anErrorOccurred,
+        message: defaultMessage ?? AppStrings.error,
         originalException: error,
       );
     }

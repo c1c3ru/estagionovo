@@ -2,9 +2,9 @@
 import 'package:equatable/equatable.dart';
 import 'dart:math';
 
-import 'package:estagio/core/enum/class_shift.dart';
-import 'package:estagio/core/enum/internship_shift.dart';
-import 'package:estagio/core/enum/user_role.dart';
+import 'package:student_supervisor_app/core/enums/class_shift.dart';
+import 'package:student_supervisor_app/core/enums/internship_shift.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
 
 class StudentEntity extends Equatable {
   final String id;
@@ -65,10 +65,12 @@ class StudentEntity extends Equatable {
   }
 
   bool get isOnTrack {
-    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now()))
+    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now())) {
       return true;
-    if (contractEndDate.isBefore(DateTime.now()))
+    }
+    if (contractEndDate.isBefore(DateTime.now())) {
       return totalHoursCompleted >= totalHoursRequired;
+    }
 
     final totalDays = contractEndDate.difference(contractStartDate).inDays;
     if (totalDays <= 0) return true;

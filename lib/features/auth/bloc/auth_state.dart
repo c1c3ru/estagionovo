@@ -1,8 +1,7 @@
 // lib/features/auth/presentation/bloc/auth_state.dart
 import 'package:equatable/equatable.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
 import '../../../../domain/entities/user_entity.dart'; // Importa UserEntity do domínio
-import '../../../../core/enum/user_role.dart';
-
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -27,7 +26,6 @@ class AuthSuccess extends AuthState {
   // A role já está dentro do UserEntity, mas pode ser útil tê-la separada aqui
   // para acesso rápido na UI se necessário, ou pode ser removida se UserEntity.role for suficiente.
   final UserRole userRole;
-
 
   const AuthSuccess({required this.user, required this.userRole});
 

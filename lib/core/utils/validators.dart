@@ -54,7 +54,8 @@ class Validators {
     }
     // Exemplo simples: verifica se tem entre 10 e 15 dígitos (considerando códigos de país/área)
     final phoneRegExp = RegExp(r'^\+?[0-9]{10,15}$');
-    if (!phoneRegExp.hasMatch(value.replaceAll(RegExp(r'[\s()-]'), ''))) { // Remove espaços, (), -
+    if (!phoneRegExp.hasMatch(value.replaceAll(RegExp(r'[\s()-]'), ''))) {
+      // Remove espaços, (), -
       return 'Número de telefone inválido.';
     }
     return null;
@@ -71,13 +72,14 @@ class Validators {
     return null;
   }
 
-   /// Validador para datas (ex: não pode ser no passado).
+  /// Validador para datas (ex: não pode ser no passado).
   static String? dateNotPast(DateTime? date, {String fieldName = 'Data'}) {
     if (date == null) {
       return '$fieldName é obrigatória.';
     }
     // Compara apenas a data, ignorando a hora, para evitar problemas com o momento exato.
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final selectedDate = DateTime(date.year, date.month, date.day);
 
     if (selectedDate.isBefore(today)) {
@@ -91,31 +93,32 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return 'Matrícula SIAPE é obrigatória.';
     }
-    
+
     // Remove espaços e caracteres não numéricos
     final cleanValue = value.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     if (cleanValue.length != 7) {
       return 'Matrícula SIAPE deve ter exatamente 7 dígitos.';
     }
-    
+
     // Verifica se todos os caracteres são dígitos
     if (!RegExp(r'^[0-9]{7}$').hasMatch(cleanValue)) {
       return 'Matrícula SIAPE deve conter apenas números.';
     }
-    
+
     return null;
   }
 
   /// Validador para verificar se a matrícula SIAPE é única (usado com verificação no banco).
-  static String? siapeRegistrationUnique(String? value, {bool isUnique = true}) {
+  static String? siapeRegistrationUnique(String? value,
+      {bool isUnique = true}) {
     final basicValidation = siapeRegistration(value);
     if (basicValidation != null) return basicValidation;
-    
+
     if (!isUnique) {
       return 'Esta matrícula SIAPE já está em uso.';
     }
-    
+
     return null;
   }
 

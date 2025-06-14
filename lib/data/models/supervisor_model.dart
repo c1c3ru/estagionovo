@@ -1,106 +1,115 @@
-// lib/data/models/supervisor_model.dart
-import 'package:equatable/equatable.dart';
+import '../../domain/entities/supervisor_entity.dart';
 
-class SupervisorModel extends Equatable {
-  final String id; // UUID PRIMARY KEY REFERENCES users(id)
-  final String fullName; // VARCHAR NOT NULL
-  final String siapeRegistration; // VARCHAR(7) NOT NULL - Matrícula SIAPE obrigatória
-  final String? department; // VARCHAR
-  final String? position; // VARCHAR
-  final String? jobCode; // VARCHAR(50)
-  final String? profilePictureUrl; // TEXT
-  final String? phoneNumber; // VARCHAR(20)
-  final DateTime createdAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-  final DateTime? updatedAt; // TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+class SupervisorModel {
+  final String id;
+  final String userId;
+  final String department;
+  final String position;
+  final String specialization;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  const SupervisorModel({
+  SupervisorModel({
     required this.id,
-    required this.fullName,
-    required this.siapeRegistration,
-    this.department,
-    this.position,
-    this.jobCode,
-    this.profilePictureUrl,
-    this.phoneNumber,
+    required this.userId,
+    required this.department,
+    required this.position,
+    required this.specialization,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
   });
-
-  @override
-  List<Object?> get props => [
-        id,
-        fullName,
-        siapeRegistration,
-        department,
-        position,
-        jobCode,
-        profilePictureUrl,
-        phoneNumber,
-        createdAt,
-        updatedAt,
-      ];
 
   factory SupervisorModel.fromJson(Map<String, dynamic> json) {
     return SupervisorModel(
       id: json['id'] as String,
-      fullName: json['full_name'] as String,
-      siapeRegistration: json['siape_registration'] as String,
-      department: json['department'] as String?,
-      position: json['position'] as String?,
-      jobCode: json['job_code'] as String?,
-      profilePictureUrl: json['profile_picture_url'] as String?,
-      phoneNumber: json['phone_number'] as String?,
+      userId: json['user_id'] as String,
+      department: json['department'] as String,
+      specialization: json["specialization"] as String,
+      position: json["position"] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'full_name': fullName,
-      'siape_registration': siapeRegistration,
+      'user_id': userId,
       'department': department,
       'position': position,
-      'job_code': jobCode,
-      'profile_picture_url': profilePictureUrl,
-      'phone_number': phoneNumber,
+      'specialization': specialization,
       'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
+  }
+
+  SupervisorEntity toEntity() {
+    return SupervisorEntity(
+      id: id,
+      userId: userId,
+      department: department,
+      specialization: specialization,
+      position: position,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+
+  factory SupervisorModel.fromEntity(SupervisorEntity entity) {
+    return SupervisorModel(
+      id: entity.id,
+      userId: entity.userId,
+      department: entity.department,
+      position: entity.position,
+      specialization: entity.specialization,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    );
   }
 
   SupervisorModel copyWith({
     String? id,
-    String? fullName,
-    String? siapeRegistration,
+    String? userId,
     String? department,
-    bool? clearDepartment,
-    String? position,
-    bool? clearPosition,
-    String? jobCode,
-    bool? clearJobCode,
-    String? profilePictureUrl,
-    bool? clearProfilePictureUrl,
-    String? phoneNumber,
-    bool? clearPhoneNumber,
+    String? specialization,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? clearUpdatedAt,
   }) {
     return SupervisorModel(
       id: id ?? this.id,
-      fullName: fullName ?? this.fullName,
-      siapeRegistration: siapeRegistration ?? this.siapeRegistration,
-      department: clearDepartment == true ? null : department ?? this.department,
-      position: clearPosition == true ? null : position ?? this.position,
-      jobCode: clearJobCode == true ? null : jobCode ?? this.jobCode,
-      profilePictureUrl: clearProfilePictureUrl == true ? null : profilePictureUrl ?? this.profilePictureUrl,
-      phoneNumber: clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
+      userId: userId ?? this.userId,
+      department: department ?? this.department,
+      specialization: specialization ?? this.specialization,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      position: 'Função',
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SupervisorModel &&
+        other.id == id &&
+        other.userId == userId &&
+        other.department == department &&
+        other.specialization == specialization &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        userId.hashCode ^
+        department.hashCode ^
+        specialization.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'SupervisorModel(id: $id, userId: $userId, department: $department, specialization: $specialization, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }

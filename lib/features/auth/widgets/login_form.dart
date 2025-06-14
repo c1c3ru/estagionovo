@@ -2,14 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
+import '../bloc/auth_bloc.dart' as bloc;
+import '../bloc/auth_event.dart' hide AuthEvent;
+import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({Key? key}) : super(key: key);
@@ -44,7 +45,7 @@ class _LoginFormState extends State<LoginForm> {
       _authBloc.add(LoginSubmittedEvent(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-      ));
+      ) as AuthEvent);
     }
   }
 

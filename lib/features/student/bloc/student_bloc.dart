@@ -1,354 +1,346 @@
-// lib/features/student/presentation/bloc/student_bloc.dart
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../../../domain/entities/student_entity.dart';
+import '../../../domain/usecases/student/get_all_students_usecase.dart';
+import '../../../domain/usecases/student/get_student_by_id_usecase.dart';
+import '../../../domain/usecases/student/get_student_by_user_id_usecase.dart';
+import '../../../domain/usecases/student/create_student_usecase.dart';
+import '../../../domain/usecases/student/update_student_usecase.dart';
+import '../../../domain/usecases/student/delete_student_usecase.dart';
+import '../../../domain/usecases/student/get_students_by_supervisor_usecase.dart';
 
-import '../../../../core/errors/app_exceptions.dart';
-import '../../../../domain/entities/student_entity.dart';
-import '../../../../domain/entities/time_log_entity.dart';
-import '../../../../domain/entities/contract_entity.dart';
+// Events
+abstract class StudentEvent extends Equatable {
+  const StudentEvent();
 
-// Usecases do Estudante
-import '../../../../domain/usecases/student/get_student_details_usecase.dart';
-import '../../../../domain/usecases/student/update_student_profile_usecase.dart';
-import '../../../../domain/usecases/student/check_in_usecase.dart';
-import '../../../../domain/usecases/student/check_out_usecase.dart';
+  @override
+  List<Object?> get props => [];
+}
 
-// Usecases de TimeLog (podem vir de IStudentRepository ou ITimeLogRepository)
-import '../../../../domain/usecases/student/get_student_time_logs_usecase.dart';
-import '../../../../domain/usecases/student/create_time_log_usecase.dart';
-import '../../../../domain/usecases/student/update_time_log_usecase.dart';
-import '../../../../domain/usecases/student/delete_time_log_usecase.dart';
-// Usecase para buscar log ativo (precisaria ser definido no domínio e repositório)
+class StudentLoadAllRequested extends StudentEvent {}
 
-// Usecases de Contrato
-import '../../../../domain/usecases/contract/get_contracts_for_student_usecase.dart';
+class StudentLoadByIdRequested extends StudentEvent {
+  final String id;
 
-// Repositório (para os parâmetros dos usecases)
-import '../../../../domain/repositories/i_student_repository.dart'
-    show UpdateStudentProfileParams;
+  const StudentLoadByIdRequested({required this.id});
 
-import 'student_event.dart';
-import 'student_state.dart';
+  @override
+  List<Object> get props => [id];
+}
 
-// Importe o logger se for usar
-// import '../../../../core/utils/logger_utils.dart';
+class StudentLoadCurrentRequested extends StudentEvent {}
 
+class StudentLoadByUserIdRequested extends StudentEvent {
+  final String userId;
+
+  const StudentLoadByUserIdRequested({required this.userId});
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class StudentCreateRequested extends StudentEvent {
+  final StudentEntity student;
+
+  const StudentCreateRequested({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentUpdateRequested extends StudentEvent {
+  final StudentEntity student;
+
+  const StudentUpdateRequested({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentDeleteRequested extends StudentEvent {
+  final String id;
+
+  const StudentDeleteRequested({required this.id});
+
+  @override
+  List<Object> get props => [id];
+}
+
+class StudentLoadBySupervisorRequested extends StudentEvent {
+  final String supervisorId;
+
+  const StudentLoadBySupervisorRequested({required this.supervisorId});
+
+  @override
+  List<Object> get props => [supervisorId];
+}
+
+// States
+abstract class StudentState extends Equatable {
+  const StudentState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class StudentInitial extends StudentState {}
+
+// Loading States
+class StudentLoading extends StudentState {}
+
+class StudentSelecting extends StudentState {}
+
+class StudentInserting extends StudentState {}
+
+class StudentUpdating extends StudentState {}
+
+class StudentDeleting extends StudentState {}
+
+// Success States
+class StudentLoadAllSuccess extends StudentState {
+  final List<StudentEntity> students;
+
+  const StudentLoadAllSuccess({required this.students});
+
+  @override
+  List<Object> get props => [students];
+}
+
+class StudentLoadByIdSuccess extends StudentState {
+  final StudentEntity? student;
+
+  const StudentLoadByIdSuccess({required this.student});
+
+  @override
+  List<Object?> get props => [student];
+}
+
+class StudentLoadCurrentSuccess extends StudentState {
+  final StudentEntity student;
+
+  const StudentLoadCurrentSuccess({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentCreateSuccess extends StudentState {
+  final StudentEntity student;
+
+  const StudentCreateSuccess({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentUpdateSuccess extends StudentState {
+  final StudentEntity student;
+
+  const StudentUpdateSuccess({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentDeleteSuccess extends StudentState {
+  final String deletedId;
+
+  const StudentDeleteSuccess({required this.deletedId});
+
+  @override
+  List<Object> get props => [deletedId];
+}
+
+class StudentLoadBySupervisorSuccess extends StudentState {
+  final List<StudentEntity> students;
+
+  const StudentLoadBySupervisorSuccess({required this.students});
+
+  @override
+  List<Object> get props => [students];
+}
+
+// Error States
+class StudentSelectError extends StudentState {
+  final String message;
+
+  const StudentSelectError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class StudentInsertError extends StudentState {
+  final String message;
+
+  const StudentInsertError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class StudentUpdateError extends StudentState {
+  final String message;
+
+  const StudentUpdateError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class StudentDeleteError extends StudentState {
+  final String message;
+
+  const StudentDeleteError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
 class StudentBloc extends Bloc<StudentEvent, StudentState> {
-  // Usecases do Estudante
-  final GetStudentDetailsUsecase _getStudentDetailsUsecase;
-  final UpdateStudentProfileUsecase _updateStudentProfileUsecase;
-  final CheckInUsecase _checkInUsecase;
-  final CheckOutUsecase _checkOutUsecase;
-
-  // Usecases de TimeLog
-  final GetStudentTimeLogsUsecase _getStudentTimeLogsUsecase;
-  final CreateTimeLogUsecase _createTimeLogUsecase;
-  final DeleteTimeLogUsecase _deleteTimeLogUsecase;
-  // final GetActiveTimeLogForStudentUsecase _getActiveTimeLogForStudentUsecase; // Para buscar log ativo
-
-  // Usecases de Contrato
-  final GetContractsForStudentUsecase _getContractsForStudentUsecase;
+  final GetAllStudentsUsecase _getAllStudentsUsecase;
+  final GetStudentByIdUsecase _getStudentByIdUsecase;
+  final GetStudentByUserIdUsecase _getStudentByUserIdUsecase;
+  final CreateStudentUsecase _createStudentUsecase;
+  final UpdateStudentUsecase _updateStudentUsecase;
+  final DeleteStudentUsecase _deleteStudentUsecase;
+  final GetStudentsBySupervisorUsecase _getStudentsBySupervisorUsecase;
 
   StudentBloc({
-    required GetStudentDetailsUsecase getStudentDetailsUsecase,
-    required UpdateStudentProfileUsecase updateStudentProfileUsecase,
-    required CheckInUsecase checkInUsecase,
-    required CheckOutUsecase checkOutUsecase,
-    required GetStudentTimeLogsUsecase getStudentTimeLogsUsecase,
-    required CreateTimeLogUsecase createTimeLogUsecase,
-    required UpdateTimeLogUsecase updateTimeLogUsecase,
-    required DeleteTimeLogUsecase deleteTimeLogUsecase,
-    // required GetActiveTimeLogForStudentUsecase getActiveTimeLogForStudentUsecase,
-    required GetContractsForStudentUsecase getContractsForStudentUsecase,
-  })  : _getStudentDetailsUsecase = getStudentDetailsUsecase,
-        _updateStudentProfileUsecase = updateStudentProfileUsecase,
-        _checkInUsecase = checkInUsecase,
-        _checkOutUsecase = checkOutUsecase,
-        _getStudentTimeLogsUsecase = getStudentTimeLogsUsecase,
-        _createTimeLogUsecase = createTimeLogUsecase,
-        _deleteTimeLogUsecase = deleteTimeLogUsecase,
-        // _getActiveTimeLogForStudentUsecase = getActiveTimeLogForStudentUsecase,
-        _getContractsForStudentUsecase = getContractsForStudentUsecase,
-        super(const StudentInitial()) {
-    on<LoadStudentDashboardDataEvent>(_onLoadStudentDashboardData);
-    on<UpdateStudentProfileInfoEvent>(_onUpdateStudentProfileInfo);
-    on<StudentCheckInEvent>(_onStudentCheckIn);
-    on<StudentCheckOutEvent>(_onStudentCheckOut);
-    on<LoadStudentTimeLogsEvent>(_onLoadStudentTimeLogs);
-    on<CreateManualTimeLogEvent>(_onCreateManualTimeLog);
-    on<UpdateManualTimeLogEvent>(_onUpdateManualTimeLog);
-    on<DeleteTimeLogRequestedEvent>(_onDeleteTimeLogRequested);
-    on<FetchActiveTimeLogEvent>(_onFetchActiveTimeLog);
+    required GetAllStudentsUsecase getAllStudentsUsecase,
+    required GetStudentByIdUsecase getStudentByIdUsecase,
+    required GetStudentByUserIdUsecase getStudentByUserIdUsecase,
+    required CreateStudentUsecase createStudentUsecase,
+    required UpdateStudentUsecase updateStudentUsecase,
+    required DeleteStudentUsecase deleteStudentUsecase,
+    required GetStudentsBySupervisorUsecase getStudentsBySupervisorUsecase,
+  })  : _getAllStudentsUsecase = getAllStudentsUsecase,
+        _getStudentByIdUsecase = getStudentByIdUsecase,
+        _getStudentByUserIdUsecase = getStudentByUserIdUsecase,
+        _createStudentUsecase = createStudentUsecase,
+        _updateStudentUsecase = updateStudentUsecase,
+        _deleteStudentUsecase = deleteStudentUsecase,
+        _getStudentsBySupervisorUsecase = getStudentsBySupervisorUsecase,
+        super(StudentInitial()) {
+    on<StudentLoadAllRequested>(_onStudentLoadAllRequested);
+    on<StudentLoadByIdRequested>(_onStudentLoadByIdRequested);
+    on<StudentLoadCurrentRequested>(_onStudentLoadCurrentRequested);
+    on<StudentLoadByUserIdRequested>(_onStudentLoadByUserIdRequested);
+    on<StudentCreateRequested>(_onStudentCreateRequested);
+    on<StudentUpdateRequested>(_onStudentUpdateRequested);
+    on<StudentDeleteRequested>(_onStudentDeleteRequested);
+    on<StudentLoadBySupervisorRequested>(_onStudentLoadBySupervisorRequested);
   }
 
-  Future<void> _onLoadStudentDashboardData(
-    LoadStudentDashboardDataEvent event,
+  Future<void> _onStudentLoadAllRequested(
+    StudentLoadAllRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
+    emit(StudentSelecting());
     try {
-      // 1. Buscar detalhes do estudante
-      final studentDetailsResult =
-          await _getStudentDetailsUsecase.call(event.userId);
-      final StudentEntity student = await studentDetailsResult.fold(
-        (failure) => throw failure, // Lança para o catch do BLoC
-        (student) => student,
-      );
-
-      // 2. Buscar logs de tempo recentes e calcular horas da semana
-      // (Exemplo: últimos 5 logs e horas da semana atual)
-      final now = DateTime.now();
-      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-      final endOfWeek = startOfWeek
-          .add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-
-      final timeLogsResult = await _getStudentTimeLogsUsecase.call(
-        studentId: event.userId,
-        // Para o dashboard, podemos pegar todos da semana atual ou um limite
-        startDate: startOfWeek,
-        endDate: endOfWeek,
-      );
-
-      List<TimeLogEntity> allLogsThisWeek = [];
-      timeLogsResult.fold(
-        (failure) => throw failure,
-        (logs) => allLogsThisWeek = logs,
-      );
-
-      double hoursThisWeek = allLogsThisWeek
-          .where((log) => log.hoursLogged != null)
-          .fold(0.0, (sum, log) => sum + log.hoursLogged!);
-
-      // Pega os 5 mais recentes para exibição (já ordenados pelo repositório/datasource)
-      List<TimeLogEntity> recentLogs = allLogsThisWeek.take(5).toList();
-
-      // 3. Buscar contratos do estudante
-      final contractsResult =
-          await _getContractsForStudentUsecase.call(event.userId);
-      List<ContractEntity> contracts = [];
-      contractsResult.fold(
-        (failure) =>
-            throw failure, // Ou tratar de forma diferente se contratos não forem críticos
-        (contractList) => contracts = contractList,
-      );
-
-      // 4. Buscar log de tempo ativo (se houver)
-      // Para isso, o GetStudentTimeLogsUsecase pode ser adaptado ou um novo usecase/método no repo.
-      // Assumindo que getStudentTimeLogs pode retornar logs sem checkout_time.
-      TimeLogEntity? activeTimeLog;
-      final allTimeLogsResult =
-          await _getStudentTimeLogsUsecase.call(studentId: event.userId);
-      allTimeLogsResult.fold((failure) {
-        /* não faz nada, continua sem active log */
-      }, (logs) {
-        // ignore: cast_from_null_always_fails
-        activeTimeLog = logs.firstWhere((log) => log.checkOutTime == null,
-            orElse: () => null as TimeLogEntity);
-      });
-
-      emit(StudentDashboardLoadSuccess(
-        student: student,
-        timeStats: StudentTimeStats(
-          hoursThisWeek: hoursThisWeek,
-          recentLogs: recentLogs,
-          activeTimeLog: activeTimeLog,
-        ),
-        contracts: contracts,
-      ));
+      final students = await _getAllStudentsUsecase();
+      emit(StudentLoadAllSuccess(students: students));
     } catch (e) {
-      // logger.e('Erro ao carregar dados do dashboard do estudante', error: e);
-      emit(StudentOperationFailure(
-          message: e is AppFailure
-              ? e.message
-              : 'Erro desconhecido ao carregar dados do dashboard.'));
+      emit(StudentSelectError(message: e.toString()));
     }
   }
 
-  Future<void> _onUpdateStudentProfileInfo(
-    UpdateStudentProfileInfoEvent event,
+  Future<void> _onStudentLoadByIdRequested(
+    StudentLoadByIdRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _updateStudentProfileUsecase.call(
-      UpdateStudentProfileParams(
-        // Usando o Params do repositório
-        studentId: event.userId,
-        fullName: event.params.fullName,
-        registrationNumber: event.params.registrationNumber,
-        course: event.params.course,
-        advisorName: event.params.advisorName,
-        isMandatoryInternship: event.params.isMandatoryInternship,
-        profilePictureUrl: event.params.profilePictureUrl,
-        phoneNumber: event.params.phoneNumber,
-        birthDate: event.params.birthDate, // Adicionado
-        classShift: event.params.classShift, // Adicionado
-      ),
-    );
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (updatedStudent) {
-        emit(StudentProfileUpdateSuccess(updatedStudent: updatedStudent));
-        // Atualizar o estado do dashboard se ele já estiver carregado
-        if (state is StudentDashboardLoadSuccess) {
-          final currentDashboardState = state as StudentDashboardLoadSuccess;
-          emit(currentDashboardState.copyWith(student: updatedStudent));
-        }
-      },
-    );
+    emit(StudentSelecting());
+    try {
+      final student = await _getStudentByIdUsecase(event.id);
+      emit(StudentLoadByIdSuccess(student: student));
+    } catch (e) {
+      emit(StudentSelectError(message: e.toString()));
+    }
   }
 
-  Future<void> _onStudentCheckIn(
-    StudentCheckInEvent event,
+  Future<void> _onStudentLoadCurrentRequested(
+    StudentLoadCurrentRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _checkInUsecase.call(
-      studentId: event.userId,
-      notes: event.notes,
-    );
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (timeLog) {
-        emit(StudentTimeLogOperationSuccess(
-            timeLog: timeLog, message: 'Check-in realizado com sucesso!'));
-        // Se o dashboard estiver carregado, atualiza o activeTimeLog
-        if (state is StudentDashboardLoadSuccess) {
-          final dashboardState = state as StudentDashboardLoadSuccess;
-          emit(dashboardState.copyWith(
-              timeStats:
-                  dashboardState.timeStats.copyWith(activeTimeLog: timeLog)));
-        } else if (state is ActiveTimeLogFetched) {
-          // Se um estado específico de log ativo existir
-          emit(ActiveTimeLogFetched(activeTimeLog: timeLog));
-        }
-      },
-    );
+    emit(StudentSelecting());
+    try {
+      // TODO: Get current user ID from auth
+      const currentUserId = 'current-user-id'; // Placeholder
+      final student = await _getStudentByUserIdUsecase(currentUserId);
+      if (student != null) {
+        emit(StudentLoadCurrentSuccess(student: student));
+      } else {
+        emit(StudentSelectError(message: 'Estudante não encontrado'));
+      }
+    } catch (e) {
+      emit(StudentSelectError(message: e.toString()));
+    }
   }
 
-  Future<void> _onStudentCheckOut(
-    StudentCheckOutEvent event,
+  Future<void> _onStudentLoadByUserIdRequested(
+    StudentLoadByUserIdRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _checkOutUsecase.call(
-      studentId: event.userId,
-      activeTimeLogId: event.activeTimeLogId,
-      description: event.description,
-    );
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (timeLog) {
-        emit(StudentTimeLogOperationSuccess(
-            timeLog: timeLog, message: 'Check-out realizado com sucesso!'));
-        // Se o dashboard estiver carregado, limpa o activeTimeLog
-        if (state is StudentDashboardLoadSuccess) {
-          final dashboardState = state as StudentDashboardLoadSuccess;
-          emit(dashboardState.copyWith(
-              timeStats:
-                  dashboardState.timeStats.copyWith(clearActiveTimeLog: true)));
-        } else if (state is ActiveTimeLogFetched) {
-          emit(const ActiveTimeLogFetched(activeTimeLog: null));
-        }
-      },
-    );
+    emit(StudentSelecting());
+    try {
+      final student = await _getStudentByUserIdUsecase(event.userId);
+      emit(StudentLoadByIdSuccess(student: student));
+    } catch (e) {
+      emit(StudentSelectError(message: e.toString()));
+    }
   }
 
-  Future<void> _onLoadStudentTimeLogs(
-    LoadStudentTimeLogsEvent event,
+  Future<void> _onStudentCreateRequested(
+    StudentCreateRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _getStudentTimeLogsUsecase.call(
-      studentId: event.userId,
-      startDate: event.startDate,
-      endDate: event.endDate,
-    );
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (timeLogs) => emit(StudentTimeLogsLoadSuccess(timeLogs: timeLogs)),
-    );
+    emit(StudentInserting());
+    try {
+      final student = await _createStudentUsecase(event.student);
+      emit(StudentCreateSuccess(student: student));
+    } catch (e) {
+      emit(StudentInsertError(message: e.toString()));
+    }
   }
 
-  Future<void> _onCreateManualTimeLog(
-    CreateManualTimeLogEvent event,
+  Future<void> _onStudentUpdateRequested(
+    StudentUpdateRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _createTimeLogUsecase.call(
-      studentId: event.userId,
-      logDate: event.logDate,
-      checkInTime: event.checkInTime,
-      checkOutTime: event.checkOutTime,
-      description: event.description,
-    );
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (timeLog) => emit(StudentTimeLogOperationSuccess(
-          timeLog: timeLog, message: 'Registo de tempo criado com sucesso!')),
-    );
+    emit(StudentUpdating());
+    try {
+      final student = await _updateStudentUsecase(event.student);
+      emit(StudentUpdateSuccess(student: student));
+    } catch (e) {
+      emit(StudentUpdateError(message: e.toString()));
+    }
   }
 
-  Future<void> _onUpdateManualTimeLog(
-    UpdateManualTimeLogEvent event,
+  Future<void> _onStudentDeleteRequested(
+    StudentDeleteRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    // A interface IStudentRepository.updateTimeLog espera um TimeLogEntity completo.
-    // O UpdateTimeLogUsecase (que usa IStudentRepository) também.
-    // Para implementar corretamente, precisamos buscar o log, aplicar as mudanças e enviar.
-
-    // Etapa 1: Buscar o log de tempo existente
-    // Supondo que temos um usecase para buscar por ID, ou o repositório diretamente.
-    // Para simplificar, se o TimeLogUsecase (que não está injetado) tivesse um getById, usaríamos.
-    // Como não temos, vamos emitir um erro por agora, ou teríamos que adicionar um GetTimeLogByIdUsecase.
-    // A alternativa seria modificar o UpdateTimeLogUsecase para aceitar campos parciais,
-    // o que exigiria uma mudança na cadeia até o datasource.
-
-    // Vamos assumir que o evento precisaria ser redesenhado para passar o TimeLogEntity original,
-    // ou que a UI que dispara este evento já tem a entidade.
-    // Por agora, esta funcionalidade não pode ser completada sem mais informações ou refatoração.
-    emit(const StudentOperationFailure(
-        message:
-            'Atualização de log manual: buscar log original antes de atualizar não implementado neste BLoC.'));
+    emit(StudentDeleting());
+    try {
+      await _deleteStudentUsecase(event.id);
+      emit(StudentDeleteSuccess(deletedId: event.id));
+    } catch (e) {
+      emit(StudentDeleteError(message: e.toString()));
+    }
   }
 
-  Future<void> _onDeleteTimeLogRequested(
-    DeleteTimeLogRequestedEvent event,
+  Future<void> _onStudentLoadBySupervisorRequested(
+    StudentLoadBySupervisorRequested event,
     Emitter<StudentState> emit,
   ) async {
-    emit(const StudentLoading());
-    final result = await _deleteTimeLogUsecase.call(event.timeLogId);
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (_) => emit(const StudentTimeLogDeleteSuccess()),
-    );
-  }
-
-  Future<void> _onFetchActiveTimeLog(
-    FetchActiveTimeLogEvent event,
-    Emitter<StudentState> emit,
-  ) async {
-    final result =
-        await _getStudentTimeLogsUsecase.call(studentId: event.userId);
-    result.fold(
-      (failure) => emit(StudentOperationFailure(message: failure.message)),
-      (logs) {
-        TimeLogEntity? activeLog;
-        try {
-          activeLog = logs.firstWhere((log) => log.checkOutTime == null,
-              // ignore: cast_from_null_always_fails
-              orElse: () => null as TimeLogEntity);
-        } catch (e) {
-          activeLog = null;
-        }
-        emit(ActiveTimeLogFetched(activeTimeLog: activeLog));
-        if (state is StudentDashboardLoadSuccess) {
-          final dashboardState = state as StudentDashboardLoadSuccess;
-          emit(dashboardState.copyWith(
-              timeStats:
-                  dashboardState.timeStats.copyWith(activeTimeLog: activeLog)));
-        }
-      },
-    );
+    emit(StudentSelecting());
+    try {
+      final students = await _getStudentsBySupervisorUsecase(event.supervisorId);
+      emit(StudentLoadBySupervisorSuccess(students: students));
+    } catch (e) {
+      emit(StudentSelectError(message: e.toString()));
+    }
   }
 }
+

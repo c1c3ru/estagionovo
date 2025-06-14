@@ -1,20 +1,45 @@
-// lib/domain/usecases/auth/register_usecase.dart
-import 'package:dartz/dartz.dart';
-import '../../../core/errors/app_exceptions.dart';
-import '../../entities/user_entity.dart';
 import '../../repositories/i_auth_repository.dart';
+import '../../entities/user_entity.dart';
 
 class RegisterUsecase {
-  final IAuthRepository _repository;
+  final IAuthRepository _authRepository;
 
-  RegisterUsecase(this._repository);
+  RegisterUsecase(this._authRepository);
 
-  Future<Either<AppFailure, UserEntity>> call(RegisterParams params) async {
-    // Validações ou lógica de negócios podem ser adicionadas aqui.
-    // Exemplo: verificar se a senha atende a critérios de complexidade.
-    // if (params.password.length < 6) {
-    //   return Left(ValidationFailure('A senha deve ter pelo menos 6 caracteres.'));
-    // }
-    return await _repository.register(params);
+  Future<UserEntity> call(String email, String password, String name, String role) async {
+    if (email.isEmpty) {
+      throw Exception('E-mail é obrigatório');
+    }
+    
+    if (password.isEmpty) {
+      throw Exception('Senha é obrigatória');
+    }
+    
+    if (name.isEmpty) {
+      throw Exception('Nome é obrigatório');
+    }
+    
+    if (role.isEmpty) {
+      throw Exception('Tipo de usuário é obrigatório');
+    }
+    
+    if (!_isValidEmail(email)) {
+      throw Exception('E-mail inválido');
+    }
+    
+    if (password.length < 6) {
+      throw Exception('Senha deve ter pelo menos 6 caracteres');
+    }
+    
+    if (name.length < 2) {
+      throw Exception('Nome deve ter pelo menos 2 caracteres');
+    }
+    
+    return await _authRepository.register(email, password, name, role);
+  }
+  
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 }
+

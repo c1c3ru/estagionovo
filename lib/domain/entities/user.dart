@@ -1,6 +1,6 @@
 // lib/domain/entities/user_entity.dart
 import 'package:equatable/equatable.dart';
-import 'package:estagio/core/enum/user_role.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
 // Importa o enum UserRole da camada de dados.
 // Se preferir uma separação mais estrita, você pode definir um UserRoleEntity aqui.
 

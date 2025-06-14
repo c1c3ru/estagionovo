@@ -1,29 +1,46 @@
-// lib/domain/usecases/contract/update_contract_usecase.dart
-import 'package:dartz/dartz.dart';
-import '../../../core/errors/app_exceptions.dart';
+import '../../repositories/i_contract_repository.dart';
 import '../../entities/contract_entity.dart';
-import '../../repositories/i_contract_repository.dart'; // Contém UpsertContractParams
 
 class UpdateContractUsecase {
-  final IContractRepository _repository;
+  final IContractRepository _contractRepository;
 
-  UpdateContractUsecase(this._repository);
+  UpdateContractUsecase(this._contractRepository);
 
-  Future<Either<AppFailure, ContractEntity>> call(UpsertContractParams params) async {
-    // Validações básicas
-    if (params.id == null || params.id!.isEmpty) {
-      return Left(ValidationFailure('O ID do contrato é obrigatório para atualização.'));
+  Future<ContractEntity> call(ContractEntity contract) async {
+    try {
+      // Validações
+      if (contract.id.isEmpty) {
+        throw Exception('ID do contrato é obrigatório');
+      }
+      
+      if (contract.studentId.isEmpty) {
+        throw Exception('ID do estudante é obrigatório');
+      }
+      
+      if (contract.supervisorId.isEmpty) {
+        throw Exception('ID do supervisor é obrigatório');
+      }
+      
+      if (contract.company.isEmpty) {
+        throw Exception('Empresa é obrigatória');
+      }
+      
+      if (contract.position.isEmpty) {
+        throw Exception('Cargo é obrigatório');
+      }
+      
+      if (contract.weeklyHours <= 0) {
+        throw Exception('Horas semanais devem ser maior que zero');
+      }
+      
+      if (contract.startDate.isAfter(contract.endDate)) {
+        throw Exception('Data de início deve ser anterior à data de fim');
+      }
+
+      return await _contractRepository.updateContract(contract);
+    } catch (e) {
+      throw Exception('Erro ao atualizar contrato: $e');
     }
-    if (params.studentId.isEmpty) {
-      return Left(ValidationFailure('O ID do estudante é obrigatório.'));
-    }
-     if (params.createdBy.isEmpty) {
-      return Left(ValidationFailure('O ID do atualizador do contrato é obrigatório.'));
-    }
-    if (params.startDate.isAfter(params.endDate)) {
-      return Left(ValidationFailure('A data de início não pode ser posterior à data de término.'));
-    }
-    // Outras validações específicas do contrato podem ser adicionadas aqui.
-    return await _repository.updateContract(params);
   }
 }
+

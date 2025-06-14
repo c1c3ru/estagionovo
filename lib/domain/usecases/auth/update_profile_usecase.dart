@@ -1,5 +1,4 @@
 // lib/domain/usecases/auth/update_profile_usecase.dart
-import 'package:dartz/dartz.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../entities/user_entity.dart';
 import '../../repositories/i_auth_repository.dart';
@@ -9,7 +8,8 @@ class UpdateProfileUsecase {
 
   UpdateProfileUsecase(this._repository);
 
-  Future<Either<AppFailure, UserEntity>> call(UpdateProfileParams params) async {
+  Future<Either<AppFailure, UserEntity>> call(
+      UpdateProfileParams params) async {
     // Validações podem ser adicionadas aqui, ex: verificar se o nome não está vazio se fornecido.
     // if (params.fullName != null && params.fullName!.isEmpty) {
     //   return Left(ValidationFailure('O nome completo não pode estar vazio.'));

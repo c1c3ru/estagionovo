@@ -8,11 +8,11 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
+import '../bloc/auth_event.dart' hide AuthEvent;
+import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
 
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({Key? key}) : super(key: key);
+  const ForgotPasswordPage({super.key});
 
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
@@ -39,7 +39,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (_formKey.currentState?.validate() ?? false) {
       _authBloc.add(PasswordResetRequestedEvent(
         email: _emailController.text.trim(),
-      ));
+      ) as AuthEvent);
     }
   }
 

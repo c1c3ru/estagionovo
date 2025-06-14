@@ -1,158 +1,298 @@
-// lib/data/datasources/supabase/contract_datasource.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/errors/app_exceptions.dart';
-// Importe o enum ContractStatus se precisar de conversões aqui,
-// mas geralmente é feito no modelo ou repositório.
-// import '../../models/enums.dart';
 
-abstract class IContractSupabaseDatasource {
-  /// Cria um novo contrato na tabela 'contracts'.
-  Future<Map<String, dynamic>> createContractData(
-      Map<String, dynamic> contractData);
-
-  /// Obtém um contrato específico pelo seu ID.
-  Future<Map<String, dynamic>?> getContractDataById(String contractId);
-
-  /// Obtém todos os contratos para um estudante específico.
-  Future<List<Map<String, dynamic>>> getContractsDataForStudent(
-      String studentId);
-
-  /// Obtém todos os contratos, opcionalmente filtrados.
-  Future<List<Map<String, dynamic>>> getAllContractsData({
-    String? studentId,
-    String? supervisorId,
-    String? status, // String para o valor do enum ContractStatus
-  });
-
-  /// Atualiza um contrato existente.
-  Future<Map<String, dynamic>> updateContractData(
-      String contractId, Map<String, dynamic> dataToUpdate);
-
-  /// Remove um contrato.
-  Future<void> deleteContractData(String contractId);
-}
-
-class ContractSupabaseDatasource implements IContractSupabaseDatasource {
+class ContractDatasource {
   final SupabaseClient _supabaseClient;
 
-  ContractSupabaseDatasource(this._supabaseClient);
+  ContractDatasource(this._supabaseClient);
 
-  @override
-  Future<Map<String, dynamic>> createContractData(
-      Map<String, dynamic> contractData) async {
+  Future<List<Map<String, dynamic>>> getAllContracts() async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''')
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getContractById(String id) async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''')
+          .eq('id', id)
+          .maybeSingle();
+
+      return response;
+    } catch (e) {
+      throw Exception('Erro ao buscar contrato: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getContractsByStudent(String studentId) async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('*')
+          .eq('student_id', studentId)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos do estudante: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getContractsBySupervisor(String supervisorId) async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*)
+          ''')
+          .eq('supervisor_id', supervisorId)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos do supervisor: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getActiveContracts() async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''')
+          .eq('status', 'active')
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos ativos: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getContractsByStatus(String status) async {
+    try {
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''')
+          .eq('status', status)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos por status: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getExpiringContracts(int daysAhead) async {
+    try {
+      final futureDate = DateTime.now().add(Duration(days: daysAhead));
+      
+      final response = await _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''')
+          .eq('status', 'active')
+          .lte('end_date', futureDate.toIso8601String())
+          .order('end_date', ascending: true);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar contratos próximos do vencimento: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> createContract(Map<String, dynamic> contractData) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
           .insert(contractData)
           .select()
           .single();
+
       return response;
-    } on PostgrestException {
-      rethrow;
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao criar contrato: ${e.toString()}');
+      throw Exception('Erro ao criar contrato: $e');
     }
   }
 
-  @override
-  Future<Map<String, dynamic>?> getContractDataById(String contractId) async {
+  Future<Map<String, dynamic>> updateContract(String id, Map<String, dynamic> contractData) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
-          .select() // Você pode querer selecionar colunas específicas ou fazer joins aqui
-          .eq('id', contractId)
-          .maybeSingle();
+          .update(contractData)
+          .eq('id', id)
+          .select()
+          .single();
+
       return response;
-    } on PostgrestException {
-      rethrow;
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter contrato: ${e.toString()}');
+      throw Exception('Erro ao atualizar contrato: $e');
     }
   }
 
-  @override
-  Future<List<Map<String, dynamic>>> getContractsDataForStudent(
-      String studentId) async {
+  Future<void> deleteContract(String id) async {
+    try {
+      await _supabaseClient
+          .from('contracts')
+          .delete()
+          .eq('id', id);
+    } catch (e) {
+      throw Exception('Erro ao excluir contrato: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> updateContractStatus(String id, String status) async {
+    try {
+      final updateData = {
+        'status': status,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final response = await _supabaseClient
+          .from('contracts')
+          .update(updateData)
+          .eq('id', id)
+          .select()
+          .single();
+
+      return response;
+    } catch (e) {
+      throw Exception('Erro ao atualizar status do contrato: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> activateContract(String id) async {
+    return await updateContractStatus(id, 'active');
+  }
+
+  Future<Map<String, dynamic>> suspendContract(String id) async {
+    return await updateContractStatus(id, 'suspended');
+  }
+
+  Future<Map<String, dynamic>> completeContract(String id) async {
+    return await updateContractStatus(id, 'completed');
+  }
+
+  Future<Map<String, dynamic>> cancelContract(String id) async {
+    return await updateContractStatus(id, 'cancelled');
+  }
+
+  Future<Map<String, dynamic>?> getActiveContractByStudent(String studentId) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
+          .select('*')
           .eq('student_id', studentId)
-          .order('start_date', ascending: false)
-          .select(); // sem generics
+          .eq('status', 'active')
+          .maybeSingle();
 
-      // O Supabase retorna List<dynamic>, então faça o cast:
-      return (response as List).map((e) => e as Map<String, dynamic>).toList();
-    } on PostgrestException {
-      rethrow;
+      return response;
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter contratos do estudante: ${e.toString()}');
+      throw Exception('Erro ao buscar contrato ativo do estudante: $e');
     }
   }
 
-  @override
-  Future<List<Map<String, dynamic>>> getAllContractsData({
-    String? studentId,
-    String? supervisorId,
+  Future<Map<String, dynamic>> getContractStatistics() async {
+    try {
+      final response = await _supabaseClient
+          .rpc('get_contract_statistics');
+
+      return response as Map<String, dynamic>;
+    } catch (e) {
+      // Fallback para cálculo manual se a função RPC não existir
+      final allContracts = await getAllContracts();
+      
+      final stats = {
+        'total': allContracts.length,
+        'active': allContracts.where((c) => c['status'] == 'active').length,
+        'completed': allContracts.where((c) => c['status'] == 'completed').length,
+        'suspended': allContracts.where((c) => c['status'] == 'suspended').length,
+        'cancelled': allContracts.where((c) => c['status'] == 'cancelled').length,
+      };
+
+      return stats;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> searchContracts({
+    String? company,
+    String? position,
     String? status,
+    DateTime? startDateFrom,
+    DateTime? startDateTo,
+    DateTime? endDateFrom,
+    DateTime? endDateTo,
   }) async {
     try {
-      var query = _supabaseClient.from('contracts');
+      var query = _supabaseClient
+          .from('contracts')
+          .select('''
+            *,
+            students(*),
+            supervisors(*)
+          ''');
 
-      if (studentId != null && studentId.isNotEmpty) {
-        query = query.eq('student_id', studentId);
+      if (company != null && company.isNotEmpty) {
+        query = query.ilike('company', '%$company%');
       }
-      if (supervisorId != null && supervisorId.isNotEmpty) {
-        query = query.eq('supervisor_id', supervisorId);
+
+      if (position != null && position.isNotEmpty) {
+        query = query.ilike('position', '%$position%');
       }
+
       if (status != null && status.isNotEmpty) {
         query = query.eq('status', status);
       }
 
-      query = query.order('created_at', ascending: false);
+      if (startDateFrom != null) {
+        query = query.gte('start_date', startDateFrom.toIso8601String());
+      }
 
-      final response = await query.select(); // sem generics
+      if (startDateTo != null) {
+        query = query.lte('start_date', startDateTo.toIso8601String());
+      }
 
-      return (response as List).map((e) => e as Map<String, dynamic>).toList();
-    } on PostgrestException {
-      rethrow;
+      if (endDateFrom != null) {
+        query = query.gte('end_date', endDateFrom.toIso8601String());
+      }
+
+      if (endDateTo != null) {
+        query = query.lte('end_date', endDateTo.toIso8601String());
+      }
+
+      final response = await query.order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter todos os contratos: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> updateContractData(
-      String contractId, Map<String, dynamic> dataToUpdate) async {
-    try {
-      // O trigger 'trigger_set_timestamp' deve cuidar do 'updated_at'.
-      final response = await _supabaseClient
-          .from('contracts')
-          .update(dataToUpdate)
-          .eq('id', contractId)
-          .select()
-          .single();
-      return response;
-    } on PostgrestException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao atualizar contrato: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<void> deleteContractData(String contractId) async {
-    try {
-      await _supabaseClient.from('contracts').delete().eq('id', contractId);
-    } on PostgrestException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao remover contrato: ${e.toString()}');
+      throw Exception('Erro ao pesquisar contratos: $e');
     }
   }
 }
+

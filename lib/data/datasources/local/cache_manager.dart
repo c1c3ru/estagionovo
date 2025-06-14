@@ -1,80 +1,56 @@
-// lib/data/datasources/local/cache_manager.dart
+import 'dart:convert';
 
-abstract class ICacheManager {
-  /// Salva um dado no cache com uma chave e tempo de expiração opcional.
-  Future<void> saveData(String key, dynamic data, {Duration? expiresIn});
-
-  /// Obtém um dado do cache pela chave. Retorna null se não existir ou estiver expirado.
-  Future<dynamic> getData(String key);
-
-  /// Remove um dado do cache.
-  Future<void> removeData(String key);
-
-  /// Limpa todo o cache.
-  Future<void> clearAllCache();
-
-  /// Verifica se uma chave existe e não está expirada.
-  Future<bool> containsKey(String key);
-}
-
-class _CacheEntry {
-  final dynamic data;
-  final DateTime expiryTime;
-
-  _CacheEntry(this.data, this.expiryTime);
-
-  bool get isExpired => DateTime.now().isAfter(expiryTime);
-}
-
-class InMemoryCacheManager implements ICacheManager {
-  final Map<String, _CacheEntry> _cache = {};
-  final Duration defaultCacheDuration;
-
-  InMemoryCacheManager(
-      {this.defaultCacheDuration = const Duration(minutes: 15)});
-
-  @override
-  Future<void> saveData(String key, dynamic data, {Duration? expiresIn}) async {
-    final expiry = DateTime.now().add(expiresIn ?? defaultCacheDuration);
-    _cache[key] = _CacheEntry(data, expiry);
+class CacheManager {
+  final Map<String, CacheItem> _cache = {};
+  
+  void put(String key, dynamic data, {Duration? ttl}) {
+    final expiry = ttl != null ? DateTime.now().add(ttl) : null;
+    _cache[key] = CacheItem(data: data, expiry: expiry);
   }
-
-  @override
-  Future<dynamic> getData(String key) async {
-    final entry = _cache[key];
-    if (entry != null && !entry.isExpired) {
-      return entry.data;
-    }
-    // Se expirado, remove do cache
-    if (entry != null && entry.isExpired) {
+  
+  T? get<T>(String key) {
+    final item = _cache[key];
+    if (item == null) return null;
+    
+    if (item.expiry != null && DateTime.now().isAfter(item.expiry!)) {
       _cache.remove(key);
+      return null;
     }
-    return null; // Não encontrado ou expirado
+    
+    return item.data as T?;
   }
-
-  @override
-  Future<void> removeData(String key) async {
+  
+  void remove(String key) {
     _cache.remove(key);
   }
-
-  @override
-  Future<void> clearAllCache() async {
+  
+  void clear() {
     _cache.clear();
   }
-
-  @override
-  Future<bool> containsKey(String key) async {
-    final entry = _cache[key];
-    if (entry != null && !entry.isExpired) {
-      return true;
+  
+  bool containsKey(String key) {
+    final item = _cache[key];
+    if (item == null) return false;
+    
+    if (item.expiry != null && DateTime.now().isAfter(item.expiry!)) {
+      _cache.remove(key);
+      return false;
     }
-    if (entry != null && entry.isExpired) {
-      _cache.remove(key); // Limpa se expirado
-    }
-    return false;
+    
+    return true;
+  }
+  
+  void cleanExpired() {
+    final now = DateTime.now();
+    _cache.removeWhere((key, item) => 
+        item.expiry != null && now.isAfter(item.expiry!));
   }
 }
 
-// Se você precisar de cache persistente, considere usar Hive ou Sembast
-// e crie uma implementação diferente de ICacheManager.
-// Exemplo: HiveCacheManager, SembastCacheManager
+class CacheItem {
+  final dynamic data;
+  final DateTime? expiry;
+  
+  CacheItem({required this.data, this.expiry});
+}
+

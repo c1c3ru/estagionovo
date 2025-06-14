@@ -1,7 +1,7 @@
 // lib/features/shared/widgets/status_badge.dart
-import 'package:estagio/core/enum/contract_status.dart';
-import 'package:estagio/domain/entities/student_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 import '../../../core/constants/app_colors.dart'; // Para as cores de status
 
 class StatusBadge extends StatelessWidget {
@@ -83,27 +83,22 @@ class StatusBadge extends StatelessWidget {
         bgColor = AppColors.statusActive;
         statusIcon = Icons.play_circle_filled_outlined;
         break;
-      case ContractStatus.pendingApproval:
+      case ContractStatus.pending:
         bgColor = AppColors.statusPending;
         fgColor = AppColors.textPrimaryLight;
         statusIcon = Icons.pending_actions_outlined;
         break;
-      case ContractStatus.expired:
+      case ContractStatus.inactive:
         bgColor = AppColors.statusExpired; // Cor específica para expirado
         statusIcon = Icons.event_busy_outlined;
         break;
-      case ContractStatus.terminated:
+      case ContractStatus.cancelled:
         bgColor = AppColors.statusTerminated;
         statusIcon = Icons.do_not_disturb_on_outlined;
         break;
       case ContractStatus.completed:
         bgColor = AppColors.statusCompleted;
         statusIcon = Icons.assignment_turned_in_outlined;
-        break;
-      case ContractStatus.unknown:
-        bgColor = Theme.of(context).disabledColor;
-        fgColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
-        statusIcon = Icons.help_outline;
         break;
     }
     return StatusBadge(

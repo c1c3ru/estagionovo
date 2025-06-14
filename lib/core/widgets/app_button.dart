@@ -56,7 +56,7 @@ class AppButton extends StatelessWidget {
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 18), // Tamanho do ícone ajustado
-                const SizedBox(width: AppConstants.paddingSmall),
+                SizedBox(width: AppConstants.paddingSmall),
               ],
               Text(text),
             ],
@@ -70,13 +70,16 @@ class AppButton extends StatelessWidget {
             backgroundColor: MaterialStateProperty.resolveWith<Color?>(
               (Set<MaterialState> states) {
                 if (states.contains(MaterialState.disabled)) {
-                  return (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.5);
+                  return (backgroundColor ?? theme.colorScheme.primary)
+                      .withOpacity(0.5);
                 }
                 return backgroundColor ?? theme.colorScheme.primary;
               },
             ),
-            foregroundColor: MaterialStateProperty.all(foregroundColor ?? theme.colorScheme.onPrimary),
-            minimumSize: MaterialStateProperty.all(Size(minWidth ?? 0, minHeight ?? 48)),
+            foregroundColor: MaterialStateProperty.all(
+                foregroundColor ?? theme.colorScheme.onPrimary),
+            minimumSize:
+                MaterialStateProperty.all(Size(minWidth ?? 0, minHeight ?? 48)),
           ),
           child: child,
         );
@@ -87,7 +90,8 @@ class AppButton extends StatelessWidget {
             foregroundColor: foregroundColor ?? theme.colorScheme.primary,
             side: BorderSide(
               color: (isLoading || isDisabled)
-                  ? (foregroundColor ?? theme.colorScheme.primary).withOpacity(0.5)
+                  ? (foregroundColor ?? theme.colorScheme.primary)
+                      .withOpacity(0.5)
                   : (foregroundColor ?? theme.colorScheme.primary),
             ),
             minimumSize: Size(minWidth ?? 0, minHeight ?? 48),

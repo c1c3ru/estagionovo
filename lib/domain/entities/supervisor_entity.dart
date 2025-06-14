@@ -1,87 +1,51 @@
-import 'package:equatable/equatable.dart';
-import 'package:estagio/core/enum/user_role.dart';
-import 'user_entity.dart';
-
-// Represents a supervisor, inheriting from Equatable for value comparison.
-class SupervisorEntity extends Equatable {
+class SupervisorEntity {
   final String id;
-  final UserEntity user;
-  final String fullName;
-  final UserRole role;
-
-  // Professional Information
+  final String userId;
   final String department;
-  final String? position;
-  final String? jobCode;
-  final String? specialization;
-
-  // Contact and Personalization
-  final String? phoneNumber;
-  final String? profilePictureUrl;
-
-  // Timestamps
+  final String position;
+  final String specialization;
+  final String? phone;
   final DateTime createdAt;
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   const SupervisorEntity({
     required this.id,
-    required this.user,
-    required this.fullName,
-    this.role = UserRole.supervisor,
+    required this.userId,
     required this.department,
-    this.position,
-    this.jobCode,
-    this.specialization,
-    this.phoneNumber,
-    this.profilePictureUrl,
+    required this.position,
+    required this.specialization,
+    this.phone,
     required this.createdAt,
-    this.updatedAt,
+    required this.updatedAt,
   });
 
   @override
-  List<Object?> get props => [
-        id,
-        user,
-        fullName,
-        role,
-        department,
-        position,
-        jobCode,
-        specialization,
-        phoneNumber,
-        profilePictureUrl,
-        createdAt,
-        updatedAt,
-      ];
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SupervisorEntity &&
+        other.id == id &&
+        other.userId == userId &&
+        other.department == department &&
+        other.position == position &&
+        other.phone == phone &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt;
+  }
 
-  // copyWith method to create a new instance with updated fields.
-  SupervisorEntity copyWith({
-    String? id,
-    UserEntity? user,
-    String? fullName,
-    UserRole? role,
-    String? department,
-    String? position,
-    String? jobCode,
-    String? specialization,
-    String? phoneNumber,
-    String? profilePictureUrl,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return SupervisorEntity(
-      id: id ?? this.id,
-      user: user ?? this.user,
-      fullName: fullName ?? this.fullName,
-      role: role ?? this.role,
-      department: department ?? this.department,
-      position: position ?? this.position,
-      jobCode: jobCode ?? this.jobCode,
-      specialization: specialization ?? this.specialization,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        userId.hashCode ^
+        department.hashCode ^
+        position.hashCode ^
+        phone.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'SupervisorEntity(id: $id, userId: $userId, department: $department, position: $position, phone: $phone, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
+

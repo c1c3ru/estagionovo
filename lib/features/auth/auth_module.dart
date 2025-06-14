@@ -1,8 +1,8 @@
 // lib/features/auth/auth_module.dart
-import 'package:estagio/features/auth/pages/forgot_password_page.dart';
-import 'package:estagio/features/auth/pages/login_page.dart';
-import 'package:estagio/features/auth/pages/register_page.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:student_supervisor_app/features/auth/pages/forgot_password_page.dart';
+import 'package:student_supervisor_app/features/auth/pages/login_page.dart';
+import 'package:student_supervisor_app/features/auth/pages/register_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
 // Datasources

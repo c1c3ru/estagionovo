@@ -7,7 +7,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
+import '../bloc/auth_event.dart' hide AuthEvent;
 
 class SupervisorRegisterForm extends StatefulWidget {
   const SupervisorRegisterForm({super.key});
@@ -68,7 +68,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
           position: _positionController.text.trim().isEmpty
               ? null
               : _positionController.text.trim(),
-        ),
+        ) as AuthEvent,
       );
     }
   }
@@ -124,9 +124,8 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             validator: Validators.siapeRegistration,
             onChanged: _onSiapeChanged,
             prefixIcon: Icons.badge_outlined,
-            suffixIcon: _isSiapeValid
-                ? const Icon(Icons.check_circle, color: Colors.green)
-                : null,
+            suffixIcon: _isSiapeValid ? Icons.check_circle : null,
+            suffixIconColor: _isSiapeValid ? Colors.green : null,
           ),
           const SizedBox(height: 16),
 
@@ -137,7 +136,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             validator: Validators.email,
-            prefixIcon: const Icon(Icons.email_outlined),
+            prefixIcon: Icons.email_outlined,
           ),
           const SizedBox(height: 16),
 
@@ -153,7 +152,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
               }
               return null;
             },
-            prefixIcon: const Icon(Icons.phone_outlined),
+            prefixIcon: Icons.phone_outlined,
           ),
           const SizedBox(height: 16),
 
@@ -163,7 +162,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             labelText: 'Departamento (opcional)',
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
-            prefixIcon: const Icon(Icons.business_outlined),
+            prefixIcon: Icons.business_outlined,
           ),
           const SizedBox(height: 16),
 
@@ -184,8 +183,8 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             obscureText: !_isPasswordVisible,
             textInputAction: TextInputAction.next,
             validator: Validators.password,
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
+            prefixIcon: Icons.lock_outline,
+            suffixIconButton: IconButton(
               icon: Icon(
                 _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
               ),
@@ -206,8 +205,8 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             textInputAction: TextInputAction.done,
             validator: (value) =>
                 Validators.confirmPassword(_passwordController.text, value),
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
+            prefixIcon: Icons.lock_outline,
+            suffixIconButton: IconButton(
               icon: Icon(
                 _isConfirmPasswordVisible
                     ? Icons.visibility_off

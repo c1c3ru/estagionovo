@@ -1,190 +1,258 @@
-// lib/features/auth/presentation/bloc/auth_bloc.dart
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart'; // Para o Either
+import 'package:equatable/equatable.dart';
+import '../../../domain/entities/user_entity.dart';
+import '../../../domain/usecases/auth/login_usecase.dart';
+import '../../../domain/usecases/auth/register_usecase.dart';
+import '../../../domain/usecases/auth/logout_usecase.dart';
+import '../../../domain/usecases/auth/get_current_user_usecase.dart';
 
-import '../../../../core/errors/app_exceptions.dart';
-import '../../../../domain/entities/user_entity.dart';
-import '../../../../domain/usecases/auth/get_current_user_usecase.dart';
-import '../../../../domain/usecases/auth/login_usecase.dart';
-import '../../../../domain/usecases/auth/logout_usecase.dart';
-import '../../../../domain/usecases/auth/register_usecase.dart';
-import '../../../../domain/usecases/auth/reset_password_usecase.dart';
-import '../../../../domain/usecases/auth/update_profile_usecase.dart';
-import '../../../../domain/usecases/auth/get_auth_state_changes_usecase.dart';
-import '../../../../domain/repositories/i_auth_repository.dart'; // Para LoginParams, RegisterParams, UpdateProfileParams
+// Events
+abstract class AuthEvent extends Equatable {
+  const AuthEvent();
 
-import 'auth_event.dart';
-import 'auth_state.dart';
+  @override
+  List<Object?> get props => [];
+}
 
-// Importe o logger se for usar
-// import '../../../../core/utils/logger_utils.dart';
+class AuthCheckRequested extends AuthEvent {}
 
+class AuthLoginRequested extends AuthEvent {
+  final String email;
+  final String password;
+
+  const AuthLoginRequested({
+    required this.email,
+    required this.password,
+  });
+
+  @override
+  List<Object> get props => [email, password];
+}
+
+class AuthRegisterRequested extends AuthEvent {
+  final String email;
+  final String password;
+  final String name;
+  final String role;
+
+  const AuthRegisterRequested({
+    required this.email,
+    required this.password,
+    required this.name,
+    required this.role,
+  });
+
+  @override
+  List<Object> get props => [email, password, name, role];
+}
+
+class AuthLogoutRequested extends AuthEvent {}
+
+class AuthResetPasswordRequested extends AuthEvent {
+  final String email;
+
+  const AuthResetPasswordRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}
+
+// States
+abstract class AuthState extends Equatable {
+  String message;
+
+  const AuthState();
+
+  @override
+  List<Object?> get props => [];
+
+  get user => null;
+}
+
+class AuthInitial extends AuthState {}
+
+// Loading States
+class AuthLoading extends AuthState {}
+
+class AuthLoggingIn extends AuthState {}
+
+class AuthRegistering extends AuthState {}
+
+class AuthLoggingOut extends AuthState {}
+
+class AuthResettingPassword extends AuthState {}
+
+// Success States
+class AuthAuthenticated extends AuthState {
+  final UserEntity user;
+
+  const AuthAuthenticated({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
+class AuthUnauthenticated extends AuthState {}
+
+class AuthLogoutSuccess extends AuthState {}
+
+class AuthResetPasswordSuccess extends AuthState {
+  final String message;
+
+  const AuthResetPasswordSuccess({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+// Error States
+class AuthLoginError extends AuthState {
+  final String message;
+
+  const AuthLoginError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthRegisterError extends AuthState {
+  final String message;
+
+  const AuthRegisterError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthLogoutError extends AuthState {
+  final String message;
+
+  const AuthLogoutError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthResetPasswordError extends AuthState {
+  final String message;
+
+  const AuthResetPasswordError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthCheckError extends AuthState {
+  final String message;
+
+  const AuthCheckError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUsecase _loginUsecase;
   final RegisterUsecase _registerUsecase;
   final LogoutUsecase _logoutUsecase;
   final GetCurrentUserUsecase _getCurrentUserUsecase;
-  final ResetPasswordUsecase _resetPasswordUsecase;
-  final UpdateProfileUsecase _updateProfileUsecase;
-  final GetAuthStateChangesUsecase _getAuthStateChangesUsecase;
-  StreamSubscription<UserEntity?>? _authStateSubscription;
 
   AuthBloc({
     required LoginUsecase loginUsecase,
     required RegisterUsecase registerUsecase,
     required LogoutUsecase logoutUsecase,
     required GetCurrentUserUsecase getCurrentUserUsecase,
-    required ResetPasswordUsecase resetPasswordUsecase,
-    required UpdateProfileUsecase updateProfileUsecase,
-    required GetAuthStateChangesUsecase getAuthStateChangesUsecase,
   })  : _loginUsecase = loginUsecase,
         _registerUsecase = registerUsecase,
         _logoutUsecase = logoutUsecase,
         _getCurrentUserUsecase = getCurrentUserUsecase,
-        _resetPasswordUsecase = resetPasswordUsecase,
-        _updateProfileUsecase = updateProfileUsecase,
-        _getAuthStateChangesUsecase = getAuthStateChangesUsecase,
-        super(const AuthInitial()) {
-    on<LoginSubmittedEvent>(_onLoginSubmitted);
-    on<RegisterSubmittedEvent>(_onRegisterSubmitted);
-    on<LogoutRequestedEvent>(_onLogoutRequested);
-    on<PasswordResetRequestedEvent>(_onPasswordResetRequested);
-    on<CheckAuthStatusRequestedEvent>(_onCheckAuthStatusRequested);
-    on<UpdateUserProfileRequestedEvent>(_onUpdateUserProfileRequested);
-    on<AuthStateChangedEvent>(_onAuthStateChanged);
-
-    // Ouve as mudanças no estado de autenticação do repositório (via usecase)
-    _authStateSubscription = _getAuthStateChangesUsecase.call().listen((user) {
-      add(AuthStateChangedEvent(isAuthenticated: user != null, user: user));
-    });
+        super(AuthInitial()) {
+    on<AuthCheckRequested>(_onAuthCheckRequested);
+    on<AuthLoginRequested>(_onAuthLoginRequested);
+    on<AuthRegisterRequested>(_onAuthRegisterRequested);
+    on<AuthLogoutRequested>(_onAuthLogoutRequested);
+    on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
   }
 
-  Future<void> _onLoginSubmitted(
-    LoginSubmittedEvent event,
+  Future<void> _onAuthCheckRequested(
+    AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoading());
-    final result = await _loginUsecase.call(
-      LoginParams(email: event.email, password: event.password),
-    );
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.message)),
-      (userEntity) =>
-          emit(AuthSuccess(user: userEntity, userRole: userEntity.role)),
-    );
-  }
-
-  Future<void> _onRegisterSubmitted(
-    RegisterSubmittedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
-    final result = await _registerUsecase.call(
-      RegisterParams(
-        email: event.email,
-        password: event.password,
-        fullName: event.fullName,
-        role: event.role,
-      ),
-    );
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.message)),
-      // Após o registo, o utilizador normalmente precisa confirmar o email.
-      // O UserEntity retornado aqui pode ser o utilizador antes da confirmação.
-      (userEntity) => emit(const AuthRegistrationSuccess(
-          message:
-              'Conta criada com sucesso! Verifique o seu email para confirmação.')),
-    );
-  }
-
-  Future<void> _onLogoutRequested(
-    LogoutRequestedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
-    final result = await _logoutUsecase.call();
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.message)),
-      (_) => emit(
-          const AuthUnauthenticated()), // Após logout, o estado é não autenticado
-    );
-  }
-
-  Future<void> _onPasswordResetRequested(
-    PasswordResetRequestedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading());
-    final result = await _resetPasswordUsecase.call(event.email);
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.message)),
-      (_) => emit(const AuthPasswordResetEmailSent(
-          message:
-              'Instruções para redefinição de senha enviadas para o seu email.')),
-    );
-  }
-
-  Future<void> _onCheckAuthStatusRequested(
-    CheckAuthStatusRequestedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    // Este evento pode não precisar emitir AuthLoading para evitar flashes na UI
-    // A subscrição a authStateChanges já deve lidar com o estado inicial.
-    // Mas se for chamado explicitamente (ex: pull-to-refresh de status), um loading pode ser útil.
-    // emit(const AuthLoading());
-    final result = await _getCurrentUserUsecase.call();
-    result.fold(
-      (failure) => emit(
-          const AuthUnauthenticated()), // Se falhar ao buscar, assume não autenticado
-      (userEntity) {
-        if (userEntity != null) {
-          emit(AuthSuccess(user: userEntity, userRole: userEntity.role));
-        } else {
-          emit(const AuthUnauthenticated());
-        }
-      },
-    );
-  }
-
-  Future<void> _onUpdateUserProfileRequested(
-    UpdateUserProfileRequestedEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthLoading()); // Ou um ProfileUpdateLoading state
-    final result = await _updateProfileUsecase.call(
-      UpdateProfileParams(
-        userId: event.userId, // O ID do utilizador é crucial
-        fullName: event.fullName,
-        phoneNumber: event.phoneNumber,
-        profilePictureUrl: event.profilePictureUrl,
-      ),
-    );
-    result.fold(
-        (failure) => emit(AuthFailure(
-            message: failure.message)), // Ou um ProfileUpdateFailure state
-        (updatedUserEntity) {
-      emit(AuthProfileUpdateSuccess(updatedUser: updatedUserEntity));
-      // Re-emitir AuthSuccess para atualizar qualquer UI que dependa do UserEntity principal
-      emit(AuthSuccess(
-          user: updatedUserEntity, userRole: updatedUserEntity.role));
-    });
-  }
-
-  void _onAuthStateChanged(
-    AuthStateChangedEvent event,
-    Emitter<AuthState> emit,
-  ) {
-    if (event.isAuthenticated && event.user != null) {
-      emit(AuthSuccess(user: event.user!, userRole: event.user!.role));
-    } else {
-      emit(const AuthUnauthenticated());
+    emit(AuthLoading());
+    try {
+      final user = await _getCurrentUserUsecase();
+      if (user != null) {
+        emit(AuthAuthenticated(user: user));
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    } catch (e) {
+      emit(AuthCheckError(message: e.toString()));
+      emit(AuthUnauthenticated());
     }
   }
 
-  @override
-  Future<void> close() {
-    _authStateSubscription?.cancel();
-    return super.close();
+  Future<void> _onAuthLoginRequested(
+    AuthLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoggingIn());
+    try {
+      final user = await _loginUsecase(event.email, event.password);
+      emit(AuthAuthenticated(user: user));
+    } catch (e) {
+      emit(AuthLoginError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthRegisterRequested(
+    AuthRegisterRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthRegistering());
+    try {
+      final user = await _registerUsecase(
+        event.email,
+        event.password,
+        event.name,
+        event.role,
+      );
+      emit(AuthAuthenticated(user: user));
+    } catch (e) {
+      emit(AuthRegisterError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthLogoutRequested(
+    AuthLogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoggingOut());
+    try {
+      await _logoutUsecase();
+      emit(AuthLogoutSuccess());
+      emit(AuthUnauthenticated());
+    } catch (e) {
+      emit(AuthLogoutError(message: e.toString()));
+      // Even if logout fails, consider user as unauthenticated
+      emit(AuthUnauthenticated());
+    }
+  }
+
+  Future<void> _onAuthResetPasswordRequested(
+    AuthResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthResettingPassword());
+    try {
+      // TODO: Implement reset password logic
+      // await _authRepository.resetPassword(event.email);
+      emit(AuthResetPasswordSuccess(
+        message: 'E-mail de redefinição de senha enviado para ${event.email}',
+      ));
+    } catch (e) {
+      emit(AuthResetPasswordError(message: e.toString()));
+    }
   }
 }

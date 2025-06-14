@@ -1,136 +1,105 @@
-// lib/core/constants/app_strings.dart
-
 class AppStrings {
-  // Geral
-  static const String appName =
-      'Gestão de Estágios'; // Ou o nome que você definiu "estagio"
-  static const String tryAgain = 'Tentar Novamente';
-  static const String errorOccurred = 'Ocorreu um erro';
-  static const String anErrorOccurred =
-      'Ocorreu um erro inesperado. Por favor, tente novamente.';
+  // General
+  static const String appName = 'Estagio';
+  static const String loading = 'Carregando...';
+  static const String error = 'Erro';
   static const String success = 'Sucesso';
-  static const String loading = 'A carregar...';
+  static const String warning = 'Aviso';
+  static const String info = 'Informação';
   static const String cancel = 'Cancelar';
-  static const String save = 'Guardar';
-  static const String ok = 'OK';
-  static const String close = 'Fechar';
-  static const String next = 'Próximo';
-  static const String previous = 'Anterior';
-  static const String submit = 'Submeter';
-  static const String requiredField = 'Este campo é obrigatório.';
-  static const String invalidEmail = 'Email inválido.';
-  static const String passwordTooShort =
-      'A senha deve ter pelo menos 6 caracteres';
+  static const String confirm = 'Confirmar';
+  static const String save = 'Salvar';
+  static const String delete = 'Excluir';
+  static const String edit = 'Editar';
+  static const String add = 'Adicionar';
+  static const String search = 'Pesquisar';
+  static const String filter = 'Filtrar';
+  static const String refresh = 'Atualizar';
+  static const String retry = 'Tentar novamente';
+  static const String noData = 'Nenhum dado encontrado';
+  static const String noResults = 'Nenhum resultado encontrado';
 
-  // Autenticação
-  static const String login = 'Login';
-  static const String register = 'Registar';
+  // Auth
+  static const String login = 'Entrar';
   static const String logout = 'Sair';
-  static const String forgotPassword = 'Esqueceu a senha?';
-  static const String email = 'Email';
+  static const String register = 'Cadastrar';
+  static const String email = 'E-mail';
   static const String password = 'Senha';
-  static const String confirmPassword = 'Confirmar Senha';
-  static const String fullName = 'Nome Completo';
-  static const String selectRole = 'Selecionar Perfil';
+  static const String confirmPassword = 'Confirmar senha';
+  static const String forgotPassword = 'Esqueci minha senha';
+  static const String resetPassword = 'Redefinir senha';
+  static const String loginSuccess = 'Login realizado com sucesso';
+  static const String loginError = 'Erro ao fazer login';
+  static const String registerSuccess = 'Cadastro realizado com sucesso';
+  static const String registerError = 'Erro ao fazer cadastro';
+  static const String logoutSuccess = 'Logout realizado com sucesso';
+
+  // Validation
+  static const String fieldRequired = 'Este campo é obrigatório';
+  static const String invalidEmail = 'E-mail inválido';
+  static const String passwordTooShort =
+      'Senha deve ter pelo menos 6 caracteres';
+  static const String passwordsDontMatch = 'Senhas não coincidem';
+  static const String invalidName = 'Nome inválido';
+
+  // User Roles
   static const String student = 'Estudante';
   static const String supervisor = 'Supervisor';
-  static const String admin = 'Administrador';
-  static const String loginSuccess = 'Login realizado com sucesso!';
-  static const String registrationSuccessTitle = 'Registo Concluído';
-  static const String registrationSuccessMessage =
-      'Conta criada com sucesso. Verifique o seu email para confirmação.';
-  static const String passwordResetEmailSent =
-      'Instruções para redefinir a senha enviadas para o seu email.';
-  static const String logoutConfirmation = 'Tem a certeza que deseja sair?';
-  static const String registrationSuccessful = 'Registo realizado com sucesso!';
-  static const String loginFailed =
-      'Falha no login. Verifique suas credenciais.';
-  static const String registrationFailed =
-      'Falha no registo. Por favor, tente novamente.';
-  static const String passwordResetFailed =
-      'Falha ao enviar email de redefinição de senha. Por favor, tente novamente.';
 
-  // Mensagens relacionadas à matrícula SIAPE
-  static const String siapeRequired = 'Matrícula SIAPE é obrigatória.';
-  static const String siapeInvalid =
-      'Matrícula SIAPE deve ter exatamente 7 dígitos.';
-  static const String siapeAlreadyExists =
-      'Esta matrícula SIAPE já está em uso.';
-  static const String siapeOnlyNumbers =
-      'Matrícula SIAPE deve conter apenas números.';
-  static const String siapeRegistration = 'Matrícula SIAPE';
-  static const String siapeHint = 'Digite sua matrícula SIAPE (7 dígitos)';
-  static const String unauthorizedSupervisor =
-      'Apenas funcionários com matrícula SIAPE podem se cadastrar como supervisores.';
-
-  // Dashboard (Geral)
-  static const String dashboard = 'Dashboard';
-
-  // Estudante
-  static const String studentDashboardTitle = 'Painel do Estudante';
-  static const String timeLog = 'Registo de Horas';
+  // Navigation
+  static const String home = 'Início';
   static const String profile = 'Perfil';
-  static const String checkIn = 'Check-in';
-  static const String checkOut = 'Check-out';
-  static const String recentTimeLogs = 'Registos de Tempo Recentes';
-  static const String noRecentTimeLogs = 'Nenhum registo de tempo recente';
-  static const String logTime = 'Registar Tempo';
-  static const String weeklySummary = 'Resumo Semanal';
-  static const String hoursThisWeek = 'Horas esta semana';
-  static const String weeklyTarget = 'Meta semanal';
-  static const String weeklyTargetAchieved = 'Meta semanal atingida! 🎉';
-  static const String hoursRemainingThisWeek = 'horas restantes esta semana';
+  static const String settings = 'Configurações';
+  static const String about = 'Sobre';
+
+// Student
+  static const String studentHome = 'Página Inicial do Estudante';
+  static const String students = 'Estudantes';
+  static const String studentProfile = 'Perfil do Estudante';
+  static const String timeLog = 'Registro de Horas';
+  static const String clockIn = 'Entrada';
+  static const String clockOut = 'Saída';
+  static const String totalHours = 'Total de Horas';
+  static const String todayHours = 'Horas Hoje';
+  static const String weekHours = 'Horas da Semana';
+  static const String monthHours = 'Horas do Mês';
 
   // Supervisor
-  static const String supervisorDashboardTitle = 'Painel do Supervisor';
-  static const String students = 'Estudantes';
-  static const String timeApprovals = 'Aprovações de Horas';
+  static const String supervisors = 'Supervisores';
+  static const String supervisorProfile = 'Perfil do Supervisor';
+  static const String manageStudents = 'Gerenciar Estudantes';
+  static const String viewReports = 'Ver Relatórios';
+
+  // Contract
   static const String contracts = 'Contratos';
-  static const String totalStudents = 'Total';
-  static const String activeStudents = 'Ativos';
-  static const String inactiveStudents = 'Inativos';
-  static const String expiringContracts =
-      'Vencendo'; // Para contratos ou estágios
-  static const String studentDistribution = 'Distribuição de Estagiários';
-  static const String studentList = 'Lista de Estudantes';
-  static const String ganttView = 'Visualização Gantt';
-  static const String noStudentsFound = 'Nenhum estagiário encontrado.';
-  static const String filterStudents = 'Filtrar Estagiários';
-  static const String studentName = 'Nome do Estagiário';
-  static const String course = 'Curso';
-  static const String status = 'Status';
-  static const String applyFilters = 'Aplicar';
-  static const String clearFilters = 'Limpar';
+  static const String contractDetails = 'Detalhes do Contrato';
+  static const String contractStatus = 'Status do Contrato';
+  static const String startDate = 'Data de Início';
+  static const String endDate = 'Data de Término';
+  static const String workload = 'Carga Horária';
 
-  // User roles (removed duplicates - keeping original definitions)
+  // Errors
+  static const String networkError = 'Erro de conexão';
+  static const String serverError = 'Erro do servidor';
+  static const String unknownError = 'Erro desconhecido';
+  static const String timeoutError = 'Tempo limite excedido';
+  static const String unauthorizedError = 'Não autorizado';
+  static const String forbiddenError = 'Acesso negado';
+  static const String notFoundError = 'Não encontrado';
 
-  // Comum
-  static const String settings = 'Configurações';
-  static const String helpAndFeedback = 'Ajuda e Feedback';
-  static const String registerSupervisorPage = 'Cadastro de Supervisor';
+  static String? requiredField;
 
-  // Status
-  static const String active = 'Ativo';
-  static const String inactive = 'Inativo';
-  static const String pending = 'Pendente';
-  static const String approved = 'Aprovado';
-  static const String rejected = 'Rejeitado';
+  static String registerSupervisorPage;
 
-  // Loading states (removed duplicate - keeping original definition)
+  static String registrationSuccessful;
 
-  static const String saving = 'Salvando...';
-  static const String processing = 'Processando...';
+  static var fullName;
 
-  // Mensagens de erro de rede/conectividade
-  static const String networkError = 'Erro de conexão. Verifique sua internet.';
-  static const String serverError =
-      'Erro no servidor. Tente novamente mais tarde.';
-  static const String unknownError = 'Erro desconhecido. Tente novamente.';
+  static var selectRole;
 
-  // Mensagens de confirmação
-  static const String confirmDelete = 'Tem certeza que deseja excluir?';
-  static const String confirmLogout = 'Tem certeza que deseja sair?';
+  static var siapeRegistration;
 
-  // Previne instanciação
-  AppStrings._();
+  static var siapeHint;
+
+  static var phoneNumber;
 }

@@ -1,14 +1,12 @@
-// lib/domain/usecases/auth/logout_usecase.dart
-import 'package:dartz/dartz.dart';
-import '../../../core/errors/app_exceptions.dart';
 import '../../repositories/i_auth_repository.dart';
 
 class LogoutUsecase {
-  final IAuthRepository _repository;
+  final IAuthRepository _authRepository;
 
-  LogoutUsecase(this._repository);
+  LogoutUsecase(this._authRepository);
 
-  Future<Either<AppFailure, void>> call() async {
-    return await _repository.logout();
+  Future<void> call() async {
+    await _authRepository.logout();
   }
 }
+

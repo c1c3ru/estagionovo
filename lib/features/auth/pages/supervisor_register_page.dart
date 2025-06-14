@@ -1,11 +1,11 @@
 // lib/features/auth/pages/supervisor_register_page.dart
-import 'package:estagio/features/supervisor/bloc/supervisor_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_state.dart';
+import '../bloc/auth_state.dart' hide AuthState;
 import '../widgets/supervisor_register_form.dart';
 
 class SupervisorRegisterPage extends StatelessWidget {
@@ -16,7 +16,7 @@ class SupervisorRegisterPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(AppStrings.registerSupervisorPage),
+        title: Text(AppStrings.registerSupervisorPage),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -32,7 +32,7 @@ class SupervisorRegisterPage extends StatelessWidget {
             );
           } else if (state is AuthSuccessState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(AppStrings.registrationSuccessful),
                 backgroundColor: Colors.green,
               ),

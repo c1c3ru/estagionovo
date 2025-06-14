@@ -1,179 +1,225 @@
-// lib/data/datasources/supabase/time_log_datasource.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/errors/app_exceptions.dart';
 
-abstract class ITimeLogSupabaseDatasource {
-  /// Cria um novo registo de tempo na tabela 'time_logs'.
-  Future<Map<String, dynamic>> createTimeLogData(
-      Map<String, dynamic> timeLogData);
-
-  /// Obtém um registo de tempo específico pelo seu ID.
-  Future<Map<String, dynamic>?> getTimeLogDataById(String timeLogId);
-
-  /// Obtém todos os registos de tempo para um estudante específico, opcionalmente num intervalo de datas.
-  Future<List<Map<String, dynamic>>> getTimeLogsDataForStudent({
-    required String studentId,
-    DateTime? startDate,
-    DateTime? endDate,
-  });
-
-  /// Atualiza um registo de tempo existente.
-  Future<Map<String, dynamic>> updateTimeLogData(
-      String timeLogId, Map<String, dynamic> dataToUpdate);
-
-  /// Remove um registo de tempo.
-  Future<void> deleteTimeLogData(String timeLogId);
-
-  /// Obtém todos os registos de tempo (para supervisores/admins), opcionalmente filtrados.
-  Future<List<Map<String, dynamic>>> getAllTimeLogsData({
-    String? studentId,
-    bool? approved, // Filtrar por status de aprovação
-    DateTime? startDate,
-    DateTime? endDate,
-  });
-}
-
-class TimeLogSupabaseDatasource implements ITimeLogSupabaseDatasource {
+class TimeLogDatasource {
   final SupabaseClient _supabaseClient;
 
-  TimeLogSupabaseDatasource(this._supabaseClient);
+  TimeLogDatasource(this._supabaseClient);
 
-  @override
-  Future<Map<String, dynamic>> createTimeLogData(
-      Map<String, dynamic> timeLogData) async {
+  Future<List<Map<String, dynamic>>> getAllTimeLogs() async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('*, students(*)')
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar registros de horas: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getTimeLogById(String id) async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('*, students(*)')
+          .eq('id', id)
+          .maybeSingle();
+
+      return response;
+    } catch (e) {
+      throw Exception('Erro ao buscar registro de horas: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getTimeLogsByStudent(String studentId) async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('*')
+          .eq('student_id', studentId)
+          .order('clock_in', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar registros do estudante: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getTimeLogsByDateRange(
+    String studentId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('*')
+          .eq('student_id', studentId)
+          .gte('clock_in', startDate.toIso8601String())
+          .lte('clock_in', endDate.toIso8601String())
+          .order('clock_in', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar registros por período: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getActiveTimeLog(String studentId) async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('*')
+          .eq('student_id', studentId)
+          .isFilter('clock_out', null)
+          .maybeSingle();
+
+      return response;
+    } catch (e) {
+      throw Exception('Erro ao buscar registro ativo: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> createTimeLog(Map<String, dynamic> timeLogData) async {
     try {
       final response = await _supabaseClient
           .from('time_logs')
           .insert(timeLogData)
           .select()
           .single();
+
       return response;
-    } on PostgrestException {
-      rethrow;
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao criar registo de tempo: ${e.toString()}');
+      throw Exception('Erro ao criar registro de horas: $e');
     }
   }
 
-  @override
-  Future<Map<String, dynamic>?> getTimeLogDataById(String timeLogId) async {
+  Future<Map<String, dynamic>> updateTimeLog(String id, Map<String, dynamic> timeLogData) async {
     try {
       final response = await _supabaseClient
           .from('time_logs')
-          .select()
-          .eq('id', timeLogId)
-          .maybeSingle();
-      return response;
-    } on PostgrestException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter registo de tempo: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> getTimeLogsDataForStudent({
-    required String studentId,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      var query = _supabaseClient
-          .from('time_logs')
-          .select()
-          .eq('student_id', studentId)
-          .order('log_date', ascending: false) // Mais recentes primeiro
-          .order('check_in_time', ascending: false);
-
-      if (startDate != null) {
-        query =
-            query.gte('log_date', startDate.toIso8601String().substring(0, 10));
-      }
-      if (endDate != null) {
-        query =
-            query.lte('log_date', endDate.toIso8601String().substring(0, 10));
-      }
-
-      final response = await query;
-      return response;
-    } on PostgrestException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter registos de tempo do estudante: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> updateTimeLogData(
-      String timeLogId, Map<String, dynamic> dataToUpdate) async {
-    try {
-      // O trigger 'trigger_set_timestamp' deve cuidar do 'updated_at'.
-      final response = await _supabaseClient
-          .from('time_logs')
-          .update(dataToUpdate)
-          .eq('id', timeLogId)
+          .update(timeLogData)
+          .eq('id', id)
           .select()
           .single();
+
       return response;
-    } on PostgrestException {
-      rethrow;
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao atualizar registo de tempo: ${e.toString()}');
+      throw Exception('Erro ao atualizar registro de horas: $e');
     }
   }
 
-  @override
-  Future<void> deleteTimeLogData(String timeLogId) async {
+  Future<void> deleteTimeLog(String id) async {
     try {
-      await _supabaseClient.from('time_logs').delete().eq('id', timeLogId);
-    } on PostgrestException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao remover registo de tempo: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> getAllTimeLogsData({
-    String? studentId,
-    bool? approved,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
-    try {
-      var query = _supabaseClient
+      await _supabaseClient
           .from('time_logs')
-          .select()
-          .order('log_date', ascending: false)
-          .order('created_at', ascending: false); // Ou check_in_time
-
-      if (studentId != null && studentId.isNotEmpty) {
-        query = query.eq('student_id', studentId);
-      }
-      if (approved != null) {
-        query = query.eq('approved', approved);
-      }
-      if (startDate != null) {
-        query =
-            query.gte('log_date', startDate.toIso8601String().substring(0, 10));
-      }
-      if (endDate != null) {
-        query =
-            query.lte('log_date', endDate.toIso8601String().substring(0, 10));
-      }
-
-      final response = await query;
-      return response;
-    } on PostgrestException {
-      rethrow;
+          .delete()
+          .eq('id', id);
     } catch (e) {
-      throw ServerException(
-          'Erro inesperado ao obter todos os registos de tempo: ${e.toString()}');
+      throw Exception('Erro ao excluir registro de horas: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> clockIn(String studentId, {String? notes}) async {
+    try {
+      // Verificar se já existe um registro ativo
+      final activeLog = await getActiveTimeLog(studentId);
+      if (activeLog != null) {
+        throw Exception('Já existe um registro de entrada ativo');
+      }
+
+      final timeLogData = {
+        'student_id': studentId,
+        'clock_in': DateTime.now().toIso8601String(),
+        'notes': notes,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      return await createTimeLog(timeLogData);
+    } catch (e) {
+      throw Exception('Erro ao registrar entrada: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> clockOut(String studentId, {String? notes}) async {
+    try {
+      // Buscar registro ativo
+      final activeLog = await getActiveTimeLog(studentId);
+      if (activeLog == null) {
+        throw Exception('Nenhum registro de entrada ativo encontrado');
+      }
+
+      final updateData = {
+        'clock_out': DateTime.now().toIso8601String(),
+        'notes': notes ?? activeLog['notes'],
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      return await updateTimeLog(activeLog['id'], updateData);
+    } catch (e) {
+      throw Exception('Erro ao registrar saída: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getTotalHoursByStudent(
+    String studentId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final response = await _supabaseClient
+          .rpc('calculate_total_hours', params: {
+        'student_id_param': studentId,
+        'start_date_param': startDate.toIso8601String(),
+        'end_date_param': endDate.toIso8601String(),
+      });
+
+      return response as Map<String, dynamic>;
+    } catch (e) {
+      // Fallback para cálculo manual se a função RPC não existir
+      final timeLogs = await getTimeLogsByDateRange(studentId, startDate, endDate);
+      
+      double totalHours = 0;
+      int completedLogs = 0;
+      
+      for (final log in timeLogs) {
+        if (log['clock_out'] != null) {
+          final clockIn = DateTime.parse(log['clock_in']);
+          final clockOut = DateTime.parse(log['clock_out']);
+          final duration = clockOut.difference(clockIn);
+          totalHours += duration.inMinutes / 60.0;
+          completedLogs++;
+        }
+      }
+
+      return {
+        'total_hours': totalHours,
+        'completed_logs': completedLogs,
+        'total_logs': timeLogs.length,
+      };
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getTimeLogsBySupervisor(String supervisorId) async {
+    try {
+      final response = await _supabaseClient
+          .from('time_logs')
+          .select('''
+            *,
+            students!inner(
+              *,
+              users(*)
+            )
+          ''')
+          .eq('students.supervisor_id', supervisorId)
+          .order('created_at', ascending: false);
+
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Erro ao buscar registros do supervisor: $e');
     }
   }
 }
+

@@ -1,133 +1,104 @@
-// lib/data/datasources/supabase/auth_datasource.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/errors/app_exceptions.dart'; // Para ServerException, se necessário
-// Importe seus enums se precisar deles aqui, mas geralmente a conversão de/para string é feita no repositório
-// import '../../models/enums.dart';
+import '../../models/user_model.dart';
 
-abstract class IAuthSupabaseDatasource {
-  Future<AuthResponse> loginWithEmailPassword({
-    required String email,
-    required String password,
-  });
-
-  Future<AuthResponse> registerWithEmailPassword({
-    required String email,
-    required String password,
-    required Map<String, dynamic> data, // Para fullName, role, etc.
-  });
-
-  Future<void> logout();
-
-  Future<void> sendPasswordResetEmail({required String email});
-
-  User? getCurrentSupabaseUser();
-
-  Stream<AuthState> get supabaseAuthStateChanges;
-
-  Future<User> updateSupabaseUser({required UserAttributes attributes});
-}
-
-class AuthSupabaseDatasource implements IAuthSupabaseDatasource {
+class AuthDatasource {
   final SupabaseClient _supabaseClient;
 
-  AuthSupabaseDatasource(this._supabaseClient);
+  AuthDatasource(this._supabaseClient);
 
-  @override
-  Future<AuthResponse> loginWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final user = _supabaseClient.auth.currentUser;
+      if (user == null) return null;
+
+      final response = await _supabaseClient
+          .from('users')
+          .select()
+          .eq('id', user.id)
+          .single();
+
+      return UserModel.fromJson(response);
+    } catch (e) {
+      throw Exception('Erro ao obter usuário atual: $e');
+    }
+  }
+
+  Future<UserModel> login(String email, String password) async {
     try {
       final response = await _supabaseClient.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      return response;
-    } on AuthException catch (e) {
-      // O repositório tratará AuthException e a converterá em AppFailure
-      throw e;
+
+      if (response.user == null) {
+        throw Exception('Credenciais inválidas');
+      }
+
+      final userResponse = await _supabaseClient
+          .from('users')
+          .select()
+          .eq('id', response.user!.id)
+          .single();
+
+      return UserModel.fromJson(userResponse);
     } catch (e) {
-      // Para erros inesperados não AuthException
-      throw ServerException('Erro inesperado durante o login: ${e.toString()}');
+      throw Exception('Erro ao fazer login: $e');
     }
   }
 
-  @override
-  Future<AuthResponse> registerWithEmailPassword({
-    required String email,
-    required String password,
-    required Map<String, dynamic> data,
-  }) async {
+  Future<UserModel> register(String email, String password, String name, String role) async {
     try {
       final response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: data,
       );
-      return response;
-    } on AuthException catch (e) {
-      throw e;
+
+      if (response.user == null) {
+        throw Exception('Erro ao criar conta');
+      }
+
+      final userModel = UserModel(
+        id: response.user!.id,
+        email: email,
+        name: name,
+        role: role,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await _supabaseClient
+          .from('users')
+          .insert(userModel.toJson());
+
+      return userModel;
     } catch (e) {
-      throw ServerException('Erro inesperado durante o registo: ${e.toString()}');
+      throw Exception('Erro ao registrar usuário: $e');
     }
   }
 
-  @override
   Future<void> logout() async {
     try {
       await _supabaseClient.auth.signOut();
-    } on AuthException catch (e) {
-      throw e;
     } catch (e) {
-      throw ServerException('Erro inesperado durante o logout: ${e.toString()}');
+      throw Exception('Erro ao fazer logout: $e');
     }
   }
 
-  @override
-  Future<void> sendPasswordResetEmail({required String email}) async {
+  Future<void> resetPassword(String email) async {
     try {
       await _supabaseClient.auth.resetPasswordForEmail(email);
-      // Adicionar redirectTo se necessário:
-      // redirectTo: 'io.supabase.yourproject://password-reset-callback/',
-    } on AuthException catch (e) {
-      throw e;
     } catch (e) {
-      throw ServerException('Erro inesperado ao enviar email de redefinição de senha: ${e.toString()}');
+      throw Exception('Erro ao redefinir senha: $e');
     }
   }
 
-  @override
-  User? getCurrentSupabaseUser() {
+  Future<bool> isLoggedIn() async {
     try {
-      return _supabaseClient.auth.currentUser;
+      final user = _supabaseClient.auth.currentUser;
+      return user != null;
     } catch (e) {
-      // Geralmente, acessar currentUser não lança exceção, mas é bom ter um catch.
-      throw ServerException('Erro ao obter utilizador atual do Supabase: ${e.toString()}');
-    }
-  }
-
-  @override
-  Stream<AuthState> get supabaseAuthStateChanges {
-    try {
-      return _supabaseClient.auth.onAuthStateChange;
-    } catch (e) {
-      // Lançar um erro ou retornar um stream de erro
-      throw ServerException('Erro ao obter stream de mudanças de estado de autenticação: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<User> updateSupabaseUser({required UserAttributes attributes}) async {
-    try {
-      final response = await _supabaseClient.auth.updateUser(attributes);
-      if (response.user == null) {
-        throw const AuthException('Falha ao atualizar utilizador no Supabase: resposta sem utilizador.');
-      }
-      return response.user!;
-    } on AuthException catch (e) {
-      throw e;
-    } catch (e) {
-      throw ServerException('Erro inesperado ao atualizar utilizador Supabase: ${e.toString()}');
+      return false;
     }
   }
 }
+
