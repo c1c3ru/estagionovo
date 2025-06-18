@@ -1,9 +1,11 @@
 // lib/features/supervisor/presentation/bloc/supervisor_state.dart
 import 'package:equatable/equatable.dart';
-import '../../../../domain/entities/student_entity.dart';
-import '../../../../domain/entities/supervisor_entity.dart';
-import '../../../../domain/entities/time_log_entity.dart';
-import '../../../../domain/entities/contract_entity.dart';
+import '../../../domain/entities/supervisor_entity.dart';
+import '../../../domain/entities/student_entity.dart';
+import '../../../domain/entities/time_log_entity.dart';
+import '../../../domain/entities/contract_entity.dart';
+import '../../../data/models/student_model.dart';
+import '../../../domain/repositories/i_supervisor_repository.dart';
 
 // Dados agregados para o dashboard do supervisor
 class SupervisorDashboardStats extends Equatable {
@@ -13,10 +15,10 @@ class SupervisorDashboardStats extends Equatable {
   final int expiringContractsSoon; // Contratos a vencer nos próximos X dias
 
   const SupervisorDashboardStats({
-    this.totalStudents = 0,
-    this.activeStudents = 0,
-    this.inactiveStudents = 0,
-    this.expiringContractsSoon = 0,
+    required this.totalStudents,
+    required this.activeStudents,
+    required this.inactiveStudents,
+    required this.expiringContractsSoon,
   });
 
   @override
@@ -55,8 +57,9 @@ class SupervisorInitial extends SupervisorState {
 }
 
 class SupervisorLoading extends SupervisorState {
-  final String? loadingMessage; // Mensagem opcional durante o carregamento
-  const SupervisorLoading({this.loadingMessage});
+  final String loadingMessage;
+
+  const SupervisorLoading({required this.loadingMessage});
 
   @override
   List<Object?> get props => [loadingMessage];
@@ -72,6 +75,8 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
   final SupervisorDashboardStats stats;
   final bool showGanttView;
   final List<TimeLogEntity> pendingApprovals; // Para aprovações pendentes
+  final bool isLoading;
+  final FilterStudentsParams? appliedFilters;
 
   const SupervisorDashboardLoadSuccess({
     this.supervisorProfile,
@@ -80,6 +85,8 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
     required this.stats,
     this.showGanttView = false,
     required this.pendingApprovals,
+    this.isLoading = false,
+    this.appliedFilters,
   });
 
   @override
@@ -89,7 +96,9 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
         contracts,
         stats,
         showGanttView,
-        pendingApprovals
+        pendingApprovals,
+        isLoading,
+        appliedFilters,
       ];
 
   SupervisorDashboardLoadSuccess copyWith({
@@ -99,6 +108,8 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
     SupervisorDashboardStats? stats,
     bool? showGanttView,
     List<TimeLogEntity>? pendingApprovals,
+    bool? isLoading,
+    FilterStudentsParams? appliedFilters,
   }) {
     return SupervisorDashboardLoadSuccess(
       supervisorProfile: supervisorProfile ?? this.supervisorProfile,
@@ -107,6 +118,8 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
       stats: stats ?? this.stats,
       showGanttView: showGanttView ?? this.showGanttView,
       pendingApprovals: pendingApprovals ?? this.pendingApprovals,
+      isLoading: isLoading ?? this.isLoading,
+      appliedFilters: appliedFilters ?? this.appliedFilters,
     );
   }
 }
@@ -152,7 +165,10 @@ class SupervisorOperationSuccess extends SupervisorState {
   final String message;
   final dynamic entity; // A entidade que foi criada/atualizada (opcional)
 
-  const SupervisorOperationSuccess({required this.message, this.entity});
+  const SupervisorOperationSuccess({
+    required this.message,
+    this.entity,
+  });
 
   @override
   List<Object?> get props => [message, entity];

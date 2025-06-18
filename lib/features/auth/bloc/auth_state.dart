@@ -21,16 +21,13 @@ class AuthLoading extends AuthState {
 }
 
 /// Estado de sucesso na autenticação (login ou verificação de status).
-class AuthSuccess extends AuthState {
-  final UserEntity user; // Utilizador autenticado
-  // A role já está dentro do UserEntity, mas pode ser útil tê-la separada aqui
-  // para acesso rápido na UI se necessário, ou pode ser removida se UserEntity.role for suficiente.
-  final UserRole userRole;
+class AuthAuthenticated extends AuthState {
+  final UserEntity user;
 
-  const AuthSuccess({required this.user, required this.userRole});
+  const AuthAuthenticated({required this.user});
 
   @override
-  List<Object?> get props => [user, userRole];
+  List<Object> get props => [user];
 }
 
 /// Estado quando o utilizador não está autenticado.
@@ -61,13 +58,13 @@ class AuthPasswordResetEmailSent extends AuthState {
 }
 
 /// Estado de falha em qualquer operação de autenticação.
-class AuthFailure extends AuthState {
+class AuthError extends AuthState {
   final String message;
 
-  const AuthFailure({required this.message});
+  const AuthError({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }
 
 /// Estado de sucesso na atualização do perfil (opcional, pode ser tratado por um ProfileBloc)

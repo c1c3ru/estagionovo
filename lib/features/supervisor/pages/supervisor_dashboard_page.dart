@@ -1,16 +1,27 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
 import 'package:student_supervisor_app/data/models/student_model.dart';
 import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_event.dart';
 import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
 
 import '../../../../core/errors/app_exceptions.dart';
-import '../../../../domain/entities/student_entity.dart' hide StudentStatus;
+import '../../../../domain/entities/student_entity.dart';
 import '../../../../domain/entities/supervisor_entity.dart';
 import '../../../../domain/entities/time_log_entity.dart';
 import '../../../../domain/entities/contract_entity.dart';
+import '../../../../domain/entities/user_entity.dart';
+import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
+import '../../../../domain/usecases/contract/get_all_contracts_usecase.dart';
+import '../../../../domain/usecases/contract/upsert_contract_usecase.dart';
+import '../../../../domain/repositories/i_supervisor_repository.dart';
 
 // Usecases de Supervisor
 import '../../../../domain/usecases/supervisor/get_supervisor_details_usecase.dart';
@@ -23,7 +34,6 @@ import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_
 import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
 
 // Usecases de Contrato (usados pelo Supervisor)
-import '../../../../domain/usecases/contract/get_all_contracts_usecase.dart';
 import '../../../../domain/usecases/contract/create_contract_usecase.dart';
 import '../../../../domain/usecases/contract/update_contract_usecase.dart';
 import '../../../../domain/usecases/contract/delete_contract_usecase.dart';
@@ -206,46 +216,32 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     ApproveOrRejectTimeLogEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is SupervisorDashboardLoadSuccess) {
-      // **IMPROVEMENT**: Optimistically update the UI before making the network call
-      // to provide immediate feedback.
-      final originalApprovals =
-          List<TimeLogEntity>.from(currentState.pendingApprovals);
-      final updatedApprovals = originalApprovals
-        ..removeWhere((log) => log.id == event.timeLogId);
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
 
-      emit(currentState.copyWith(pendingApprovals: updatedApprovals));
+      try {
+        final result = await _approveOrRejectTimeLogUsecase.call(
+          ApproveOrRejectTimeLogParams(
+            timeLogId: event.timeLogId,
+            approved: event.approved,
+            supervisorId: event.supervisorId,
+            rejectionReason: event.rejectionReason,
+          ),
+        );
 
-      // **TODO**: Obter o ID do supervisor a partir do seu serviço de autenticação (ex: AuthBloc)
-      // em vez de o passar a partir da UI.
-      const supervisorId = "get-real-supervisor-id-from-auth-service";
-
-      final result = await _approveOrRejectTimeLogUsecase.call(
-        timeLogId: event.timeLogId,
-        approved: event.isApproved,
-        supervisorId: supervisorId,
-      );
-
-      result.fold(
-        (failure) {
-          // If the operation fails, revert the state and show an error.
-          emit(currentState.copyWith(
-              pendingApprovals: originalApprovals,
-              isLoading: true,
-              appliedFilters: ''));
-          emit(SupervisorOperationFailure(message: failure.message));
-        },
-        (updatedTimeLog) {
-          emit(SupervisorOperationSuccess(
-            message: event.isApproved
-                ? 'Registo de tempo aprovado!'
-                : 'Registo de tempo rejeitado.',
-            entity: updatedTimeLog,
-          ));
-          // The state is already updated, no need to reload the whole dashboard.
-        },
-      );
+        result.fold(
+          (failure) =>
+              emit(SupervisorOperationFailure(message: failure.message)),
+          (_) {
+            // Recarrega os logs pendentes após aprovar/rejeitar
+            add(LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
+          },
+        );
+      } catch (e) {
+        emit(SupervisorOperationFailure(
+            message: 'Erro ao processar o registro de tempo: ${e.toString()}'));
+      }
     }
   }
 
@@ -396,38 +392,54 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     LoadAllTimeLogsForApprovalEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(const SupervisorLoading(
-        loadingMessage: 'A carregar registos de tempo...'));
-    final result = await _getAllTimeLogsForSupervisorUsecase.call(
-      studentId: event.studentIdFilter,
-      pendingApprovalOnly: event.pendingOnly,
-    );
-    result.fold(
-      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
-      (timeLogs) =>
-          emit(SupervisorTimeLogsForApprovalLoadSuccess(timeLogs: timeLogs)),
-    );
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
+
+      final result = await _getAllTimeLogsForSupervisorUsecase.call(
+        GetAllTimeLogsParams(
+          studentId: event.studentIdFilter,
+          pendingOnly: event.pendingOnly,
+        ),
+      );
+
+      result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (timeLogs) {
+          emit(currentState.copyWith(
+            pendingApprovals: timeLogs,
+            isLoading: false,
+          ));
+        },
+      );
+    }
   }
 
   Future<void> _onLoadAllContracts(
     LoadAllContractsEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(const SupervisorLoading(loadingMessage: 'A carregar contratos...'));
-    final result = await _getAllContractsUsecase.call(GetAllContractsParams(
-      studentId: event.studentIdFilter,
-      status: event.statusFilter,
-    ));
-    result.fold<void>(
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
+
+      final result = await _getAllContractsUsecase.call(
+        GetAllContractsParams(
+          studentId: event.studentIdFilter,
+          status: event.statusFilter,
+        ),
+      );
+
+      result.fold(
         (failure) => emit(SupervisorOperationFailure(message: failure.message)),
-        (List<ContractEntity> contracts) {
-      if (state is SupervisorDashboardLoadSuccess) {
-        emit((state as SupervisorDashboardLoadSuccess)
-            .copyWith(contracts: contracts));
-      } else {
-        emit(SupervisorContractsLoadSuccess(contracts: contracts));
-      }
-    });
+        (contracts) {
+          emit(currentState.copyWith(
+            contracts: contracts,
+            isLoading: false,
+          ));
+        },
+      );
+    }
   }
 
   Future<void> _onCreateContractBySupervisor(

@@ -1,18 +1,32 @@
 import 'package:dartz/dartz.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
-
 import '../entities/contract_entity.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/enums/contract_status.dart';
 
 abstract class IContractRepository {
-  Future<List<ContractEntity>> getAllContracts(
-      {String? studentId, String? supervisorId, ContractStatus? status});
-  Future<ContractEntity?> getContractById(String id);
-  Future<List<ContractEntity>> getContractsByStudent(String studentId);
-  Future<List<ContractEntity>> getContractsBySupervisor(String supervisorId);
-  Future<ContractEntity?> getActiveContractByStudent(String studentId);
-  Future<ContractEntity> createContract(ContractEntity contract);
-  Future<ContractEntity> updateContract(ContractEntity contract);
-  Future<void> deleteContract(String id);
-  Future<Map<String, dynamic>> getContractStatistics();
+  Future<Either<AppFailure, List<ContractEntity>>> getAllContracts({
+    String? studentId,
+    ContractStatus? status,
+  });
+
+  Future<Either<AppFailure, ContractEntity>> getContractById(String id);
+
+  Future<Either<AppFailure, ContractEntity>> createContract(
+      ContractEntity contract);
+
+  Future<Either<AppFailure, ContractEntity>> updateContract(
+      ContractEntity contract);
+
+  Future<Either<AppFailure, void>> deleteContract(String id);
+
+  Future<Either<AppFailure, List<ContractEntity>>> getContractsByStudent(
+      String studentId);
+
+  Future<Either<AppFailure, List<ContractEntity>>> getContractsBySupervisor(
+      String supervisorId);
+
+  Future<Either<AppFailure, ContractEntity?>> getActiveContractByStudent(
+      String studentId);
+
+  Future<Either<AppFailure, Map<String, dynamic>>> getContractStatistics();
 }

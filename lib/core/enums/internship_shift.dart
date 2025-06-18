@@ -19,4 +19,3 @@ enum InternshipShift {
   @override
   String toString() => value;
 }
-

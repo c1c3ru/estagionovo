@@ -1,10 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../core/enums/user_role.dart';
+import '../../../core/errors/app_exceptions.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecases/auth/login_usecase.dart';
 import '../../../domain/usecases/auth/register_usecase.dart';
 import '../../../domain/usecases/auth/logout_usecase.dart';
 import '../../../domain/usecases/auth/get_current_user_usecase.dart';
+import '../../../domain/usecases/auth/reset_password_usecase.dart';
+import '../../../domain/usecases/auth/update_profile_usecase.dart';
+import '../../../domain/usecases/auth/get_auth_state_changes_usecase.dart';
 
 // Events
 abstract class AuthEvent extends Equatable {
@@ -32,18 +37,18 @@ class AuthLoginRequested extends AuthEvent {
 class AuthRegisterRequested extends AuthEvent {
   final String email;
   final String password;
-  final String name;
+  final String fullName;
   final String role;
 
-  const AuthRegisterRequested({
+  AuthRegisterRequested({
     required this.email,
     required this.password,
-    required this.name,
+    required this.fullName,
     required this.role,
   });
 
   @override
-  List<Object> get props => [email, password, name, role];
+  List<Object> get props => [email, password, fullName, role];
 }
 
 class AuthLogoutRequested extends AuthEvent {}
@@ -55,6 +60,28 @@ class AuthResetPasswordRequested extends AuthEvent {
 
   @override
   List<Object> get props => [email];
+}
+
+class AuthUpdateProfileRequested extends AuthEvent {
+  final String userId;
+  final String? fullName;
+  final String? email;
+  final String? password;
+  final String? phoneNumber;
+  final String? profilePictureUrl;
+
+  const AuthUpdateProfileRequested({
+    required this.userId,
+    this.fullName,
+    this.email,
+    this.password,
+    this.phoneNumber,
+    this.profilePictureUrl,
+  });
+
+  @override
+  List<Object?> get props =>
+      [userId, fullName, email, password, phoneNumber, profilePictureUrl];
 }
 
 // States
@@ -105,6 +132,15 @@ class AuthResetPasswordSuccess extends AuthState {
   List<Object> get props => [message];
 }
 
+class AuthProfileUpdated extends AuthState {
+  final UserEntity user;
+
+  const AuthProfileUpdated({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
 // Error States
 class AuthLoginError extends AuthState {
   final String message;
@@ -151,28 +187,63 @@ class AuthCheckError extends AuthState {
   List<Object> get props => [message];
 }
 
+class AuthError extends AuthState {
+  final String message;
+
+  const AuthError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthPasswordResetSent extends AuthState {
+  const AuthPasswordResetSent();
+
+  @override
+  List<Object?> get props => [];
+}
+
 // BLoC
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final LoginUsecase _loginUsecase;
-  final RegisterUsecase _registerUsecase;
-  final LogoutUsecase _logoutUsecase;
   final GetCurrentUserUsecase _getCurrentUserUsecase;
+  final LoginUsecase _loginUsecase;
+  final LogoutUsecase _logoutUsecase;
+  final RegisterUsecase _registerUsecase;
+  final ResetPasswordUsecase _resetPasswordUsecase;
+  final UpdateProfileUsecase _updateProfileUsecase;
+  final GetAuthStateChangesUsecase _getAuthStateChangesUsecase;
 
   AuthBloc({
-    required LoginUsecase loginUsecase,
-    required RegisterUsecase registerUsecase,
-    required LogoutUsecase logoutUsecase,
     required GetCurrentUserUsecase getCurrentUserUsecase,
-  })  : _loginUsecase = loginUsecase,
-        _registerUsecase = registerUsecase,
+    required LoginUsecase loginUsecase,
+    required LogoutUsecase logoutUsecase,
+    required RegisterUsecase registerUsecase,
+    required ResetPasswordUsecase resetPasswordUsecase,
+    required UpdateProfileUsecase updateProfileUsecase,
+    required GetAuthStateChangesUsecase getAuthStateChangesUsecase,
+  })  : _getCurrentUserUsecase = getCurrentUserUsecase,
+        _loginUsecase = loginUsecase,
         _logoutUsecase = logoutUsecase,
-        _getCurrentUserUsecase = getCurrentUserUsecase,
+        _registerUsecase = registerUsecase,
+        _resetPasswordUsecase = resetPasswordUsecase,
+        _updateProfileUsecase = updateProfileUsecase,
+        _getAuthStateChangesUsecase = getAuthStateChangesUsecase,
         super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
-    on<AuthRegisterRequested>(_onAuthRegisterRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
+    on<AuthRegisterRequested>(_onAuthRegisterRequested);
     on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
+    on<AuthUpdateProfileRequested>(_onAuthUpdateProfileRequested);
+
+    // Iniciar monitoramento de mudanças de estado de autenticação
+    _getAuthStateChangesUsecase().listen((user) {
+      if (user != null) {
+        add(AuthCheckRequested());
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    });
   }
 
   Future<void> _onAuthCheckRequested(
@@ -180,79 +251,88 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-    try {
-      final user = await _getCurrentUserUsecase();
-      if (user != null) {
-        emit(AuthAuthenticated(user: user));
-      } else {
-        emit(AuthUnauthenticated());
-      }
-    } catch (e) {
-      emit(AuthCheckError(message: e.toString()));
-      emit(AuthUnauthenticated());
-    }
+    final result = await _getCurrentUserUsecase();
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => user != null
+          ? emit(AuthAuthenticated(user: user))
+          : emit(AuthUnauthenticated()),
+    );
   }
 
   Future<void> _onAuthLoginRequested(
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoggingIn());
-    try {
-      final user = await _loginUsecase(event.email, event.password);
-      emit(AuthAuthenticated(user: user));
-    } catch (e) {
-      emit(AuthLoginError(message: e.toString()));
-    }
-  }
-
-  Future<void> _onAuthRegisterRequested(
-    AuthRegisterRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthRegistering());
-    try {
-      final user = await _registerUsecase(
-        event.email,
-        event.password,
-        event.name,
-        event.role,
-      );
-      emit(AuthAuthenticated(user: user));
-    } catch (e) {
-      emit(AuthRegisterError(message: e.toString()));
-    }
+    emit(AuthLoading());
+    final result = await _loginUsecase(
+      email: event.email,
+      password: event.password,
+    );
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => emit(AuthAuthenticated(user: user)),
+    );
   }
 
   Future<void> _onAuthLogoutRequested(
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoggingOut());
-    try {
-      await _logoutUsecase();
-      emit(AuthLogoutSuccess());
-      emit(AuthUnauthenticated());
-    } catch (e) {
-      emit(AuthLogoutError(message: e.toString()));
-      // Even if logout fails, consider user as unauthenticated
-      emit(AuthUnauthenticated());
-    }
+    emit(AuthLoading());
+    final result = await _logoutUsecase();
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (_) => emit(AuthUnauthenticated()),
+    );
+  }
+
+  Future<void> _onAuthRegisterRequested(
+    AuthRegisterRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await _registerUsecase(
+      email: event.email,
+      password: event.password,
+      fullName: event.fullName,
+      role: UserRole.fromString(event.role),
+    );
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => emit(AuthAuthenticated(user: user)),
+    );
   }
 
   Future<void> _onAuthResetPasswordRequested(
     AuthResetPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthResettingPassword());
-    try {
-      await _authRepository.resetPassword(event.email);
-      emit(AuthResetPasswordSuccess(
-        message: 'E-mail de redefinição de senha enviado para ${event.email}',
-      ));
-    } catch (e) {
-      emit(AuthResetPasswordError(message: e.toString()));
-    }
+    emit(AuthLoading());
+    final result = await _resetPasswordUsecase(email: event.email);
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (_) => emit(AuthPasswordResetSent()),
+    );
+  }
+
+  Future<void> _onAuthUpdateProfileRequested(
+    AuthUpdateProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await _updateProfileUsecase(
+      userId: event.userId,
+      fullName: event.fullName,
+      email: event.email,
+      password: event.password,
+      phoneNumber: event.phoneNumber,
+      profilePictureUrl: event.profilePictureUrl,
+    );
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => emit(AuthAuthenticated(user: user)),
+    );
   }
 }
 

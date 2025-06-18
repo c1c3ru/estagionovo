@@ -4,47 +4,48 @@ import 'dart:math';
 import 'package:student_supervisor_app/core/enums/class_shift.dart';
 import 'package:student_supervisor_app/core/enums/internship_shift.dart';
 import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart';
 
 class StudentEntity extends Equatable {
   final String id;
+  final String userId;
   final String fullName;
-  final String registrationNumber;
+  final String email;
   final String course;
   final String advisorName;
+  final String registrationNumber;
   final bool isMandatoryInternship;
   final ClassShift classShift;
-  final InternshipShift internshipShift1;
-  final InternshipShift? internshipShift2;
-  final DateTime birthDate;
+  final InternshipShift internshipShift;
+  final String supervisorId;
+  final double totalHoursCompleted;
+  final double totalHoursRequired;
+  final double weeklyHoursTarget;
   final DateTime contractStartDate;
   final DateTime contractEndDate;
-  final double totalHoursRequired;
-  final double totalHoursCompleted;
-  final double weeklyHoursTarget;
-  final String? profilePictureUrl;
-  final String? phoneNumber;
+  final bool isOnTrack;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final UserRole role;
 
   const StudentEntity({
     required this.id,
+    required this.userId,
     required this.fullName,
-    required this.registrationNumber,
+    required this.email,
     required this.course,
     required this.advisorName,
+    required this.registrationNumber,
     required this.isMandatoryInternship,
     required this.classShift,
-    required this.internshipShift1,
-    this.internshipShift2,
-    required this.birthDate,
+    required this.internshipShift,
+    required this.supervisorId,
+    required this.totalHoursCompleted,
+    required this.totalHoursRequired,
+    required this.weeklyHoursTarget,
     required this.contractStartDate,
     required this.contractEndDate,
-    required this.totalHoursRequired,
-    required this.totalHoursCompleted,
-    required this.weeklyHoursTarget,
-    this.profilePictureUrl,
-    this.phoneNumber,
+    required this.isOnTrack,
     required this.createdAt,
     this.updatedAt,
     this.role = UserRole.student,
@@ -61,24 +62,6 @@ class StudentEntity extends Equatable {
     return max(remaining, 0.0);
   }
 
-  bool get isOnTrack {
-    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now())) {
-      return true;
-    }
-    if (contractEndDate.isBefore(DateTime.now())) {
-      return totalHoursCompleted >= totalHoursRequired;
-    }
-
-    final totalDays = contractEndDate.difference(contractStartDate).inDays;
-    if (totalDays <= 0) return true;
-
-    final daysElapsed = DateTime.now().difference(contractStartDate).inDays;
-    final effectiveDaysElapsed = min(max(daysElapsed, 0), totalDays);
-    final expectedProgress =
-        (effectiveDaysElapsed / totalDays) * totalHoursRequired;
-    return totalHoursCompleted >= expectedProgress;
-  }
-
   int get daysRemainingInContract {
     final now =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
@@ -88,25 +71,38 @@ class StudentEntity extends Equatable {
     return end.difference(now).inDays;
   }
 
+  StudentStatus get status {
+    final now = DateTime.now();
+    if (contractStartDate.isAfter(now)) {
+      return StudentStatus.pending;
+    }
+    if (contractEndDate.isBefore(now)) {
+      return totalHoursCompleted >= totalHoursRequired
+          ? StudentStatus.completed
+          : StudentStatus.terminated;
+    }
+    return isOnTrack ? StudentStatus.active : StudentStatus.inactive;
+  }
+
   @override
   List<Object?> get props => [
         id,
+        userId,
         fullName,
-        registrationNumber,
+        email,
         course,
         advisorName,
+        registrationNumber,
         isMandatoryInternship,
         classShift,
-        internshipShift1,
-        internshipShift2,
-        birthDate,
+        internshipShift,
+        supervisorId,
+        totalHoursCompleted,
+        totalHoursRequired,
+        weeklyHoursTarget,
         contractStartDate,
         contractEndDate,
-        totalHoursRequired,
-        totalHoursCompleted,
-        weeklyHoursTarget,
-        profilePictureUrl,
-        phoneNumber,
+        isOnTrack,
         createdAt,
         updatedAt,
         role,
@@ -114,56 +110,47 @@ class StudentEntity extends Equatable {
 
   StudentEntity copyWith({
     String? id,
+    String? userId,
     String? fullName,
-    String? registrationNumber,
+    String? email,
     String? course,
     String? advisorName,
+    String? registrationNumber,
     bool? isMandatoryInternship,
     ClassShift? classShift,
-    InternshipShift? internshipShift1,
-    InternshipShift? internshipShift2,
-    bool? clearInternshipShift2,
-    DateTime? birthDate,
+    InternshipShift? internshipShift,
+    String? supervisorId,
+    double? totalHoursCompleted,
+    double? totalHoursRequired,
+    double? weeklyHoursTarget,
     DateTime? contractStartDate,
     DateTime? contractEndDate,
-    double? totalHoursRequired,
-    double? totalHoursCompleted,
-    double? weeklyHoursTarget,
-    String? profilePictureUrl,
-    bool? clearProfilePictureUrl,
-    String? phoneNumber,
-    bool? clearPhoneNumber,
+    bool? isOnTrack,
     DateTime? createdAt,
     DateTime? updatedAt,
-    bool? clearUpdatedAt,
     UserRole? role,
   }) {
     return StudentEntity(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       fullName: fullName ?? this.fullName,
-      registrationNumber: registrationNumber ?? this.registrationNumber,
+      email: email ?? this.email,
       course: course ?? this.course,
       advisorName: advisorName ?? this.advisorName,
+      registrationNumber: registrationNumber ?? this.registrationNumber,
       isMandatoryInternship:
           isMandatoryInternship ?? this.isMandatoryInternship,
       classShift: classShift ?? this.classShift,
-      internshipShift1: internshipShift1 ?? this.internshipShift1,
-      internshipShift2: clearInternshipShift2 == true
-          ? null
-          : internshipShift2 ?? this.internshipShift2,
-      birthDate: birthDate ?? this.birthDate,
+      internshipShift: internshipShift ?? this.internshipShift,
+      supervisorId: supervisorId ?? this.supervisorId,
+      totalHoursCompleted: totalHoursCompleted ?? this.totalHoursCompleted,
+      totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
+      weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
       contractStartDate: contractStartDate ?? this.contractStartDate,
       contractEndDate: contractEndDate ?? this.contractEndDate,
-      totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
-      totalHoursCompleted: totalHoursCompleted ?? this.totalHoursCompleted,
-      weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
-      profilePictureUrl: clearProfilePictureUrl == true
-          ? null
-          : profilePictureUrl ?? this.profilePictureUrl,
-      phoneNumber:
-          clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
+      isOnTrack: isOnTrack ?? this.isOnTrack,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       role: role ?? this.role,
     );
   }
@@ -173,22 +160,22 @@ class StudentEntity extends Equatable {
     if (identical(this, other)) return true;
     return other is StudentEntity &&
         other.id == id &&
+        other.userId == userId &&
         other.fullName == fullName &&
-        other.registrationNumber == registrationNumber &&
+        other.email == email &&
         other.course == course &&
         other.advisorName == advisorName &&
+        other.registrationNumber == registrationNumber &&
         other.isMandatoryInternship == isMandatoryInternship &&
         other.classShift == classShift &&
-        other.internshipShift1 == internshipShift1 &&
-        other.internshipShift2 == internshipShift2 &&
-        other.birthDate == birthDate &&
+        other.internshipShift == internshipShift &&
+        other.supervisorId == supervisorId &&
+        other.totalHoursCompleted == totalHoursCompleted &&
+        other.totalHoursRequired == totalHoursRequired &&
+        other.weeklyHoursTarget == weeklyHoursTarget &&
         other.contractStartDate == contractStartDate &&
         other.contractEndDate == contractEndDate &&
-        other.totalHoursRequired == totalHoursRequired &&
-        other.totalHoursCompleted == totalHoursCompleted &&
-        other.weeklyHoursTarget == weeklyHoursTarget &&
-        other.profilePictureUrl == profilePictureUrl &&
-        other.phoneNumber == phoneNumber &&
+        other.isOnTrack == isOnTrack &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.role == role;
@@ -197,31 +184,29 @@ class StudentEntity extends Equatable {
   @override
   int get hashCode {
     return id.hashCode ^
+        userId.hashCode ^
         fullName.hashCode ^
-        registrationNumber.hashCode ^
+        email.hashCode ^
         course.hashCode ^
         advisorName.hashCode ^
+        registrationNumber.hashCode ^
         isMandatoryInternship.hashCode ^
         classShift.hashCode ^
-        internshipShift1.hashCode ^
-        internshipShift2.hashCode ^
-        birthDate.hashCode ^
+        internshipShift.hashCode ^
+        supervisorId.hashCode ^
+        totalHoursCompleted.hashCode ^
+        totalHoursRequired.hashCode ^
+        weeklyHoursTarget.hashCode ^
         contractStartDate.hashCode ^
         contractEndDate.hashCode ^
-        totalHoursRequired.hashCode ^
-        totalHoursCompleted.hashCode ^
-        weeklyHoursTarget.hashCode ^
-        profilePictureUrl.hashCode ^
-        phoneNumber.hashCode ^
+        isOnTrack.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode ^
         role.hashCode;
   }
 
-  get email => null;
-
   @override
   String toString() {
-    return 'StudentEntity(id: $id, fullName: $fullName, registrationNumber: $registrationNumber, course: $course, advisorName: $advisorName, isMandatoryInternship: $isMandatoryInternship, classShift: $classShift, internshipShift1: $internshipShift1, internshipShift2: $internshipShift2, birthDate: $birthDate, contractStartDate: $contractStartDate, contractEndDate: $contractEndDate, totalHoursRequired: $totalHoursRequired, totalHoursCompleted: $totalHoursCompleted, weeklyHoursTarget: $weeklyHoursTarget, profilePictureUrl: $profilePictureUrl, phoneNumber: $phoneNumber, createdAt: $createdAt, updatedAt: $updatedAt, role: $role)';
+    return 'StudentEntity(id: $id, fullName: $fullName, email: $email, course: $course, advisorName: $advisorName, registrationNumber: $registrationNumber, isMandatoryInternship: $isMandatoryInternship, classShift: $classShift, internshipShift: $internshipShift, supervisorId: $supervisorId, totalHoursCompleted: $totalHoursCompleted, totalHoursRequired: $totalHoursRequired, weeklyHoursTarget: $weeklyHoursTarget, contractStartDate: $contractStartDate, contractEndDate: $contractEndDate, isOnTrack: $isOnTrack, createdAt: $createdAt, updatedAt: $updatedAt, role: $role)';
   }
 }

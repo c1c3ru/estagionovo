@@ -12,7 +12,7 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-import '../../../../domain/entities/student.dart';
+import '../../../../domain/entities/student_entity.dart';
 import '../bloc/supervisor_bloc.dart';
 import '../bloc/supervisor_event.dart';
 import '../bloc/supervisor_state.dart';
@@ -20,7 +20,7 @@ import '../bloc/supervisor_state.dart';
 class StudentEditPage extends StatefulWidget {
   final String? studentId;
 
-  const StudentEditPage({Key? key, this.studentId}) : super(key: key);
+  const StudentEditPage({super.key, this.studentId});
 
   @override
   State<StudentEditPage> createState() => _StudentEditPageState();

@@ -5,7 +5,7 @@ import '../datasources/local/preferences_manager.dart';
 import '../models/user_model.dart';
 import 'package:dartz/dartz.dart';
 import '../../core/errors/app_exceptions.dart';
-import '../../domain/usecases/auth/update_profile_params.dart';
+import '../../core/enums/user_role.dart';
 
 class AuthRepository implements IAuthRepository {
   final AuthDatasource _authDatasource;
@@ -18,86 +18,117 @@ class AuthRepository implements IAuthRepository {
         _preferencesManager = preferencesManager;
 
   @override
-  Future<UserEntity?> getCurrentUser() async {
+  Stream<UserEntity?> get authStateChanges => _authDatasource.authStateChanges
+      .map((user) => user != null ? UserModel.fromJson(user).toEntity() : null);
+
+  @override
+  Future<Either<AppFailure, UserEntity>> getCurrentUser() async {
     try {
       final userModel = await _authDatasource.getCurrentUser();
       if (userModel != null) {
         // Cache user data locally
         await _preferencesManager.saveUserData(userModel.toJson());
-        return userModel.toEntity();
+        return Right(userModel.toEntity());
       }
 
       // Try to get from local cache if network fails
       final cachedUserData = _preferencesManager.getUserData();
       if (cachedUserData != null) {
         final userModel = UserModel.fromJson(cachedUserData);
-        return userModel.toEntity();
+        return Right(userModel.toEntity());
       }
 
-      return null;
+      return Left(AuthFailure('Usuário não encontrado'));
     } catch (e) {
       // Fallback to cached data
       final cachedUserData = _preferencesManager.getUserData();
       if (cachedUserData != null) {
         final userModel = UserModel.fromJson(cachedUserData);
-        return userModel.toEntity();
+        return Right(userModel.toEntity());
       }
-      rethrow;
+      return Left(AuthFailure(e.toString()));
     }
   }
 
   @override
-  Future<UserEntity> login(String email, String password) async {
+  Future<Either<AppFailure, UserEntity>> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       final userModel = await _authDatasource.login(email, password);
-
-      // Cache user data locally
       await _preferencesManager.saveUserData(userModel.toJson());
-
-      return userModel.toEntity();
+      return Right(userModel.toEntity());
     } catch (e) {
-      rethrow;
+      return Left(AuthFailure(e.toString()));
     }
   }
 
   @override
-  Future<UserEntity> register(
-      String email, String password, String name, String role) async {
+  Future<Either<AppFailure, UserEntity>> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required UserRole role,
+  }) async {
     try {
       final userModel =
-          await _authDatasource.register(email, password, name, role);
-
-      // Cache user data locally
+          await _authDatasource.register(email, password, fullName, role.name);
       await _preferencesManager.saveUserData(userModel.toJson());
-
-      return userModel.toEntity();
+      return Right(userModel.toEntity());
     } catch (e) {
-      rethrow;
+      return Left(AuthFailure(e.toString()));
     }
   }
 
   @override
-  Future<void> logout() async {
+  Future<Either<AppFailure, void>> logout() async {
     try {
       await _authDatasource.logout();
-
-      // Clear local data
       await _preferencesManager.removeUserData();
       await _preferencesManager.removeUserToken();
+      return const Right(null);
     } catch (e) {
       // Even if network logout fails, clear local data
       await _preferencesManager.removeUserData();
       await _preferencesManager.removeUserToken();
-      rethrow;
+      return Left(AuthFailure(e.toString()));
     }
   }
 
   @override
-  Future<void> resetPassword(String email) async {
+  Future<Either<AppFailure, void>> resetPassword({
+    required String email,
+  }) async {
     try {
       await _authDatasource.resetPassword(email);
+      return const Right(null);
     } catch (e) {
-      rethrow;
+      return Left(AuthFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, UserEntity>> updateProfile({
+    required String userId,
+    String? fullName,
+    String? email,
+    String? password,
+    String? phoneNumber,
+    String? profilePictureUrl,
+  }) async {
+    try {
+      final user = await _authDatasource.updateProfile(
+        userId: userId,
+        fullName: fullName,
+        email: email,
+        password: password,
+        phoneNumber: phoneNumber,
+        profilePictureUrl: profilePictureUrl,
+      );
+      return Right(UserModel.fromJson(user).toEntity());
+    } catch (e) {
+      return Left(AuthFailure(e.toString()));
     }
   }
 
@@ -109,20 +140,6 @@ class AuthRepository implements IAuthRepository {
       // Fallback to local check
       final cachedUserData = _preferencesManager.getUserData();
       return cachedUserData != null;
-    }
-  }
-
-  @override
-  Stream<UserEntity?>? get authStateChanges => null;
-
-  @override
-  Future<Either<AppFailure, UserEntity>> updateUserProfile(
-      UpdateProfileParams params) async {
-    try {
-      // Implementação temporária - retorna erro
-      return Left(const ServerFailure(message: 'Método não implementado'));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

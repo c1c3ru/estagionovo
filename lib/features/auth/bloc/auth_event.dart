@@ -10,59 +10,34 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class RegisterSupervisorEvent extends AuthEvent {
-  final String fullName;
-  final String email;
-  final String password;
-  final String siapeRegistration;
-  final String? phoneNumber;
-  final String? department;
-  final String? position;
-
-  const RegisterSupervisorEvent({
-    required this.fullName,
-    required this.email,
-    required this.password,
-    required this.siapeRegistration,
-    this.phoneNumber,
-    this.department,
-    this.position,
-  });
-
-  @override
-  List<Object?> get props => [
-        fullName,
-        email,
-        password,
-        siapeRegistration,
-        phoneNumber,
-        department,
-        position,
-      ];
+class AuthCheckRequested extends AuthEvent {
+  const AuthCheckRequested();
 }
 
-/// Evento disparado ao tentar fazer login.
-class LoginSubmittedEvent extends AuthEvent {
+class AuthLoginRequested extends AuthEvent {
   final String email;
   final String password;
 
-  const LoginSubmittedEvent({
+  const AuthLoginRequested({
     required this.email,
     required this.password,
   });
 
   @override
-  List<Object?> get props => [email, password];
+  List<Object> get props => [email, password];
 }
 
-/// Evento disparado ao tentar registar um novo utilizador.
-class RegisterSubmittedEvent extends AuthEvent {
+class AuthLogoutRequested extends AuthEvent {
+  const AuthLogoutRequested();
+}
+
+class AuthRegisterRequested extends AuthEvent {
   final String email;
   final String password;
   final String fullName;
-  final UserRole role;
+  final String role;
 
-  const RegisterSubmittedEvent({
+  const AuthRegisterRequested({
     required this.email,
     required this.password,
     required this.fullName,
@@ -70,47 +45,44 @@ class RegisterSubmittedEvent extends AuthEvent {
   });
 
   @override
-  List<Object?> get props => [email, password, fullName, role];
+  List<Object> get props => [email, password, fullName, role];
 }
 
-/// Evento disparado para enviar um email de redefinição de senha.
-class PasswordResetRequestedEvent extends AuthEvent {
+class AuthResetPasswordRequested extends AuthEvent {
   final String email;
 
-  const PasswordResetRequestedEvent({required this.email});
+  const AuthResetPasswordRequested({required this.email});
 
   @override
-  List<Object?> get props => [email];
+  List<Object> get props => [email];
 }
 
-/// Evento disparado para fazer logout.
-class LogoutRequestedEvent extends AuthEvent {
-  const LogoutRequestedEvent();
-}
-
-/// Evento disparado para verificar o estado atual da autenticação (ex: no início da app).
-class CheckAuthStatusRequestedEvent extends AuthEvent {
-  const CheckAuthStatusRequestedEvent();
-}
-
-/// Evento disparado para atualizar o perfil do utilizador.
-/// Pode ser melhor movido para um ProfileBloc se a lógica for complexa.
-class UpdateUserProfileRequestedEvent extends AuthEvent {
-  final String userId; // Necessário para saber qual utilizador atualizar
+class AuthUpdateProfileRequested extends AuthEvent {
+  final String userId;
   final String? fullName;
+  final String? email;
+  final String? password;
   final String? phoneNumber;
   final String? profilePictureUrl;
-  // Adicione outros campos conforme necessário
 
-  const UpdateUserProfileRequestedEvent({
+  const AuthUpdateProfileRequested({
     required this.userId,
     this.fullName,
+    this.email,
+    this.password,
     this.phoneNumber,
     this.profilePictureUrl,
   });
 
   @override
-  List<Object?> get props => [userId, fullName, phoneNumber, profilePictureUrl];
+  List<Object?> get props => [
+        userId,
+        fullName,
+        email,
+        password,
+        phoneNumber,
+        profilePictureUrl,
+      ];
 }
 
 /// Evento para ouvir mudanças no estado de autenticação (ex: do stream do Supabase)

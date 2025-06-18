@@ -1,22 +1,16 @@
 enum ClassShift {
-  morning('morning', 'Manhã'),
-  afternoon('afternoon', 'Tarde'),
-  evening('evening', 'Noite'),
-  fullTime('full_time', 'Integral');
+  morning,
+  afternoon,
+  night;
 
-  const ClassShift(this.value, this.displayName);
-
-  final String value;
-  final String displayName;
-
-  static ClassShift fromString(String value) {
-    return ClassShift.values.firstWhere(
-      (shift) => shift.value == value,
-      orElse: () => ClassShift.morning,
-    );
+  String get displayName {
+    switch (this) {
+      case ClassShift.morning:
+        return 'Manhã';
+      case ClassShift.afternoon:
+        return 'Tarde';
+      case ClassShift.night:
+        return 'Noite';
+    }
   }
-
-  @override
-  String toString() => value;
 }
-

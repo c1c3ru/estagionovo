@@ -1,16 +1,13 @@
+import 'package:dartz/dartz.dart';
+import '../../../core/errors/app_exceptions.dart';
 import '../../repositories/i_contract_repository.dart';
 
 class GetContractStatisticsUsecase {
-  final IContractRepository _contractRepository;
+  final IContractRepository _repository;
 
-  GetContractStatisticsUsecase(this._contractRepository);
+  GetContractStatisticsUsecase(this._repository);
 
-  Future<Map<String, dynamic>> call() async {
-    try {
-      return await _contractRepository.getContractStatistics();
-    } catch (e) {
-      throw Exception('Erro ao buscar estatísticas de contratos: $e');
-    }
+  Future<Either<AppFailure, Map<String, dynamic>>> call() async {
+    return await _repository.getContractStatistics();
   }
 }
-

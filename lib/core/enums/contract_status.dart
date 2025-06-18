@@ -1,23 +1,28 @@
 enum ContractStatus {
-  active('active', 'Ativo'),
-  inactive('inactive', 'Inativo'),
-  pending('pending', 'Pendente'),
-  completed('completed', 'Concluído'),
-  cancelled('cancelled', 'Cancelado');
+  active,
+  pending,
+  completed,
+  terminated;
 
-  const ContractStatus(this.value, this.displayName);
+  String get displayName {
+    switch (this) {
+      case ContractStatus.active:
+        return 'Ativo';
+      case ContractStatus.pending:
+        return 'Pendente';
+      case ContractStatus.completed:
+        return 'Concluído';
+      case ContractStatus.terminated:
+        return 'Encerrado';
+    }
+  }
 
-  final String value;
-  final String displayName;
+  String get value => name;
 
   static ContractStatus fromString(String value) {
     return ContractStatus.values.firstWhere(
-      (status) => status.value == value,
+      (e) => e.name == value,
       orElse: () => ContractStatus.pending,
     );
   }
-
-  @override
-  String toString() => value;
 }
-

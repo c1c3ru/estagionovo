@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import '../../../core/errors/app_exceptions.dart';
 import '../../repositories/i_contract_repository.dart';
 import '../../entities/contract_entity.dart';
 
@@ -6,37 +8,39 @@ class CreateContractUsecase {
 
   CreateContractUsecase(this._contractRepository);
 
-  Future<ContractEntity> call(ContractEntity contract) async {
-    try {
-      // Validações
-      if (contract.studentId.isEmpty) {
-        throw Exception('ID do estudante é obrigatório');
-      }
-      
-      if (contract.supervisorId.isEmpty) {
-        throw Exception('ID do supervisor é obrigatório');
-      }
-      
-      if (contract.company.isEmpty) {
-        throw Exception('Empresa é obrigatória');
-      }
-      
-      if (contract.position.isEmpty) {
-        throw Exception('Cargo é obrigatório');
-      }
-      
-      if (contract.weeklyHours <= 0) {
-        throw Exception('Horas semanais devem ser maior que zero');
-      }
-      
-      if (contract.startDate.isAfter(contract.endDate)) {
-        throw Exception('Data de início deve ser anterior à data de fim');
-      }
-
-      return await _contractRepository.createContract(contract);
-    } catch (e) {
-      throw Exception('Erro ao criar contrato: $e');
+  Future<Either<AppFailure, ContractEntity>> call(
+      ContractEntity contract) async {
+    if (contract.studentId.isEmpty) {
+      return Left(ValidationFailure('ID do estudante é obrigatório'));
     }
+
+    if (contract.supervisorId.isEmpty) {
+      return Left(ValidationFailure('ID do supervisor é obrigatório'));
+    }
+
+    if (contract.company.isEmpty) {
+      return Left(ValidationFailure('Nome da empresa é obrigatório'));
+    }
+
+    if (contract.position.isEmpty) {
+      return Left(ValidationFailure('Cargo é obrigatório'));
+    }
+
+    if (contract.weeklyHoursTarget <= 0) {
+      return Left(
+          ValidationFailure('Carga horária semanal deve ser maior que zero'));
+    }
+
+    if (contract.totalHoursRequired <= 0) {
+      return Left(
+          ValidationFailure('Carga horária total deve ser maior que zero'));
+    }
+
+    if (contract.startDate.isAfter(contract.endDate)) {
+      return Left(ValidationFailure(
+          'Data de início deve ser anterior à data de término'));
+    }
+
+    return await _contractRepository.createContract(contract);
   }
 }
-

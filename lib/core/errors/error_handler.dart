@@ -8,12 +8,11 @@ import 'package:postgrest/postgrest.dart';
 import '../constants/app_strings.dart';
 
 class ErrorHandler {
-  static voidhandle(
+  static void handle(
     dynamic error, {
     StackTrace? stackTrace,
     String? userFriendlyMessage,
-    BuildContext?
-        context, // Contexto para mostrar UI de erro (SnackBar, Dialog)
+    BuildContext? context,
   }) {
     logger.e(
       userFriendlyMessage ?? 'Erro não tratado',
@@ -32,12 +31,13 @@ class ErrorHandler {
     if (error is AppFailure) {
       return error;
     } else if (error is supabase_auth.AuthException) {
-      return AuthenticationFailure(
-          message: error.message, originalException: error);
+      return AuthFailure(error.message);
     } else if (error is PostgrestException) {
       // Exceção do banco de dados Supabase
-      return SupabaseServerFailure(
-          message: error.message, originalException: error);
+      return ServerFailure(
+        message: error.message,
+        originalException: error,
+      );
     }
     // Adicione outros tipos de exceção específicos aqui (ex: DioError, SocketException)
     else {

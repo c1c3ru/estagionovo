@@ -43,7 +43,6 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
 
   Future<void> _refreshDetails() async {
     _supervisorBloc
-        .add(SupervisorLoadStudentDetailsEvent(studentId: widget.studentId));
         .add(LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId));
   }
 

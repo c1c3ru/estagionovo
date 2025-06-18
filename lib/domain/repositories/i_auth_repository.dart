@@ -1,19 +1,39 @@
 import 'package:dartz/dartz.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/update_profile_params.dart';
-
 import '../entities/user_entity.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../core/enums/user_role.dart';
 
 abstract class IAuthRepository {
-  Stream<UserEntity?>? get authStateChanges => null;
-  Future<Either<AppFailure, UserEntity>> updateUserProfile(
-      UpdateProfileParams params);
+  Stream<UserEntity?> get authStateChanges;
 
-  Future<UserEntity?> getCurrentUser();
-  Future<UserEntity> login(String email, String password);
-  Future<UserEntity> register(
-      String email, String password, String name, String role);
-  Future<void> logout();
-  Future<void> resetPassword(String email);
+  Future<Either<AppFailure, UserEntity>> register({
+    required String email,
+    required String password,
+    required String fullName,
+    required UserRole role,
+  });
+
+  Future<Either<AppFailure, UserEntity>> login({
+    required String email,
+    required String password,
+  });
+
+  Future<Either<AppFailure, void>> logout();
+
+  Future<Either<AppFailure, UserEntity?>> getCurrentUser();
+
+  Future<Either<AppFailure, void>> resetPassword({
+    required String email,
+  });
+
+  Future<Either<AppFailure, UserEntity>> updateProfile({
+    required String userId,
+    String? fullName,
+    String? email,
+    String? password,
+    String? phoneNumber,
+    String? profilePictureUrl,
+  });
+
   Future<bool> isLoggedIn();
 }

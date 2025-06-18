@@ -1,34 +1,39 @@
-import '../../domain/entities/user_entity.dart';
 import '../../core/enums/user_role.dart';
+import '../../domain/entities/user_entity.dart';
 
 class UserModel {
   final String id;
   final String email;
-  final String name;
-  final String role;
-  final String? avatarUrl;
+  final String fullName;
+  final String? phoneNumber;
+  final String? profilePictureUrl;
+  final UserRole role;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
-  UserModel({
+  const UserModel({
     required this.id,
     required this.email,
-    required this.name,
+    required this.fullName,
+    this.phoneNumber,
+    this.profilePictureUrl,
     required this.role,
-    this.avatarUrl,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
-      name: json['name'] as String,
-      role: json['role'] as String,
-      avatarUrl: json['avatar_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      fullName: json['fullName'] as String,
+      phoneNumber: json['phoneNumber'] as String?,
+      profilePictureUrl: json['profilePictureUrl'] as String?,
+      role: UserRole.fromString(json['role'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
@@ -36,11 +41,12 @@ class UserModel {
     return {
       'id': id,
       'email': email,
-      'name': name,
-      'role': role,
-      'avatar_url': avatarUrl,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'fullName': fullName,
+      'phoneNumber': phoneNumber,
+      'profilePictureUrl': profilePictureUrl,
+      'role': role.toString(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -48,9 +54,10 @@ class UserModel {
     return UserEntity(
       id: id,
       email: email,
-      name: name,
-      role: UserRole.fromString(role),
-      avatarUrl: avatarUrl,
+      fullName: fullName,
+      phoneNumber: phoneNumber,
+      profilePictureUrl: profilePictureUrl,
+      role: role,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -60,9 +67,10 @@ class UserModel {
     return UserModel(
       id: entity.id,
       email: entity.email,
-      name: entity.name,
-      role: entity.role.value,
-      avatarUrl: entity.avatarUrl,
+      fullName: entity.fullName,
+      phoneNumber: entity.phoneNumber,
+      profilePictureUrl: entity.profilePictureUrl,
+      role: entity.role,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -71,18 +79,20 @@ class UserModel {
   UserModel copyWith({
     String? id,
     String? email,
-    String? name,
-    String? role,
-    String? avatarUrl,
+    String? fullName,
+    String? phoneNumber,
+    String? profilePictureUrl,
+    UserRole? role,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
-      name: name ?? this.name,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       role: role ?? this.role,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -94,9 +104,10 @@ class UserModel {
     return other is UserModel &&
         other.id == id &&
         other.email == email &&
-        other.name == name &&
+        other.fullName == fullName &&
+        other.phoneNumber == phoneNumber &&
+        other.profilePictureUrl == profilePictureUrl &&
         other.role == role &&
-        other.avatarUrl == avatarUrl &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -105,16 +116,16 @@ class UserModel {
   int get hashCode {
     return id.hashCode ^
         email.hashCode ^
-        name.hashCode ^
+        fullName.hashCode ^
+        phoneNumber.hashCode ^
+        profilePictureUrl.hashCode ^
         role.hashCode ^
-        avatarUrl.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, role: $role, avatarUrl: $avatarUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
-

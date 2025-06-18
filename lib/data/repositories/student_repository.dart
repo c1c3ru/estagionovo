@@ -105,8 +105,8 @@ class StudentRepository implements IStudentRepository {
       {required String studentId, String? notes}) async {
     try {
       // Implementação temporária
-      return Left(
-          const ServerFailure(message: 'Método checkIn não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método checkIn não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -119,8 +119,8 @@ class StudentRepository implements IStudentRepository {
       String? description}) async {
     try {
       // Implementação temporária
-      return Left(
-          const ServerFailure(message: 'Método checkOut não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método checkOut não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -135,8 +135,8 @@ class StudentRepository implements IStudentRepository {
       String? description}) async {
     try {
       // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método createTimeLog não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método createTimeLog não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -146,8 +146,8 @@ class StudentRepository implements IStudentRepository {
   Future<Either<AppFailure, void>> deleteTimeLog(String timeLogId) async {
     try {
       // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método deleteTimeLog não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método deleteTimeLog não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -159,7 +159,7 @@ class StudentRepository implements IStudentRepository {
     try {
       final student = await getStudentByUserId(userId);
       if (student == null) {
-        return Left(const ServerFailure(message: 'Estudante não encontrado'));
+        return const Left(ServerFailure(message: 'Estudante não encontrado'));
       }
       return Right(student);
     } catch (e) {
@@ -174,8 +174,8 @@ class StudentRepository implements IStudentRepository {
       DateTime? endDate}) async {
     try {
       // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método getStudentTimeLogs não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método getStudentTimeLogs não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -197,8 +197,8 @@ class StudentRepository implements IStudentRepository {
       TimeLogEntity timeLog) async {
     try {
       // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método updateTimeLog não implementado'));
+      return const Left(
+          ServerFailure(message: 'Método updateTimeLog não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

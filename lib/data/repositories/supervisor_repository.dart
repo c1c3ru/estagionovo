@@ -12,6 +12,7 @@ import '../datasources/supabase/contract_datasource.dart';
 import '../datasources/supabase/time_log_datasource.dart';
 import '../../domain/entities/time_log_entity.dart';
 import '../../domain/entities/supervisor_entity.dart';
+import '../../domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
 
 class SupervisorRepository implements ISupervisorRepository {
   final SupervisorDatasource _supervisorDatasource;
@@ -96,9 +97,13 @@ class SupervisorRepository implements ISupervisorRepository {
       required String supervisorId,
       String? rejectionReason}) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método approveOrRejectTimeLog não implementado'));
+      final timeLog = await _supervisorDatasource.approveOrRejectTimeLog(
+        timeLogId: timeLogId,
+        approved: approved,
+        supervisorId: supervisorId,
+        rejectionReason: rejectionReason,
+      );
+      return Right(TimeLogEntity.fromJson(timeLog));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -108,9 +113,10 @@ class SupervisorRepository implements ISupervisorRepository {
   Future<Either<AppFailure, StudentEntity>> createStudent(
       StudentEntity studentData) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método createStudent não implementado'));
+      final studentModel = StudentModel.fromEntity(studentData);
+      final createdStudent =
+          await _supervisorDatasource.createStudent(studentModel.toJson());
+      return Right(StudentModel.fromJson(createdStudent).toEntity());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -119,45 +125,55 @@ class SupervisorRepository implements ISupervisorRepository {
   @override
   Future<Either<AppFailure, void>> deleteStudent(String studentId) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método deleteStudent não implementado'));
+      await _supervisorDatasource.deleteStudent(studentId);
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents(
-      FilterStudentsParams? params) async {
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents({
+    String? supervisorId,
+    FilterStudentsParams? filters,
+  }) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método getAllStudents não implementado'));
+      final students = await _supervisorDatasource.getAllStudents(
+        supervisorId: supervisorId,
+        filters: filters,
+      );
+      return Right(
+          students.map((s) => StudentModel.fromJson(s).toEntity()).toList());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<AppFailure, List<TimeLogEntity>>> getAllTimeLogs(
-      {String? studentId, bool? pendingApprovalOnly}) async {
+  Future<Either<AppFailure, List<TimeLogEntity>>> getAllTimeLogs({
+    String? studentId,
+    bool pendingOnly = false,
+  }) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método getAllTimeLogs não implementado'));
+      final timeLogs = await _supervisorDatasource.getAllTimeLogs(
+        studentId: studentId,
+        pendingOnly: pendingOnly,
+      );
+      return Right(timeLogs.map((t) => TimeLogEntity.fromJson(t)).toList());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<AppFailure, StudentEntity>> getStudentDetailsForSupervisor(
+  Future<Either<AppFailure, StudentEntity>> getStudentDetails(
       String studentId) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método getStudentDetailsForSupervisor não implementado'));
+      final student = await _supervisorDatasource.getStudentById(studentId);
+      if (student == null) {
+        return const Left(ServerFailure(message: 'Estudante não encontrado'));
+      }
+      return Right(StudentModel.fromJson(student).toEntity());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
@@ -165,25 +181,29 @@ class SupervisorRepository implements ISupervisorRepository {
 
   @override
   Future<Either<AppFailure, SupervisorEntity>> getSupervisorDetails(
-      String userId) async {
+      String supervisorId) async {
     try {
-      final supervisor = await getSupervisorByUserId(userId);
+      final supervisor =
+          await _supervisorDatasource.getSupervisorById(supervisorId);
       if (supervisor == null) {
-        return Left(const ServerFailure(message: 'Supervisor não encontrado'));
+        return const Left(ServerFailure(message: 'Supervisor não encontrado'));
       }
-      return Right(supervisor);
+      return Right(SupervisorModel.fromJson(supervisor).toEntity());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<AppFailure, StudentEntity>> updateStudentBySupervisor(
-      StudentEntity studentData) async {
+  Future<Either<AppFailure, StudentEntity>> updateStudent(
+      StudentEntity student) async {
     try {
-      // Implementação temporária
-      return Left(const ServerFailure(
-          message: 'Método updateStudentBySupervisor não implementado'));
+      final studentModel = StudentModel.fromEntity(student);
+      final updatedStudent = await _supervisorDatasource.updateStudent(
+        student.id,
+        studentModel.toJson(),
+      );
+      return Right(StudentModel.fromJson(updatedStudent).toEntity());
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

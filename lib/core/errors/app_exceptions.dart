@@ -17,40 +17,80 @@ enum StudentStatus {
   }
 }
 
-// Use apenas UMA definição de AppFailure:
-abstract class AppFailure implements Exception {
+class AppException implements Exception {
+  final String message;
+
+  AppException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+class ValidationException extends AppException {
+  ValidationException(super.message);
+}
+
+class NetworkException extends AppException {
+  NetworkException(super.message);
+}
+
+class AuthException extends AppException {
+  AuthException(super.message);
+}
+
+class DatabaseException extends AppException {
+  DatabaseException(super.message);
+}
+
+class AppFailure extends Equatable {
   final String message;
   final dynamic originalException;
 
-  const AppFailure({required this.message, this.originalException});
+  const AppFailure({
+    required this.message,
+    this.originalException,
+  });
+
+  @override
+  List<Object?> get props => [message, originalException];
+
+  @override
+  String toString() => message;
 }
 
 class ValidationFailure extends AppFailure {
-  const ValidationFailure(String message, {super.originalException})
-      : super(message: message);
+  const ValidationFailure(String message) : super(message: message);
 }
 
-class AuthenticationFailure extends AppFailure {
-  const AuthenticationFailure(
-      {required super.message, super.originalException});
+class NetworkFailure extends AppFailure {
+  const NetworkFailure(String message) : super(message: message);
 }
 
-class SupabaseServerFailure extends AppFailure {
-  const SupabaseServerFailure(
-      {required super.message, super.originalException});
+class AuthFailure extends AppFailure {
+  const AuthFailure(String message) : super(message: message);
+}
+
+class DatabaseFailure extends AppFailure {
+  const DatabaseFailure(String message) : super(message: message);
 }
 
 class ServerFailure extends AppFailure {
-  const ServerFailure({required super.message, super.originalException});
+  const ServerFailure({
+    required super.message,
+    super.originalException,
+  });
 }
 
 class ServerException implements Exception {
   final String message;
   final String? code;
+  final dynamic originalException;
 
-  const ServerException(this.message, {this.code});
-
-  get originalException => null;
+  const ServerException(
+    this.message, {
+    this.code,
+    this.originalException,
+  });
 
   @override
   String toString() => 'ServerException: $message';

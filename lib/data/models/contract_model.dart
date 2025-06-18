@@ -9,12 +9,11 @@ class ContractModel {
   final String position;
   final DateTime startDate;
   final DateTime endDate;
-  final int weeklyHours;
-  final double? salary;
+  final double totalHoursRequired;
+  final double weeklyHoursTarget;
   final String status;
-  final String? description;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   ContractModel({
     required this.id,
@@ -24,12 +23,11 @@ class ContractModel {
     required this.position,
     required this.startDate,
     required this.endDate,
-    required this.weeklyHours,
-    this.salary,
+    required this.totalHoursRequired,
+    required this.weeklyHoursTarget,
     required this.status,
-    this.description,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
   });
 
   factory ContractModel.fromJson(Map<String, dynamic> json) {
@@ -41,12 +39,13 @@ class ContractModel {
       position: json['position'] as String,
       startDate: DateTime.parse(json['start_date'] as String),
       endDate: DateTime.parse(json['end_date'] as String),
-      weeklyHours: json['weekly_hours'] as int,
-      salary: json['salary'] != null ? (json['salary'] as num).toDouble() : null,
+      totalHoursRequired: (json['total_hours_required'] as num).toDouble(),
+      weeklyHoursTarget: (json['weekly_hours_target'] as num).toDouble(),
       status: json['status'] as String,
-      description: json['description'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 
@@ -59,12 +58,11 @@ class ContractModel {
       'position': position,
       'start_date': startDate.toIso8601String(),
       'end_date': endDate.toIso8601String(),
-      'weekly_hours': weeklyHours,
-      'salary': salary,
+      'total_hours_required': totalHoursRequired,
+      'weekly_hours_target': weeklyHoursTarget,
       'status': status,
-      'description': description,
       'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
@@ -77,10 +75,9 @@ class ContractModel {
       position: position,
       startDate: startDate,
       endDate: endDate,
-      weeklyHours: weeklyHours,
-      salary: salary,
+      totalHoursRequired: totalHoursRequired,
+      weeklyHoursTarget: weeklyHoursTarget,
       status: ContractStatus.fromString(status),
-      description: description,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -95,10 +92,9 @@ class ContractModel {
       position: entity.position,
       startDate: entity.startDate,
       endDate: entity.endDate,
-      weeklyHours: entity.weeklyHours,
-      salary: entity.salary,
+      totalHoursRequired: entity.totalHoursRequired,
+      weeklyHoursTarget: entity.weeklyHoursTarget,
       status: entity.status.value,
-      description: entity.description,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -112,10 +108,9 @@ class ContractModel {
     String? position,
     DateTime? startDate,
     DateTime? endDate,
-    int? weeklyHours,
-    double? salary,
+    double? totalHoursRequired,
+    double? weeklyHoursTarget,
     String? status,
-    String? description,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -127,10 +122,9 @@ class ContractModel {
       position: position ?? this.position,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      weeklyHours: weeklyHours ?? this.weeklyHours,
-      salary: salary ?? this.salary,
+      totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
+      weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
       status: status ?? this.status,
-      description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -152,10 +146,9 @@ class ContractModel {
         other.position == position &&
         other.startDate == startDate &&
         other.endDate == endDate &&
-        other.weeklyHours == weeklyHours &&
-        other.salary == salary &&
+        other.totalHoursRequired == totalHoursRequired &&
+        other.weeklyHoursTarget == weeklyHoursTarget &&
         other.status == status &&
-        other.description == description &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -169,17 +162,15 @@ class ContractModel {
         position.hashCode ^
         startDate.hashCode ^
         endDate.hashCode ^
-        weeklyHours.hashCode ^
-        salary.hashCode ^
+        totalHoursRequired.hashCode ^
+        weeklyHoursTarget.hashCode ^
         status.hashCode ^
-        description.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'ContractModel(id: $id, studentId: $studentId, supervisorId: $supervisorId, company: $company, position: $position, startDate: $startDate, endDate: $endDate, weeklyHours: $weeklyHours, salary: $salary, status: $status, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ContractModel(id: $id, studentId: $studentId, supervisorId: $supervisorId, company: $company, position: $position, startDate: $startDate, endDate: $endDate, totalHoursRequired: $totalHoursRequired, weeklyHoursTarget: $weeklyHoursTarget, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
-
