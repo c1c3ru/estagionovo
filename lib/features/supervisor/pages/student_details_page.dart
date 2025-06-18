@@ -21,9 +21,9 @@ class StudentDetailsPage extends StatefulWidget {
   final String studentId;
 
   const StudentDetailsPage({
-    Key? key,
+    super.key,
     required this.studentId,
-  }) : super(key: key);
+  });
 
   @override
   State<StudentDetailsPage> createState() => _StudentDetailsPageState();
@@ -43,6 +43,7 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
 
   Future<void> _refreshDetails() async {
     _supervisorBloc
+        .add(SupervisorLoadStudentDetailsEvent(studentId: widget.studentId));
         .add(LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId));
   }
 
