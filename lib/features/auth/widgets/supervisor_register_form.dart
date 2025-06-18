@@ -125,7 +125,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             onChanged: _onSiapeChanged,
             prefixIcon: Icons.badge_outlined,
             suffixIcon: _isSiapeValid ? Icons.check_circle : null,
-            suffixIconColor: _isSiapeValid ? Colors.green : null,
+            onSuffixIconPressed: null,
           ),
           const SizedBox(height: 16),
 
@@ -172,7 +172,7 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             labelText: 'Cargo (opcional)',
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
-            prefixIcon: const Icon(Icons.work_outline),
+            prefixIcon: Icons.work_outline,
           ),
           const SizedBox(height: 16),
 
@@ -184,16 +184,6 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             textInputAction: TextInputAction.next,
             validator: Validators.password,
             prefixIcon: Icons.lock_outline,
-            suffixIconButton: IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordVisible = !_isPasswordVisible;
-                });
-              },
-            ),
           ),
           const SizedBox(height: 16),
 
@@ -206,32 +196,20 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             validator: (value) =>
                 Validators.confirmPassword(_passwordController.text, value),
             prefixIcon: Icons.lock_outline,
-            suffixIconButton: IconButton(
-              icon: Icon(
-                _isConfirmPasswordVisible
-                    ? Icons.visibility_off
-                    : Icons.visibility,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                });
-              },
-            ),
-            onFieldSubmitted: (_) => _onRegister(),
+            onSubmitted: (_) => _onRegister(),
           ),
           const SizedBox(height: 24),
 
           // Botão de cadastro
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, state) {
-              final isLoading = state is AuthLoadingState;
+              final isLoading = state is AuthLoading;
 
               return AppButton(
                 text: AppStrings.register,
                 onPressed: isLoading ? null : _onRegister,
                 isLoading: isLoading,
-                icon: const Icon(Icons.person_add),
+                icon: Icons.person_add,
               );
             },
           ),

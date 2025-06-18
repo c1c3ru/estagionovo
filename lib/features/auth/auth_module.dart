@@ -4,13 +4,16 @@ import 'package:student_supervisor_app/features/auth/pages/forgot_password_page.
 import 'package:student_supervisor_app/features/auth/pages/login_page.dart';
 import 'package:student_supervisor_app/features/auth/pages/register_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Datasources
 import '../../data/datasources/supabase/auth_datasource.dart';
+import '../../data/datasources/local/preferences_manager.dart';
 
 // Repositories
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/repositories/i_auth_datasource.dart';
 
 // Usecases
 import '../../domain/usecases/auth/login_usecase.dart';
@@ -25,21 +28,19 @@ class AuthModule extends Module {
   @override
   void binds(Injector i) {
     // Datasources
-    // O SupabaseClient é geralmente injetado a partir do AppModule ou obtido globalmente.
-    // Se estiver no AppModule: i.get<SupabaseClient>()
-    // Se for global (como em main.dart): Supabase.instance.client
-    // Vamos assumir que está disponível para ser obtido pelo Modular se registrado no AppModule,
-    // ou podemos instanciar diretamente se a instância global 'supabase' de main.dart for usada.
-    // Por agora, vamos obter do injetor do Modular, assumindo que foi registrado no AppModule.
-    // Se não, você pode precisar ajustar isso ou passar a instância global.
-    i.add<IAuthSupabaseDatasource>(
-        () => AuthSupabaseDatasource(i.get<SupabaseClient>()));
-    // Alternativa se SupabaseClient não estiver no injetor e for global:
-    // i.add<IAuthSupabaseDatasource>(() => AuthSupabaseDatasource(Supabase.instance.client));
+    i.add<AuthDatasource>(() => AuthDatasource(i.get<SupabaseClient>()));
+
+    // Preferences Manager
+    i.add<PreferencesManager>(() {
+      return PreferencesManager(
+          SharedPreferences.getInstance() as SharedPreferences);
+    });
 
     // Repositories
-    i.add<IAuthRepository>(
-        () => AuthRepository(i.get<IAuthSupabaseDatasource>()));
+    i.add<IAuthRepository>(() => AuthRepository(
+          authDatasource: i.get<AuthDatasource>(),
+          preferencesManager: i.get<PreferencesManager>(),
+        ));
 
     // Usecases
     i.add<LoginUsecase>(() => LoginUsecase(i.get<IAuthRepository>()));

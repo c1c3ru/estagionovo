@@ -1,8 +1,9 @@
 // lib/domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/domain/entities/student.dart';
+import '../../repositories/i_supervisor_repository.dart';
+import '../../entities/student_entity.dart';
 import '../../../core/errors/app_exceptions.dart';
-import '../../repositories/i_supervisor_repository.dart'; // Contém FilterStudentsParams
+import '../../../data/models/student_model.dart';
 
 class GetAllStudentsForSupervisorUsecase {
   final ISupervisorRepository _repository;

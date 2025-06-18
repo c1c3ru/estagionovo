@@ -60,7 +60,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Text(state.message ?? 'Erro desconhecido'),
                   backgroundColor: theme.colorScheme.error,
                 ),
               );
@@ -69,7 +69,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Text(state.message ?? 'Email enviado com sucesso'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -113,6 +113,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       validator: Validators.email,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _submitForgotPassword(),
+                      suffixIcon: Icons.send_outlined,
+                      onSuffixIconPressed: _submitForgotPassword,
                     ),
                     const SizedBox(height: 24),
                     BlocBuilder<AuthBloc, AuthState>(

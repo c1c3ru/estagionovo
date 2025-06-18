@@ -11,7 +11,8 @@ class GetSupervisorDetailsUsecase {
 
   Future<Either<AppFailure, SupervisorEntity>> call(String userId) async {
     if (userId.isEmpty) {
-      return Left(ValidationFailure('O ID do utilizador não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do utilizador não pode estar vazio.'));
     }
     return await _repository.getSupervisorDetails(userId);
   }

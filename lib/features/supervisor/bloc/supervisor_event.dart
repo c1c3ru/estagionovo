@@ -1,7 +1,10 @@
 // lib/features/supervisor/presentation/bloc/supervisor_event.dart
 import 'package:equatable/equatable.dart';
-import '../../../../domain/entities/student_entity.dart'; // Para passar dados de estudante
-import '../../../../domain/entities/contract_entity.dart'; // Para passar dados de contrato
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:student_supervisor_app/data/models/student_model.dart'
+    show FilterStudentsParams;
+import '../../../domain/entities/contract_entity.dart';
+import '../../../domain/entities/student_entity.dart';
 import '../../../../domain/repositories/i_supervisor_repository.dart'; // Para FilterStudentsParams
 // Importe UserRole e StudentStatus dos seus enums centrais
 
@@ -105,7 +108,6 @@ class ApproveOrRejectTimeLogEvent extends SupervisorEvent {
     required this.approved,
     required this.supervisorId,
     this.rejectionReason,
-    required bool isApproved,
   });
 
   @override

@@ -1,8 +1,9 @@
 // lib/features/supervisor/presentation/widgets/student_list_widget.dart
-import 'package:estagio/core/enum/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart'; // Para formatação de datas
+import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../../../../core/constants/app_colors.dart'; // Para cores de status
 import '../../../../domain/entities/student_entity.dart';
@@ -77,7 +78,7 @@ class StudentListWidget extends StatelessWidget {
           true, // Se estiver dentro de uma Column/ListView que não define altura
       itemBuilder: (context, index) {
         final student = students[index];
-        final statusColor = _getStatusColor(
+        _getStatusColor(
             student.role == UserRole.student
                 ? StudentStatus.active
                 : StudentStatus.inactive,
@@ -141,7 +142,7 @@ class StudentListWidget extends StatelessWidget {
               children: [
                 const SizedBox(height: 2),
                 Text(
-                  student.course ?? '',
+                  student.course,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.hintColor),
                   maxLines: 1,

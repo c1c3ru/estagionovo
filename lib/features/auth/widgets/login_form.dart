@@ -13,7 +13,7 @@ import '../bloc/auth_event.dart' hide AuthEvent;
 import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
+  const LoginForm({super.key});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -59,7 +59,7 @@ class _LoginFormState extends State<LoginForm> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.message ?? 'An error occurred'),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
@@ -81,6 +81,10 @@ class _LoginFormState extends State<LoginForm> {
               keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
               textInputAction: TextInputAction.next,
+              suffixIcon: Icons.clear,
+              onSuffixIconPressed: () {
+                _emailController.clear();
+              },
             ),
             const SizedBox(height: 16),
             AppTextField(
@@ -92,6 +96,10 @@ class _LoginFormState extends State<LoginForm> {
               validator: (value) => Validators.password(value, minLength: 6),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submitLogin(),
+              suffixIcon: Icons.clear,
+              onSuffixIconPressed: () {
+                _passwordController.clear();
+              },
             ),
             const SizedBox(height: 8),
             Align(

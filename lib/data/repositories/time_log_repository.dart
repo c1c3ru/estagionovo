@@ -5,7 +5,7 @@ import '../../domain/entities/time_log_entity.dart';
 import '../datasources/supabase/time_log_datasource.dart';
 import '../models/time_log_model.dart';
 
-abstract class TimeLogRepository implements ITimeLogRepository {
+class TimeLogRepository implements ITimeLogRepository {
   final TimeLogDatasource _timeLogDatasource;
 
   TimeLogRepository(this._timeLogDatasource);
@@ -115,10 +115,11 @@ abstract class TimeLogRepository implements ITimeLogRepository {
   }
 
   @override
-  Future<TimeLogEntity> clockIn(String studentId, {String? description}) async {
+  Future<TimeLogEntity> clockIn(String studentId,
+      {String? description, String? notes}) async {
     try {
-      final timeLogData =
-          await _timeLogDatasource.clockIn(studentId, notes: description);
+      final timeLogData = await _timeLogDatasource.clockIn(studentId,
+          notes: notes ?? description);
       return TimeLogModel.fromJson(timeLogData).toEntity();
     } catch (e) {
       throw Exception('Erro no repositório ao registrar entrada: $e');
@@ -165,6 +166,28 @@ abstract class TimeLogRepository implements ITimeLogRepository {
     } catch (e) {
       throw Exception(
           'Erro no repositório ao buscar registros do supervisor: $e');
+    }
+  }
+
+  @override
+  Future<Duration> getTotalHoursByPeriod(
+      String studentId, DateTime start, DateTime end) async {
+    try {
+      final timeLogs = await getTimeLogsByDateRange(studentId, start, end);
+      int totalMinutes = 0;
+
+      for (final timeLog in timeLogs) {
+        if (timeLog.checkInTime != null && timeLog.checkOutTime != null) {
+          final checkIn = timeLog.checkInTime!;
+          final checkOut = timeLog.checkOutTime!;
+          final duration = checkOut.difference(checkIn);
+          totalMinutes += duration.inMinutes as int;
+        }
+      }
+
+      return Duration(minutes: totalMinutes);
+    } catch (e) {
+      throw Exception('Erro no repositório ao calcular horas por período: $e');
     }
   }
 }

@@ -52,9 +52,18 @@ class TimeLogEntity {
         updatedAt.hashCode;
   }
 
+  get checkOutTime => null;
+
+  get logDate => null;
+
+  get checkInTime => null;
+
+  bool get approved => false;
+
+  get hoursLogged => null;
+
   @override
   String toString() {
     return 'TimeLogEntity(id: $id, studentId: $studentId, clockIn: $clockIn, clockOut: $clockOut, description: $description, totalHours: $totalHours, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
-

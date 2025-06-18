@@ -3,13 +3,15 @@ import '../../domain/entities/user_entity.dart';
 import '../datasources/supabase/auth_datasource.dart';
 import '../datasources/local/preferences_manager.dart';
 import '../models/user_model.dart';
+import 'package:dartz/dartz.dart';
+import '../../core/errors/app_exceptions.dart';
+import '../../domain/usecases/auth/update_profile_params.dart';
 
 class AuthRepository implements IAuthRepository {
   final AuthDatasource _authDatasource;
   final PreferencesManager _preferencesManager;
 
-  AuthRepository(
-    param0, {
+  AuthRepository({
     required AuthDatasource authDatasource,
     required PreferencesManager preferencesManager,
   })  : _authDatasource = authDatasource,
@@ -107,6 +109,20 @@ class AuthRepository implements IAuthRepository {
       // Fallback to local check
       final cachedUserData = _preferencesManager.getUserData();
       return cachedUserData != null;
+    }
+  }
+
+  @override
+  Stream<UserEntity?>? get authStateChanges => null;
+
+  @override
+  Future<Either<AppFailure, UserEntity>> updateUserProfile(
+      UpdateProfileParams params) async {
+    try {
+      // Implementação temporária - retorna erro
+      return Left(const ServerFailure(message: 'Método não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }

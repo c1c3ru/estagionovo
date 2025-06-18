@@ -1,4 +1,5 @@
 // lib/domain/usecases/student/create_time_log_usecase.dart
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart'; // Para TimeOfDay
 import '../../../core/errors/app_exceptions.dart';
 import '../../entities/time_log_entity.dart';
@@ -17,7 +18,8 @@ class CreateTimeLogUsecase {
     String? description,
   }) async {
     if (studentId.isEmpty) {
-      return Left(ValidationFailure('O ID do estudante não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do estudante não pode estar vazio.'));
     }
     // Validação para garantir que checkOutTime, se fornecido, é posterior a checkInTime no mesmo dia.
     if (checkOutTime != null) {
@@ -26,7 +28,7 @@ class CreateTimeLogUsecase {
       final checkOutDateTime = DateTime(logDate.year, logDate.month,
           logDate.day, checkOutTime.hour, checkOutTime.minute);
       if (checkOutDateTime.isBefore(checkInDateTime)) {
-        return Left(ValidationFailure(
+        return const Left(ValidationFailure(
             'A hora de saída deve ser posterior à hora de entrada.'));
       }
     }

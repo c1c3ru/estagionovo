@@ -1,64 +1,227 @@
-import '../../core/enums/class_shift.dart';
-import '../../core/enums/internship_shift.dart';
+import 'package:equatable/equatable.dart';
+import 'dart:math';
 
-class StudentEntity {
+import 'package:student_supervisor_app/core/enums/class_shift.dart';
+import 'package:student_supervisor_app/core/enums/internship_shift.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
+
+class StudentEntity extends Equatable {
   final String id;
-  final String userId;
-  final String registration;
+  final String fullName;
+  final String registrationNumber;
   final String course;
-  final int semester;
+  final String advisorName;
+  final bool isMandatoryInternship;
   final ClassShift classShift;
-  final InternshipShift internshipShift;
-  final String? supervisorId;
+  final InternshipShift internshipShift1;
+  final InternshipShift? internshipShift2;
+  final DateTime birthDate;
+  final DateTime contractStartDate;
+  final DateTime contractEndDate;
+  final double totalHoursRequired;
+  final double totalHoursCompleted;
+  final double weeklyHoursTarget;
+  final String? profilePictureUrl;
+  final String? phoneNumber;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
+  final UserRole role;
 
   const StudentEntity({
     required this.id,
-    required this.userId,
-    required this.registration,
+    required this.fullName,
+    required this.registrationNumber,
     required this.course,
-    required this.semester,
+    required this.advisorName,
+    required this.isMandatoryInternship,
     required this.classShift,
-    required this.internshipShift,
-    this.supervisorId,
+    required this.internshipShift1,
+    this.internshipShift2,
+    required this.birthDate,
+    required this.contractStartDate,
+    required this.contractEndDate,
+    required this.totalHoursRequired,
+    required this.totalHoursCompleted,
+    required this.weeklyHoursTarget,
+    this.profilePictureUrl,
+    this.phoneNumber,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
+    this.role = UserRole.student,
   });
+
+  double get progressPercentage {
+    if (totalHoursRequired <= 0) return 0.0;
+    final percentage = (totalHoursCompleted / totalHoursRequired) * 100;
+    return min(max(percentage, 0.0), 100.0);
+  }
+
+  double get remainingHours {
+    final remaining = totalHoursRequired - totalHoursCompleted;
+    return max(remaining, 0.0);
+  }
+
+  bool get isOnTrack {
+    if (totalHoursRequired <= 0 || contractStartDate.isAfter(DateTime.now())) {
+      return true;
+    }
+    if (contractEndDate.isBefore(DateTime.now())) {
+      return totalHoursCompleted >= totalHoursRequired;
+    }
+
+    final totalDays = contractEndDate.difference(contractStartDate).inDays;
+    if (totalDays <= 0) return true;
+
+    final daysElapsed = DateTime.now().difference(contractStartDate).inDays;
+    final effectiveDaysElapsed = min(max(daysElapsed, 0), totalDays);
+    final expectedProgress =
+        (effectiveDaysElapsed / totalDays) * totalHoursRequired;
+    return totalHoursCompleted >= expectedProgress;
+  }
+
+  int get daysRemainingInContract {
+    final now =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final end = DateTime(
+        contractEndDate.year, contractEndDate.month, contractEndDate.day);
+    if (end.isBefore(now)) return 0;
+    return end.difference(now).inDays;
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        fullName,
+        registrationNumber,
+        course,
+        advisorName,
+        isMandatoryInternship,
+        classShift,
+        internshipShift1,
+        internshipShift2,
+        birthDate,
+        contractStartDate,
+        contractEndDate,
+        totalHoursRequired,
+        totalHoursCompleted,
+        weeklyHoursTarget,
+        profilePictureUrl,
+        phoneNumber,
+        createdAt,
+        updatedAt,
+        role,
+      ];
+
+  StudentEntity copyWith({
+    String? id,
+    String? fullName,
+    String? registrationNumber,
+    String? course,
+    String? advisorName,
+    bool? isMandatoryInternship,
+    ClassShift? classShift,
+    InternshipShift? internshipShift1,
+    InternshipShift? internshipShift2,
+    bool? clearInternshipShift2,
+    DateTime? birthDate,
+    DateTime? contractStartDate,
+    DateTime? contractEndDate,
+    double? totalHoursRequired,
+    double? totalHoursCompleted,
+    double? weeklyHoursTarget,
+    String? profilePictureUrl,
+    bool? clearProfilePictureUrl,
+    String? phoneNumber,
+    bool? clearPhoneNumber,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? clearUpdatedAt,
+    UserRole? role,
+  }) {
+    return StudentEntity(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      registrationNumber: registrationNumber ?? this.registrationNumber,
+      course: course ?? this.course,
+      advisorName: advisorName ?? this.advisorName,
+      isMandatoryInternship:
+          isMandatoryInternship ?? this.isMandatoryInternship,
+      classShift: classShift ?? this.classShift,
+      internshipShift1: internshipShift1 ?? this.internshipShift1,
+      internshipShift2: clearInternshipShift2 == true
+          ? null
+          : internshipShift2 ?? this.internshipShift2,
+      birthDate: birthDate ?? this.birthDate,
+      contractStartDate: contractStartDate ?? this.contractStartDate,
+      contractEndDate: contractEndDate ?? this.contractEndDate,
+      totalHoursRequired: totalHoursRequired ?? this.totalHoursRequired,
+      totalHoursCompleted: totalHoursCompleted ?? this.totalHoursCompleted,
+      weeklyHoursTarget: weeklyHoursTarget ?? this.weeklyHoursTarget,
+      profilePictureUrl: clearProfilePictureUrl == true
+          ? null
+          : profilePictureUrl ?? this.profilePictureUrl,
+      phoneNumber:
+          clearPhoneNumber == true ? null : phoneNumber ?? this.phoneNumber,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: clearUpdatedAt == true ? null : updatedAt ?? this.updatedAt,
+      role: role ?? this.role,
+    );
+  }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is StudentEntity &&
         other.id == id &&
-        other.userId == userId &&
-        other.registration == registration &&
+        other.fullName == fullName &&
+        other.registrationNumber == registrationNumber &&
         other.course == course &&
-        other.semester == semester &&
+        other.advisorName == advisorName &&
+        other.isMandatoryInternship == isMandatoryInternship &&
         other.classShift == classShift &&
-        other.internshipShift == internshipShift &&
-        other.supervisorId == supervisorId &&
+        other.internshipShift1 == internshipShift1 &&
+        other.internshipShift2 == internshipShift2 &&
+        other.birthDate == birthDate &&
+        other.contractStartDate == contractStartDate &&
+        other.contractEndDate == contractEndDate &&
+        other.totalHoursRequired == totalHoursRequired &&
+        other.totalHoursCompleted == totalHoursCompleted &&
+        other.weeklyHoursTarget == weeklyHoursTarget &&
+        other.profilePictureUrl == profilePictureUrl &&
+        other.phoneNumber == phoneNumber &&
         other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
+        other.updatedAt == updatedAt &&
+        other.role == role;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        userId.hashCode ^
-        registration.hashCode ^
+        fullName.hashCode ^
+        registrationNumber.hashCode ^
         course.hashCode ^
-        semester.hashCode ^
+        advisorName.hashCode ^
+        isMandatoryInternship.hashCode ^
         classShift.hashCode ^
-        internshipShift.hashCode ^
-        supervisorId.hashCode ^
+        internshipShift1.hashCode ^
+        internshipShift2.hashCode ^
+        birthDate.hashCode ^
+        contractStartDate.hashCode ^
+        contractEndDate.hashCode ^
+        totalHoursRequired.hashCode ^
+        totalHoursCompleted.hashCode ^
+        weeklyHoursTarget.hashCode ^
+        profilePictureUrl.hashCode ^
+        phoneNumber.hashCode ^
         createdAt.hashCode ^
-        updatedAt.hashCode;
+        updatedAt.hashCode ^
+        role.hashCode;
   }
+
+  get email => null;
 
   @override
   String toString() {
-    return 'StudentEntity(id: $id, userId: $userId, registration: $registration, course: $course, semester: $semester, classShift: $classShift, internshipShift: $internshipShift, supervisorId: $supervisorId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'StudentEntity(id: $id, fullName: $fullName, registrationNumber: $registrationNumber, course: $course, advisorName: $advisorName, isMandatoryInternship: $isMandatoryInternship, classShift: $classShift, internshipShift1: $internshipShift1, internshipShift2: $internshipShift2, birthDate: $birthDate, contractStartDate: $contractStartDate, contractEndDate: $contractEndDate, totalHoursRequired: $totalHoursRequired, totalHoursCompleted: $totalHoursCompleted, weeklyHoursTarget: $weeklyHoursTarget, profilePictureUrl: $profilePictureUrl, phoneNumber: $phoneNumber, createdAt: $createdAt, updatedAt: $updatedAt, role: $role)';
   }
 }
-

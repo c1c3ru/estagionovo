@@ -35,7 +35,8 @@ class DashboardSummaryCards extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12.0),
           child: Padding(
-            padding: const EdgeInsets.all(12.0), // Padding reduzido para cards menores
+            padding: const EdgeInsets.all(
+                12.0), // Padding reduzido para cards menores
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -46,14 +47,17 @@ class DashboardSummaryCards extends StatelessWidget {
                   count.toString(),
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: onTap != null ? theme.colorScheme.primary : null, // Cor diferente se for clicável
+                    color: onTap != null
+                        ? theme.colorScheme.primary
+                        : null, // Cor diferente se for clicável
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   title,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.hintColor),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -94,7 +98,7 @@ class DashboardSummaryCards extends StatelessWidget {
                 count: stats.activeStudents,
                 icon: Icons.check_circle_outline,
                 iconColor: AppColors.statusActive,
-                 onTap: () {
+                onTap: () {
                   // TODO: Navegar para a lista de estudantes ativos ou aplicar filtro
                   // Ex: Modular.to.pushNamed('/supervisor/students', arguments: {'filter': 'active'});
                 },
@@ -102,11 +106,13 @@ class DashboardSummaryCards extends StatelessWidget {
               const SizedBox(width: 12),
               _buildStatCard(
                 context: context,
-                title: AppStrings.inactiveStudents, // Ou 'Expirados' se for mais apropriado
+                title: AppStrings
+                    .activeStudents, // Ou 'Expirados' se for mais apropriado
                 count: stats.inactiveStudents,
-                icon: Icons.pause_circle_outline_outlined, // Ou Icons.cancel_outlined
+                icon: Icons
+                    .pause_circle_outline_outlined, // Ou Icons.cancel_outlined
                 iconColor: AppColors.statusInactive,
-                 onTap: () {
+                onTap: () {
                   // TODO: Navegar para a lista de estudantes inativos ou aplicar filtro
                 },
               ),
@@ -117,7 +123,7 @@ class DashboardSummaryCards extends StatelessWidget {
                 count: stats.expiringContractsSoon,
                 icon: Icons.warning_amber_rounded,
                 iconColor: AppColors.statusPending, // Cor de aviso
-                 onTap: () {
+                onTap: () {
                   // TODO: Navegar para a lista de contratos a vencer ou aplicar filtro
                 },
               ),
@@ -133,7 +139,7 @@ class DashboardSummaryCards extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: 1.8, // Ajuste para o tamanho desejado do card
             children: <Widget>[
-               _buildStatCard(
+              _buildStatCard(
                 context: context,
                 title: AppStrings.totalStudents,
                 count: stats.totalStudents,
@@ -151,7 +157,7 @@ class DashboardSummaryCards extends StatelessWidget {
               ),
               _buildStatCard(
                 context: context,
-                title: AppStrings.inactiveStudents,
+                title: AppStrings.activeStudents,
                 count: stats.inactiveStudents,
                 icon: Icons.pause_circle_outline_outlined,
                 iconColor: AppColors.statusInactive,

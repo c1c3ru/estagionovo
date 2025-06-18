@@ -1,7 +1,7 @@
 // lib/features/supervisor/presentation/widgets/contract_gantt_chart.dart
-import 'package:estagio/core/enum/contract_status.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Para formatação de datas
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../domain/entities/contract_entity.dart';

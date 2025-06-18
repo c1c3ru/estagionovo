@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'package:estagio/core/enum/user_role.dart';
-import 'package:estagio/domain/entities/student.dart';
-import 'package:estagio/features/supervisor/bloc/supervisor_event.dart';
-import 'package:estagio/features/supervisor/bloc/supervisor_state.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/data/models/student_model.dart';
+import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_event.dart';
+import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
 
 import '../../../../core/errors/app_exceptions.dart';
-import '../../../../domain/entities/student_entity.dart'
-    hide StudentStatus, StudentEntity;
+import '../../../../domain/entities/student_entity.dart' hide StudentStatus;
 import '../../../../domain/entities/supervisor_entity.dart';
 import '../../../../domain/entities/time_log_entity.dart';
 import '../../../../domain/entities/contract_entity.dart';
@@ -231,7 +230,10 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       result.fold(
         (failure) {
           // If the operation fails, revert the state and show an error.
-          emit(currentState.copyWith(pendingApprovals: originalApprovals));
+          emit(currentState.copyWith(
+              pendingApprovals: originalApprovals,
+              isLoading: true,
+              appliedFilters: ''));
           emit(SupervisorOperationFailure(message: failure.message));
         },
         (updatedTimeLog) {
@@ -253,7 +255,11 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
   ) {
     if (state is SupervisorDashboardLoadSuccess) {
       final currentDashboardState = state as SupervisorDashboardLoadSuccess;
-      emit(currentDashboardState.copyWith(showGanttView: event.showGanttView));
+      emit(currentDashboardState.copyWith(
+          showGanttView: event.showGanttView,
+          isLoading: true,
+          appliedFilters: FilterStudentsParams(status: StudentStatus.active),
+          pendingApprovals: []));
     }
   }
 
@@ -412,9 +418,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       studentId: event.studentIdFilter,
       status: event.statusFilter,
     ));
-    result.fold(
+    result.fold<void>(
         (failure) => emit(SupervisorOperationFailure(message: failure.message)),
-        (contracts) {
+        (List<ContractEntity> contracts) {
       if (state is SupervisorDashboardLoadSuccess) {
         emit((state as SupervisorDashboardLoadSuccess)
             .copyWith(contracts: contracts));

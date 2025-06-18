@@ -10,7 +10,8 @@ class DeleteTimeLogUsecase {
 
   Future<Either<AppFailure, void>> call(String timeLogId) async {
     if (timeLogId.isEmpty) {
-      return Left(ValidationFailure('O ID do registo de tempo não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do registo de tempo não pode estar vazio.'));
     }
     return await _repository.deleteTimeLog(timeLogId);
   }

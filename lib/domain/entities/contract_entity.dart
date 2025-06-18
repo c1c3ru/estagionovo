@@ -32,9 +32,9 @@ class ContractEntity {
   });
 
   bool get isActive => status == ContractStatus.active;
-  
+
   Duration get totalDuration => endDate.difference(startDate);
-  
+
   int get totalExpectedHours {
     final weeks = totalDuration.inDays / 7;
     return (weeks * weeklyHours).round();
@@ -70,9 +70,12 @@ class ContractEntity {
         updatedAt.hashCode;
   }
 
+  get contractType => null;
+
+  get documentUrl => null;
+
   @override
   String toString() {
     return 'ContractEntity(id: $id, studentId: $studentId, supervisorId: $supervisorId, startDate: $startDate, endDate: $endDate, weeklyHours: $weeklyHours, status: $status, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
-

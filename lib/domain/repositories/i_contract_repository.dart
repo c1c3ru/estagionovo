@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../entities/contract_entity.dart';
 

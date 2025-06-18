@@ -1,5 +1,6 @@
 // lib/domain/usecases/contract/get_all_contracts_usecase.dart
 
+import 'package:dartz/dartz.dart';
 import 'package:student_supervisor_app/core/enums/contract_status.dart';
 
 import '../../../core/errors/app_exceptions.dart';
@@ -19,8 +20,7 @@ class GetAllContractsUsecase {
 
   GetAllContractsUsecase(this._repository);
 
-  Future<Either<AppFailure, List<ContractEntity>>> call(
-      GetAllContractsParams params) async {
+  Future<List<ContractEntity>> call(GetAllContractsParams params) async {
     // Validações nos parâmetros de filtro podem ser adicionadas aqui, se necessário.
     return await _repository.getAllContracts(
       studentId: params.studentId,

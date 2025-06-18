@@ -9,16 +9,16 @@ class CreateStudentUsecase {
   Future<StudentEntity> call(StudentEntity student) async {
     try {
       // Validações
-      if (student.registration.isEmpty) {
+      if (student.registrationNumber.isEmpty) {
         throw Exception('Matrícula é obrigatória');
       }
-      
+
       if (student.course.isEmpty) {
         throw Exception('Curso é obrigatório');
       }
-      
-      if (student.semester <= 0) {
-        throw Exception('Semestre deve ser maior que zero');
+
+      if (student.fullName.isEmpty) {
+        throw Exception('Nome completo é obrigatório');
       }
 
       return await _studentRepository.createStudent(student);
@@ -27,4 +27,3 @@ class CreateStudentUsecase {
     }
   }
 }
-

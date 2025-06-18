@@ -1,12 +1,19 @@
 import '../../domain/repositories/i_student_repository.dart';
 import '../../domain/entities/student_entity.dart';
+import '../../domain/entities/time_log_entity.dart';
+import '../../core/errors/app_exceptions.dart';
 import '../datasources/supabase/student_datasource.dart';
+import '../datasources/supabase/time_log_datasource.dart';
 import '../models/student_model.dart';
+import '../models/time_log_model.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 
 class StudentRepository implements IStudentRepository {
   final StudentDatasource _studentDatasource;
+  final TimeLogDatasource _timeLogDatasource;
 
-  StudentRepository(this._studentDatasource);
+  StudentRepository(this._studentDatasource, this._timeLogDatasource);
 
   @override
   Future<List<StudentEntity>> getAllStudents() async {
@@ -38,7 +45,8 @@ class StudentRepository implements IStudentRepository {
       if (studentData == null) return null;
       return StudentModel.fromJson(studentData).toEntity();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar estudante por usuário: $e');
+      throw Exception(
+          'Erro no repositório ao buscar estudante por usuário: $e');
     }
   }
 
@@ -46,7 +54,8 @@ class StudentRepository implements IStudentRepository {
   Future<StudentEntity> createStudent(StudentEntity student) async {
     try {
       final studentModel = StudentModel.fromEntity(student);
-      final createdData = await _studentDatasource.createStudent(studentModel.toJson());
+      final createdData =
+          await _studentDatasource.createStudent(studentModel.toJson());
       return StudentModel.fromJson(createdData).toEntity();
     } catch (e) {
       throw Exception('Erro no repositório ao criar estudante: $e');
@@ -77,15 +86,121 @@ class StudentRepository implements IStudentRepository {
   }
 
   @override
-  Future<List<StudentEntity>> getStudentsBySupervisor(String supervisorId) async {
+  Future<List<StudentEntity>> getStudentsBySupervisor(
+      String supervisorId) async {
     try {
-      final studentsData = await _studentDatasource.getStudentsBySupervisor(supervisorId);
+      final studentsData =
+          await _studentDatasource.getStudentsBySupervisor(supervisorId);
       return studentsData
           .map((data) => StudentModel.fromJson(data).toEntity())
           .toList();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar estudantes do supervisor: $e');
+      throw Exception(
+          'Erro no repositório ao buscar estudantes do supervisor: $e');
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, TimeLogEntity>> checkIn(
+      {required String studentId, String? notes}) async {
+    try {
+      // Implementação temporária
+      return Left(
+          const ServerFailure(message: 'Método checkIn não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, TimeLogEntity>> checkOut(
+      {required String studentId,
+      required String activeTimeLogId,
+      String? description}) async {
+    try {
+      // Implementação temporária
+      return Left(
+          const ServerFailure(message: 'Método checkOut não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, TimeLogEntity>> createTimeLog(
+      {required String studentId,
+      required DateTime logDate,
+      required TimeOfDay checkInTime,
+      TimeOfDay? checkOutTime,
+      String? description}) async {
+    try {
+      // Implementação temporária
+      return Left(const ServerFailure(
+          message: 'Método createTimeLog não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, void>> deleteTimeLog(String timeLogId) async {
+    try {
+      // Implementação temporária
+      return Left(const ServerFailure(
+          message: 'Método deleteTimeLog não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, StudentEntity>> getStudentDetails(
+      String userId) async {
+    try {
+      final student = await getStudentByUserId(userId);
+      if (student == null) {
+        return Left(const ServerFailure(message: 'Estudante não encontrado'));
+      }
+      return Right(student);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, List<TimeLogEntity>>> getStudentTimeLogs(
+      {required String studentId,
+      DateTime? startDate,
+      DateTime? endDate}) async {
+    try {
+      // Implementação temporária
+      return Left(const ServerFailure(
+          message: 'Método getStudentTimeLogs não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, StudentEntity>> updateStudentProfile(
+      StudentEntity student) async {
+    try {
+      final updatedStudent = await updateStudent(student);
+      return Right(updatedStudent);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, TimeLogEntity>> updateTimeLog(
+      TimeLogEntity timeLog) async {
+    try {
+      // Implementação temporária
+      return Left(const ServerFailure(
+          message: 'Método updateTimeLog não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
     }
   }
 }
-

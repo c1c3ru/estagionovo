@@ -1,5 +1,5 @@
 // lib/domain/usecases/auth/reset_password_usecase.dart
-import '../../../core/errors/app_exceptions.dart';
+import 'package:dartz/dartz.dart';
 import '../../repositories/i_auth_repository.dart';
 
 class ResetPasswordUsecase {
@@ -7,7 +7,7 @@ class ResetPasswordUsecase {
 
   ResetPasswordUsecase(this._repository);
 
-  Future<Either<AppFailure, void>> call(String email) async {
+  Future<void> call(String email) async {
     // Validação do formato do email pode ser feita aqui.
     // if (!isValidEmail(email)) {
     //   return Left(ValidationFailure('Formato de email inválido.'));

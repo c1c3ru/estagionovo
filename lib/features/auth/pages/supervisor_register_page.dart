@@ -16,7 +16,7 @@ class SupervisorRegisterPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.registerSupervisorPage),
+        title: Text(AppStrings.registerSupervisorPage ?? 'Register Supervisor'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -26,13 +26,13 @@ class SupervisorRegisterPage extends StatelessWidget {
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.message ?? 'An error occurred'),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
           } else if (state is AuthSuccessState) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text(AppStrings.registrationSuccessful),
                 backgroundColor: Colors.green,
               ),

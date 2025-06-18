@@ -1,8 +1,8 @@
 // lib/domain/usecases/supervisor/update_student_by_supervisor_usecase.dart
 import 'package:dartz/dartz.dart';
-import 'package:estagio/domain/entities/student.dart';
-import '../../../core/errors/app_exceptions.dart';
+import '../../entities/student_entity.dart';
 import '../../repositories/i_supervisor_repository.dart';
+import '../../../core/errors/app_exceptions.dart';
 
 class UpdateStudentBySupervisorUsecase {
   final ISupervisorRepository _repository;

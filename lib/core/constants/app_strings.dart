@@ -18,6 +18,7 @@ class AppStrings {
   static const String retry = 'Tentar novamente';
   static const String noData = 'Nenhum dado encontrado';
   static const String noResults = 'Nenhum resultado encontrado';
+  static const String registrationSuccessful = 'Cadastro realizado com sucesso';
 
   // Auth
   static const String login = 'Entrar';
@@ -86,20 +87,20 @@ class AppStrings {
   static const String unauthorizedError = 'Não autorizado';
   static const String forbiddenError = 'Acesso negado';
   static const String notFoundError = 'Não encontrado';
+  static const String errorOccurred = 'Ocorreu um erro';
 
-  static String? requiredField;
-
-  static String registerSupervisorPage;
-
-  static String registrationSuccessful;
-
-  static var fullName;
-
-  static var selectRole;
-
-  static var siapeRegistration;
-
-  static var siapeHint;
-
-  static var phoneNumber;
+  // Additional fields
+  static const String requiredField = 'Este campo é obrigatório';
+  static const String registerSupervisorPage = 'Cadastrar Supervisor';
+  static const String fullName = 'Nome Completo';
+  static const String selectRole = 'Selecionar Função';
+  static const String siapeRegistration = 'Matrícula SIAPE';
+  static const String siapeHint = 'Digite sua matrícula SIAPE';
+  static const String phoneNumber = 'Telefone';
+  static const String tryAgain = 'Tentar Novamente';
+  static const String totalStudents = 'Total de Estudantes';
+  static const String activeStudents = 'Estudantes Ativos';
+  static const String expiringContracts = 'Contratos Expirando';
+  static const String checkIn = 'Entrada';
+  static const String checkOut = 'Saída';
 }

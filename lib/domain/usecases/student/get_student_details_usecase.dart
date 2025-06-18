@@ -12,7 +12,8 @@ class GetStudentDetailsUsecase {
   Future<Either<AppFailure, StudentEntity>> call(String userId) async {
     // Validação básica do ID do usuário pode ser adicionada aqui, se necessário.
     if (userId.isEmpty) {
-      return Left(ValidationFailure('O ID do utilizador não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do utilizador não pode estar vazio.'));
     }
     return await _repository.getStudentDetails(userId);
   }

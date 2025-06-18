@@ -70,22 +70,27 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
   final List<ContractEntity>
       contracts; // Lista de contratos para o Gantt ou visão geral
   final SupervisorDashboardStats stats;
-  final bool showGanttView; // Para alternar entre lista e Gantt
+  final bool showGanttView;
+  final List<TimeLogEntity> pendingApprovals; // Para aprovações pendentes
 
-  const SupervisorDashboardLoadSuccess(
-    List<StudentEntity> students, {
+  const SupervisorDashboardLoadSuccess({
     this.supervisorProfile,
     required this.students,
     required this.contracts,
     required this.stats,
-    this.showGanttView = false, // Padrão para visualização de lista
+    this.showGanttView = false,
+    required this.pendingApprovals,
   });
 
   @override
-  List<Object?> get props =>
-      [supervisorProfile, students, contracts, stats, showGanttView];
-
-  get isLoading => null;
+  List<Object?> get props => [
+        supervisorProfile,
+        students,
+        contracts,
+        stats,
+        showGanttView,
+        pendingApprovals
+      ];
 
   SupervisorDashboardLoadSuccess copyWith({
     SupervisorEntity? supervisorProfile,
@@ -93,14 +98,15 @@ class SupervisorDashboardLoadSuccess extends SupervisorState {
     List<ContractEntity>? contracts,
     SupervisorDashboardStats? stats,
     bool? showGanttView,
+    List<TimeLogEntity>? pendingApprovals,
   }) {
     return SupervisorDashboardLoadSuccess(
-      students ?? this.students,
       supervisorProfile: supervisorProfile ?? this.supervisorProfile,
+      students: students ?? this.students,
       contracts: contracts ?? this.contracts,
       stats: stats ?? this.stats,
       showGanttView: showGanttView ?? this.showGanttView,
-      students: [],
+      pendingApprovals: pendingApprovals ?? this.pendingApprovals,
     );
   }
 }

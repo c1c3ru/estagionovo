@@ -46,7 +46,8 @@ class AuthDatasource {
     }
   }
 
-  Future<UserModel> register(String email, String password, String name, String role) async {
+  Future<UserModel> register(
+      String email, String password, String name, String role) async {
     try {
       final response = await _supabaseClient.auth.signUp(
         email: email,
@@ -66,9 +67,7 @@ class AuthDatasource {
         updatedAt: DateTime.now(),
       );
 
-      await _supabaseClient
-          .from('users')
-          .insert(userModel.toJson());
+      await _supabaseClient.from('users').insert(userModel.toJson());
 
       return userModel;
     } catch (e) {
@@ -101,4 +100,3 @@ class AuthDatasource {
     }
   }
 }
-

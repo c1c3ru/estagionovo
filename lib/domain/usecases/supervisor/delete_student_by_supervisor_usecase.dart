@@ -10,7 +10,8 @@ class DeleteStudentBySupervisorUsecase {
 
   Future<Either<AppFailure, void>> call(String studentId) async {
     if (studentId.isEmpty) {
-      return Left(ValidationFailure('O ID do estudante não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do estudante não pode estar vazio.'));
     }
     return await _repository.deleteStudent(studentId);
   }

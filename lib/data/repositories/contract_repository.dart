@@ -1,3 +1,5 @@
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
+
 import '../../domain/repositories/i_contract_repository.dart';
 import '../../domain/entities/contract_entity.dart';
 import '../datasources/supabase/contract_datasource.dart';
@@ -9,9 +11,17 @@ class ContractRepository implements IContractRepository {
   ContractRepository(this._contractDatasource);
 
   @override
-  Future<List<ContractEntity>> getAllContracts() async {
+  Future<List<ContractEntity>> getAllContracts({
+    ContractStatus? status,
+    String? studentId,
+    String? supervisorId,
+  }) async {
     try {
-      final contractsData = await _contractDatasource.getAllContracts();
+      final contractsData = await _contractDatasource.getAllContracts(
+        status: status,
+        studentId: studentId,
+        supervisorId: supervisorId,
+      );
       return contractsData
           .map((data) => ContractModel.fromJson(data).toEntity())
           .toList();
@@ -34,28 +44,32 @@ class ContractRepository implements IContractRepository {
   @override
   Future<List<ContractEntity>> getContractsByStudent(String studentId) async {
     try {
-      final contractsData = await _contractDatasource.getContractsByStudent(studentId);
+      final contractsData =
+          await _contractDatasource.getContractsByStudent(studentId);
       return contractsData
           .map((data) => ContractModel.fromJson(data).toEntity())
           .toList();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar contratos do estudante: $e');
+      throw Exception(
+          'Erro no repositório ao buscar contratos do estudante: $e');
     }
   }
 
   @override
-  Future<List<ContractEntity>> getContractsBySupervisor(String supervisorId) async {
+  Future<List<ContractEntity>> getContractsBySupervisor(
+      String supervisorId) async {
     try {
-      final contractsData = await _contractDatasource.getContractsBySupervisor(supervisorId);
+      final contractsData =
+          await _contractDatasource.getContractsBySupervisor(supervisorId);
       return contractsData
           .map((data) => ContractModel.fromJson(data).toEntity())
           .toList();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar contratos do supervisor: $e');
+      throw Exception(
+          'Erro no repositório ao buscar contratos do supervisor: $e');
     }
   }
 
-  @override
   Future<List<ContractEntity>> getActiveContracts() async {
     try {
       final contractsData = await _contractDatasource.getActiveContracts();
@@ -71,7 +85,8 @@ class ContractRepository implements IContractRepository {
   Future<ContractEntity> createContract(ContractEntity contract) async {
     try {
       final contractModel = ContractModel.fromEntity(contract);
-      final createdData = await _contractDatasource.createContract(contractModel.toJson());
+      final createdData =
+          await _contractDatasource.createContract(contractModel.toJson());
       return ContractModel.fromJson(createdData).toEntity();
     } catch (e) {
       throw Exception('Erro no repositório ao criar contrato: $e');
@@ -104,23 +119,26 @@ class ContractRepository implements IContractRepository {
   @override
   Future<ContractEntity?> getActiveContractByStudent(String studentId) async {
     try {
-      final contractData = await _contractDatasource.getActiveContractByStudent(studentId);
+      final contractData =
+          await _contractDatasource.getActiveContractByStudent(studentId);
       if (contractData == null) return null;
       return ContractModel.fromJson(contractData).toEntity();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar contrato ativo do estudante: $e');
+      throw Exception(
+          'Erro no repositório ao buscar contrato ativo do estudante: $e');
     }
   }
 
-  @override
   Future<List<ContractEntity>> getExpiringContracts(int daysAhead) async {
     try {
-      final contractsData = await _contractDatasource.getExpiringContracts(daysAhead);
+      final contractsData =
+          await _contractDatasource.getExpiringContracts(daysAhead);
       return contractsData
           .map((data) => ContractModel.fromJson(data).toEntity())
           .toList();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar contratos próximos do vencimento: $e');
+      throw Exception(
+          'Erro no repositório ao buscar contratos próximos do vencimento: $e');
     }
   }
 
@@ -129,8 +147,8 @@ class ContractRepository implements IContractRepository {
     try {
       return await _contractDatasource.getContractStatistics();
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar estatísticas de contratos: $e');
+      throw Exception(
+          'Erro no repositório ao buscar estatísticas de contratos: $e');
     }
   }
 }
-

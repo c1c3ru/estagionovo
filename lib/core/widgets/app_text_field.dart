@@ -23,6 +23,8 @@ class AppTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final int maxLines;
   final int? minLines;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const AppTextField({
     Key? key,
@@ -45,8 +47,8 @@ class AppTextField extends StatefulWidget {
     this.textInputAction,
     this.maxLines = 1,
     this.minLines,
-    MaterialColor? suffixIconColor,
-    required IconButton suffixIconButton,
+    this.readOnly = false,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -80,6 +82,8 @@ class _AppTextFieldState extends State<AppTextField> {
       textInputAction: widget.textInputAction,
       maxLines: widget.maxLines,
       minLines: widget.minLines,
+      readOnly: widget.readOnly,
+      onTap: widget.onTap,
       style: theme.textTheme.bodyLarge, // Estilo do texto de entrada
       decoration: InputDecoration(
         labelText: widget.labelText,

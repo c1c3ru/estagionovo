@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:student_supervisor_app/core/constants/app_colors.dart';
+import 'package:student_supervisor_app/core/theme/app_text_styles.dart';
+import 'package:student_supervisor_app/features/shared/bloc/contract_bloc.dart';
 
 class ContractPage extends StatefulWidget {
   final String studentId;
@@ -81,7 +84,7 @@ class _ContractPageState extends State<ContractPage> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.description_outlined,
                       size: 48,
                       color: AppColors.textSecondary,
@@ -133,7 +136,7 @@ class _ContractPageState extends State<ContractPage> {
                         ),
                       ),
                       const Spacer(),
-                      Icon(
+                      const Icon(
                         Icons.business,
                         color: AppColors.primary,
                       ),
@@ -211,9 +214,9 @@ class _ContractPageState extends State<ContractPage> {
           );
         }
 
-        return Card(
+        return const Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Center(
               child: CircularProgressIndicator(),
             ),
@@ -257,7 +260,7 @@ class _ContractPageState extends State<ContractPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Histórico de Contratos',
           style: AppTextStyles.h6,
         ),
@@ -275,7 +278,7 @@ class _ContractPageState extends State<ContractPage> {
                 return Center(
                   child: Column(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.description_outlined,
                         size: 64,
                         color: AppColors.textSecondary,
@@ -308,7 +311,7 @@ class _ContractPageState extends State<ContractPage> {
               return Center(
                 child: Column(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.error_outline,
                       size: 64,
                       color: AppColors.error,
@@ -405,7 +408,7 @@ class _ContractCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.calendar_today,
                   size: 16,
                   color: AppColors.textSecondary,
@@ -416,7 +419,7 @@ class _ContractCard extends StatelessWidget {
                   style: AppTextStyles.bodySmall,
                 ),
                 const Spacer(),
-                Icon(
+                const Icon(
                   Icons.schedule,
                   size: 16,
                   color: AppColors.textSecondary,
@@ -432,7 +435,7 @@ class _ContractCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.attach_money,
                     size: 16,
                     color: AppColors.textSecondary,

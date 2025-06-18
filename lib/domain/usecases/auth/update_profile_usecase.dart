@@ -1,4 +1,7 @@
 // lib/domain/usecases/auth/update_profile_usecase.dart
+import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/domain/usecases/auth/update_profile_params.dart';
+
 import '../../../core/errors/app_exceptions.dart';
 import '../../entities/user_entity.dart';
 import '../../repositories/i_auth_repository.dart';

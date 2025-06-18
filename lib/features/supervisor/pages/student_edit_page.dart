@@ -1,22 +1,24 @@
-// lib/features/supervisor/presentation/pages/student_edit_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
+import 'package:student_supervisor_app/core/enums/class_shift.dart';
+import 'package:student_supervisor_app/core/enums/internship_shift.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-import '../../../../domain/entities/student_entity.dart';
-import '../../../../data/models/enums.dart'; // Para ClassShift, InternshipShift, UserRole
+import '../../../../domain/entities/student.dart';
 import '../bloc/supervisor_bloc.dart';
 import '../bloc/supervisor_event.dart';
 import '../bloc/supervisor_state.dart';
 
 class StudentEditPage extends StatefulWidget {
-  final String? studentId; // Nulo para modo de criação
+  final String? studentId;
 
   const StudentEditPage({Key? key, this.studentId}) : super(key: key);
 
@@ -28,12 +30,12 @@ class _StudentEditPageState extends State<StudentEditPage> {
   late SupervisorBloc _supervisorBloc;
   final _formKey = GlobalKey<FormState>();
   bool _isEditMode = false;
-  bool _isLoadingData = false; // Para o loading inicial no modo de edição
+  bool _isLoadingData = false;
   StudentEntity? _studentToEdit;
 
   // Controladores de formulário
-  final _emailController = TextEditingController(); // Apenas para criação
-  final _passwordController = TextEditingController(); // Apenas para criação
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _registrationNumberController = TextEditingController();
   final _courseController = TextEditingController();
@@ -50,9 +52,9 @@ class _StudentEditPageState extends State<StudentEditPage> {
   DateTime? _selectedBirthDate;
   DateTime? _selectedContractStartDate;
   DateTime? _selectedContractEndDate;
-  ClassShift? _selectedClassShift;
-  InternshipShift? _selectedInternshipShift1;
-  InternshipShift? _selectedInternshipShift2;
+  ClassShift _selectedClassShift = ClassShift.morning;
+  InternshipShift _selectedInternshipShift1 = InternshipShift.morning;
+  InternshipShift _selectedInternshipShift2 = InternshipShift.morning;
   bool _selectedIsMandatoryInternship = false;
 
   @override
@@ -62,12 +64,10 @@ class _StudentEditPageState extends State<StudentEditPage> {
     _isEditMode = widget.studentId != null;
 
     if (_isEditMode) {
+      _supervisorBloc.add(
+        LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId!),
+      );
       _isLoadingData = true;
-      // Busca os dados do estudante para edição
-      _supervisorBloc.add(LoadStudentDetailsForSupervisorEvent(studentId: widget.studentId!));
-    } else {
-      // Modo de criação, pode definir valores padrão se desejar
-      _selectedIsMandatoryInternship = false; // Exemplo de valor padrão
     }
   }
 
@@ -81,20 +81,26 @@ class _StudentEditPageState extends State<StudentEditPage> {
     _phoneNumberController.text = student.phoneNumber ?? '';
 
     _selectedBirthDate = student.birthDate;
-    _birthDateController.text = DateFormat('dd/MM/yyyy').format(student.birthDate);
+    _birthDateController.text =
+        DateFormat('dd/MM/yyyy').format(student.birthDate);
 
     _selectedContractStartDate = student.contractStartDate;
-    _contractStartDateController.text = DateFormat('dd/MM/yyyy').format(student.contractStartDate);
+    _contractStartDateController.text =
+        DateFormat('dd/MM/yyyy').format(student.contractStartDate);
 
     _selectedContractEndDate = student.contractEndDate;
-    _contractEndDateController.text = DateFormat('dd/MM/yyyy').format(student.contractEndDate);
+    _contractEndDateController.text =
+        DateFormat('dd/MM/yyyy').format(student.contractEndDate);
 
-    _totalHoursRequiredController.text = student.totalHoursRequired.toStringAsFixed(2);
-    _weeklyHoursTargetController.text = student.weeklyHoursTarget.toStringAsFixed(2);
+    _totalHoursRequiredController.text =
+        student.totalHoursRequired.toStringAsFixed(2);
+    _weeklyHoursTargetController.text =
+        student.weeklyHoursTarget.toStringAsFixed(2);
 
     _selectedClassShift = student.classShift;
     _selectedInternshipShift1 = student.internshipShift1;
-    _selectedInternshipShift2 = student.internshipShift2;
+    _selectedInternshipShift2 =
+        student.internshipShift2 ?? InternshipShift.morning;
     _selectedIsMandatoryInternship = student.isMandatoryInternship;
 
     setState(() {
@@ -131,40 +137,46 @@ class _StudentEditPageState extends State<StudentEditPage> {
     }
 
     final studentEntityData = StudentEntity(
-      id: _isEditMode ? widget.studentId! : '', // ID será gerado no backend para criação, ou usado para update
+      id: _isEditMode ? widget.studentId! : '',
       fullName: _fullNameController.text.trim(),
       registrationNumber: _registrationNumberController.text.trim(),
       course: _courseController.text.trim(),
       advisorName: _advisorNameController.text.trim(),
       isMandatoryInternship: _selectedIsMandatoryInternship,
-      classShift: _selectedClassShift ?? ClassShift.unknown, // Deve ter um valor
-      internshipShift1: _selectedInternshipShift1 ?? InternshipShift.unknown, // Deve ter um valor
+      classShift: _selectedClassShift,
+      internshipShift1: _selectedInternshipShift1,
       internshipShift2: _selectedInternshipShift2,
-      birthDate: _selectedBirthDate ?? DateTime.now(), // Deve ter um valor
-      contractStartDate: _selectedContractStartDate ?? DateTime.now(), // Deve ter um valor
-      contractEndDate: _selectedContractEndDate ?? DateTime.now().add(const Duration(days: 1)), // Deve ter um valor
-      totalHoursRequired: double.tryParse(_totalHoursRequiredController.text) ?? 0.0,
-      totalHoursCompleted: _isEditMode ? _studentToEdit!.totalHoursCompleted : 0.0, // Não editável aqui
-      weeklyHoursTarget: double.tryParse(_weeklyHoursTargetController.text) ?? 0.0,
-      profilePictureUrl: _profilePictureUrlController.text.trim().isNotEmpty ? _profilePictureUrlController.text.trim() : null,
-      phoneNumber: _phoneNumberController.text.trim().isNotEmpty ? _phoneNumberController.text.trim() : null,
-      createdAt: _isEditMode ? _studentToEdit!.createdAt : DateTime.now(), // Definido na criação
-      updatedAt: DateTime.now(),
+      birthDate: _selectedBirthDate ?? DateTime.now(),
+      contractStartDate: _selectedContractStartDate ?? DateTime.now(),
+      contractEndDate: _selectedContractEndDate ??
+          DateTime.now().add(const Duration(days: 1)),
+      totalHoursRequired:
+          double.tryParse(_totalHoursRequiredController.text) ?? 0.0,
+      totalHoursCompleted:
+          _isEditMode ? _studentToEdit!.totalHoursCompleted : 0.0,
+      weeklyHoursTarget:
+          double.tryParse(_weeklyHoursTargetController.text) ?? 0.0,
+      profilePictureUrl: _profilePictureUrlController.text.trim().isNotEmpty
+          ? _profilePictureUrlController.text.trim()
+          : null,
+      phoneNumber: _phoneNumberController.text.trim().isNotEmpty
+          ? _phoneNumberController.text.trim()
+          : null,
       role: UserRole.student,
+      createdAt: DateTime.now(),
     );
 
     if (_isEditMode) {
-      _supervisorBloc.add(UpdateStudentBySupervisorEvent(studentData: studentEntityData));
+      _supervisorBloc
+          .add(UpdateStudentBySupervisorEvent(studentData: studentEntityData));
     } else {
-      // Modo de criação
       _supervisorBloc.add(CreateStudentBySupervisorEvent(
-        studentData: studentEntityData, // O ID aqui será ignorado e gerado pelo auth/backend
+        studentData: studentEntityData,
         initialEmail: _emailController.text.trim(),
-        initialPassword: _passwordController.text.trim(),
+        initialPassword: _passwordController.text,
       ));
     }
   }
-
 
   @override
   void dispose() {
@@ -186,246 +198,247 @@ class _StudentEditPageState extends State<StudentEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? 'Editar Estudante' : 'Adicionar Novo Estudante'),
+        title: Text(_isEditMode ? 'Editar Estudante' : 'Novo Estudante'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
       ),
       body: BlocConsumer<SupervisorBloc, SupervisorState>(
         bloc: _supervisorBloc,
         listener: (context, state) {
           if (state is SupervisorOperationFailure) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+              ),
+            );
           } else if (state is SupervisorOperationSuccess) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.success));
-            Modular.to.pop(); // Volta para a tela anterior após sucesso
-          } else if (state is SupervisorStudentDetailsLoadSuccess && _isEditMode && widget.studentId == state.student.id) {
-            _populateFormFields(state.student);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Operação realizada com sucesso!'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            Modular.to.pop();
+          } else if (state is SupervisorStudentDetailsLoadSuccess) {
+            if (_isEditMode && _isLoadingData) {
+              _populateFormFields(state.student);
+            }
           }
         },
         builder: (context, state) {
           if (_isLoadingData && _isEditMode) {
-            return const LoadingIndicator();
+            return const Center(
+              child: LoadingIndicator(),
+            );
           }
 
-          if (state is SupervisorLoading && state.loadingMessage == null && _isEditMode && _studentToEdit == null) {
-            // Se está carregando os detalhes do estudante para edição e ainda não os temos
-            return const LoadingIndicator();
-          }
-
-
-          return _buildForm(context, state);
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: _buildForm(),
+          );
         },
       ),
     );
   }
 
-  Widget _buildForm(BuildContext context, SupervisorState supervisorState) {
-    final theme = Theme.of(context);
+  Widget _buildForm() {
     return Form(
       key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(20.0),
-        children: <Widget>[
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           if (!_isEditMode) ...[
-            Text('Credenciais de Acesso do Estudante', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
             AppTextField(
               controller: _emailController,
-              labelText: 'Email do Estudante',
-              prefixIcon: Icons.email_outlined,
+              labelText: 'Email',
+              hintText: 'Digite o email',
               keyboardType: TextInputType.emailAddress,
               validator: Validators.email,
-              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
             AppTextField(
               controller: _passwordController,
-              labelText: 'Senha Inicial',
-              prefixIcon: Icons.lock_outline,
-              obscureText: true, // Pode adicionar um toggle de visibilidade se desejar
-              validator: (value) => Validators.password(value, minLength: 6),
-              textInputAction: TextInputAction.next,
+              labelText: 'Senha',
+              hintText: 'Digite a senha',
+              obscureText: true,
+              validator: Validators.password,
             ),
-            const Divider(height: 32, thickness: 1),
+            const SizedBox(height: 16),
           ],
-          Text('Informações Pessoais e Acadêmicas', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 16),
           AppTextField(
             controller: _fullNameController,
             labelText: 'Nome Completo',
-            prefixIcon: Icons.person_outline,
-            validator: (value) => Validators.required(value, fieldName: 'Nome Completo'),
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.next,
+            hintText: 'Digite o nome completo',
+            validator: (value) =>
+                Validators.required(value, fieldName: 'Nome completo'),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _registrationNumberController,
-            labelText: 'Nº de Matrícula',
-            prefixIcon: Icons.badge_outlined,
-            validator: (value) => Validators.required(value, fieldName: 'Nº de Matrícula'),
-            textInputAction: TextInputAction.next,
+            labelText: 'Matrícula',
+            hintText: 'Digite a matrícula',
+            validator: (value) =>
+                Validators.required(value, fieldName: 'Matrícula'),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _courseController,
             labelText: 'Curso',
-            prefixIcon: Icons.school_outlined,
-            validator: (value) => Validators.required(value, fieldName: 'Curso'),
-            textInputAction: TextInputAction.next,
+            hintText: 'Digite o curso',
+            validator: (value) =>
+                Validators.required(value, fieldName: 'Curso'),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _advisorNameController,
-            labelText: 'Nome do Orientador(a)',
-            prefixIcon: Icons.supervisor_account_outlined,
-            validator: (value) => Validators.required(value, fieldName: 'Orientador(a)'),
-            textCapitalization: TextCapitalization.words,
-            textInputAction: TextInputAction.next,
+            labelText: 'Nome do Orientador',
+            hintText: 'Digite o nome do orientador',
+            validator: (value) =>
+                Validators.required(value, fieldName: 'Nome do orientador'),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _birthDateController,
             labelText: 'Data de Nascimento',
-            prefixIcon: Icons.cake_outlined,
+            hintText: 'Selecione a data de nascimento',
             readOnly: true,
-            validator: (v) => _selectedBirthDate == null ? 'Campo obrigatório' : Validators.dateNotFuture(_selectedBirthDate, fieldName: 'Data de Nascimento'),
-            onTap: () => _selectDate(context, _birthDateController, _selectedBirthDate, (date) => _selectedBirthDate = date, lastDate: DateTime.now()),
+            onTap: () => _selectDate(
+              context,
+              _birthDateController,
+              _selectedBirthDate,
+              (date) => _selectedBirthDate = date,
+            ),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _phoneNumberController,
-            labelText: 'Telefone (Opcional)',
-            prefixIcon: Icons.phone_outlined,
+            labelText: 'Telefone',
+            hintText: 'Digite o telefone',
             keyboardType: TextInputType.phone,
-            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
-           AppTextField(
+          AppTextField(
             controller: _profilePictureUrlController,
-            labelText: 'URL da Foto de Perfil (Opcional)',
-            prefixIcon: Icons.link_outlined,
-            keyboardType: TextInputType.url,
-            textInputAction: TextInputAction.next,
+            labelText: 'URL da Foto de Perfil',
+            hintText: 'Digite a URL da foto (opcional)',
           ),
-
-          const Divider(height: 32, thickness: 1),
-          Text('Detalhes do Contrato/Estágio', style: theme.textTheme.titleLarge),
           const SizedBox(height: 16),
           AppTextField(
             controller: _contractStartDateController,
             labelText: 'Data de Início do Contrato',
-            prefixIcon: Icons.play_circle_outline,
+            hintText: 'Selecione a data de início',
             readOnly: true,
-            validator: (v) => _selectedContractStartDate == null ? 'Campo obrigatório' : null,
-            onTap: () => _selectDate(context, _contractStartDateController, _selectedContractStartDate, (date) => _selectedContractStartDate = date, lastDate: DateTime(2101)),
+            onTap: () => _selectDate(
+              context,
+              _contractStartDateController,
+              _selectedContractStartDate,
+              (date) => _selectedContractStartDate = date,
+            ),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _contractEndDateController,
             labelText: 'Data de Fim do Contrato',
-            prefixIcon: Icons.stop_circle_outline,
+            hintText: 'Selecione a data de fim',
             readOnly: true,
-            validator: (v) {
-              if (_selectedContractEndDate == null) return 'Campo obrigatório';
-              if (_selectedContractStartDate != null && _selectedContractEndDate!.isBefore(_selectedContractStartDate!)) {
-                return 'Data final deve ser após a inicial';
-              }
-              return null;
-            },
-            onTap: () => _selectDate(context, _contractEndDateController, _selectedContractEndDate, (date) => _selectedContractEndDate = date, firstDate: _selectedContractStartDate ?? DateTime(1950), lastDate: DateTime(2101)),
+            onTap: () => _selectDate(
+              context,
+              _contractEndDateController,
+              _selectedContractEndDate,
+              (date) => _selectedContractEndDate = date,
+              firstDate: _selectedContractStartDate,
+            ),
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _totalHoursRequiredController,
-            labelText: 'Total de Horas Contratadas',
-            prefixIcon: Icons.hourglass_bottom_outlined,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            validator: (v) => Validators.required(v, fieldName: 'Total de Horas'),
-            textInputAction: TextInputAction.next,
+            labelText: 'Total de Horas Requeridas',
+            hintText: 'Digite o total de horas',
+            keyboardType: TextInputType.number,
+            validator: Validators.required,
           ),
           const SizedBox(height: 16),
-           AppTextField(
+          AppTextField(
             controller: _weeklyHoursTargetController,
             labelText: 'Meta de Horas Semanais',
-            prefixIcon: Icons.track_changes_outlined,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            validator: (v) => Validators.required(v, fieldName: 'Meta Semanal'),
-            textInputAction: TextInputAction.next,
+            hintText: 'Digite a meta de horas semanais',
+            keyboardType: TextInputType.number,
+            validator: Validators.required,
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<ClassShift>(
             value: _selectedClassShift,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Turno das Aulas',
-              prefixIcon: Icon(Icons.schedule_outlined, color: theme.inputDecorationTheme.prefixIconColor),
-              border: theme.inputDecorationTheme.border,
+              border: OutlineInputBorder(),
             ),
-            hint: const Text('Selecionar Turno'),
-            items: ClassShift.values
-                .where((s) => s != ClassShift.unknown)
-                .map((s) => DropdownMenuItem(value: s, child: Text(s.displayName)))
-                .toList(),
-            onChanged: (ClassShift? newValue) => setState(() => _selectedClassShift = newValue),
-            validator: (value) => value == null ? 'Selecione um turno' : null,
+            items: ClassShift.values.map((shift) {
+              return DropdownMenuItem(
+                value: shift,
+                child: Text(shift.displayName),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedClassShift = value!;
+              });
+            },
           ),
           const SizedBox(height: 16),
-           DropdownButtonFormField<InternshipShift>(
+          DropdownButtonFormField<InternshipShift>(
             value: _selectedInternshipShift1,
-            decoration: InputDecoration(
-              labelText: 'Turno do Estágio 1',
-              prefixIcon: Icon(Icons.work_outline, color: theme.inputDecorationTheme.prefixIconColor),
-              border: theme.inputDecorationTheme.border,
+            decoration: const InputDecoration(
+              labelText: 'Turno do Estágio',
+              border: OutlineInputBorder(),
             ),
-            hint: const Text('Selecionar Turno'),
-            items: InternshipShift.values
-                .where((s) => s != InternshipShift.unknown)
-                .map((s) => DropdownMenuItem(value: s, child: Text(s.displayName)))
-                .toList(),
-            onChanged: (InternshipShift? newValue) => setState(() => _selectedInternshipShift1 = newValue),
-            validator: (value) => value == null ? 'Selecione o turno do estágio' : null,
+            items: InternshipShift.values.map((shift) {
+              return DropdownMenuItem(
+                value: shift,
+                child: Text(shift.displayName),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedInternshipShift1 = value!;
+              });
+            },
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<InternshipShift?>( // Permite nulo
+          DropdownButtonFormField<InternshipShift>(
             value: _selectedInternshipShift2,
-            decoration: InputDecoration(
-              labelText: 'Turno do Estágio 2 (Opcional)',
-              prefixIcon: Icon(Icons.work_history_outlined, color: theme.inputDecorationTheme.prefixIconColor),
-              border: theme.inputDecorationTheme.border,
+            decoration: const InputDecoration(
+              labelText: 'Turno do Estágio (Secundário)',
+              border: OutlineInputBorder(),
             ),
-            hint: const Text('Selecionar Turno (se houver)'),
-            items: [
-              const DropdownMenuItem<InternshipShift?>(value: null, child: Text('Nenhum')),
-              ...InternshipShift.values
-                  .where((s) => s != InternshipShift.unknown)
-                  .map((s) => DropdownMenuItem<InternshipShift?>(value: s, child: Text(s.displayName)))
-            ],
-            onChanged: (InternshipShift? newValue) => setState(() => _selectedInternshipShift2 = newValue),
+            items: InternshipShift.values.map((shift) {
+              return DropdownMenuItem(
+                value: shift,
+                child: Text(shift.displayName),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedInternshipShift2 = value!;
+              });
+            },
           ),
           const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('Estágio Obrigatório?'),
+          CheckboxListTile(
+            title: const Text('Estágio Obrigatório'),
             value: _selectedIsMandatoryInternship,
-            onChanged: (bool value) => setState(() => _selectedIsMandatoryInternship = value),
-            secondary: Icon(Icons.star_border_outlined, color: theme.colorScheme.primary),
-            activeColor: theme.colorScheme.primary,
-            contentPadding: EdgeInsets.zero,
+            onChanged: (value) {
+              setState(() {
+                _selectedIsMandatoryInternship = value!;
+              });
+            },
           ),
           const SizedBox(height: 32),
           AppButton(
-            text: _isEditMode ? 'Salvar Alterações' : 'Criar Estudante',
-            isLoading: supervisorState is SupervisorLoading && supervisorState.loadingMessage != null,
+            text: _isEditMode ? 'Atualizar' : 'Criar',
             onPressed: _handleSave,
-            minWidth: double.infinity,
           ),
         ],
       ),

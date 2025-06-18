@@ -66,7 +66,7 @@ class _RegisterFormState extends State<RegisterForm> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.message ?? 'Error occurred'),
                 backgroundColor: theme.colorScheme.error,
               ),
             );
@@ -75,7 +75,7 @@ class _RegisterFormState extends State<RegisterForm> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.message ?? 'Registration successful'),
                 backgroundColor: Colors.green, // Ou theme.colorScheme.primary
               ),
             );
@@ -102,11 +102,12 @@ class _RegisterFormState extends State<RegisterForm> {
             const SizedBox(height: 16),
             AppTextField(
               controller: _emailController,
+              key: const Key('email_field'),
               labelText: AppStrings.email,
               hintText: 'seuemail@exemplo.com',
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
-              validator: Validators.email,
+              validator: (value) => Validators.email(value),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),

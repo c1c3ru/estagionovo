@@ -15,10 +15,12 @@ class GetStudentTimeLogsUsecase {
     DateTime? endDate,
   }) async {
     if (studentId.isEmpty) {
-      return Left(ValidationFailure('O ID do estudante não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do estudante não pode estar vazio.'));
     }
     if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-      return Left(ValidationFailure('A data de início não pode ser posterior à data de fim.'));
+      return const Left(ValidationFailure(
+          'A data de início não pode ser posterior à data de fim.'));
     }
     return await _repository.getStudentTimeLogs(
       studentId: studentId,

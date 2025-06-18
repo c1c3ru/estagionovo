@@ -15,17 +15,16 @@ class UpdateStudentProfileUsecase {
           ValidationFailure('O ID do estudante não pode estar vazio.'));
     }
 
-    if (student.user.fullName.isEmpty) {
+    if (student.fullName.isEmpty) {
       return const Left(
           ValidationFailure('O nome do estudante não pode estar vazio.'));
     }
 
-    if (student.user.email.isEmpty) {
+    if (student.email.isEmpty) {
       return const Left(
           ValidationFailure('O email do estudante não pode estar vazio.'));
     }
 
-    return await _repository
-        .updateStudentProfile(student as UpdateStudentProfileParams);
+    return await _repository.updateStudentProfile(student);
   }
 }

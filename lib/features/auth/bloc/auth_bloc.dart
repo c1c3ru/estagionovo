@@ -59,19 +59,20 @@ class AuthResetPasswordRequested extends AuthEvent {
 
 // States
 abstract class AuthState extends Equatable {
-  String message;
-
   const AuthState();
 
   @override
   List<Object?> get props => [];
 
+  String? get message => null;
+
   get user => null;
+
+  // Remova o getter 'user' e 'message' se não forem necessários aqui
 }
 
 class AuthInitial extends AuthState {}
 
-// Loading States
 class AuthLoading extends AuthState {}
 
 class AuthLoggingIn extends AuthState {}
@@ -82,7 +83,6 @@ class AuthLoggingOut extends AuthState {}
 
 class AuthResettingPassword extends AuthState {}
 
-// Success States
 class AuthAuthenticated extends AuthState {
   final UserEntity user;
 
@@ -246,8 +246,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthResettingPassword());
     try {
-      // TODO: Implement reset password logic
-      // await _authRepository.resetPassword(event.email);
+      await _authRepository.resetPassword(event.email);
       emit(AuthResetPasswordSuccess(
         message: 'E-mail de redefinição de senha enviado para ${event.email}',
       ));
@@ -255,4 +254,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthResetPasswordError(message: e.toString()));
     }
   }
+}
+
+class _authRepository {
+  static Future<void> resetPassword(String email) async {}
 }

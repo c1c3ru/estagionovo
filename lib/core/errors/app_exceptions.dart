@@ -1,4 +1,3 @@
-// lib/core/errors/app_exceptions.dart
 import 'package:equatable/equatable.dart';
 
 enum ExceptionType { auth, server, cache, network, validation, unknown }
@@ -18,33 +17,31 @@ enum StudentStatus {
   }
 }
 
-class AppFailure extends Equatable {
+// Use apenas UMA definição de AppFailure:
+abstract class AppFailure implements Exception {
   final String message;
-  final ExceptionType type;
-  final String? code;
-  final dynamic data;
+  final dynamic originalException;
 
-  const AppFailure({
-    required this.message,
-    required this.type,
-    this.code,
-    this.data,
-  });
-
-  @override
-  List<Object?> get props => [message, type, code, data];
-
-  @override
-  String toString() =>
-      'AppFailure(message: $message, type: $type, code: $code)';
+  const AppFailure({required this.message, this.originalException});
 }
 
 class ValidationFailure extends AppFailure {
-  const ValidationFailure(String message, {super.code, super.data})
-      : super(
-          message: message,
-          type: ExceptionType.validation,
-        );
+  const ValidationFailure(String message, {super.originalException})
+      : super(message: message);
+}
+
+class AuthenticationFailure extends AppFailure {
+  const AuthenticationFailure(
+      {required super.message, super.originalException});
+}
+
+class SupabaseServerFailure extends AppFailure {
+  const SupabaseServerFailure(
+      {required super.message, super.originalException});
+}
+
+class ServerFailure extends AppFailure {
+  const ServerFailure({required super.message, super.originalException});
 }
 
 class ServerException implements Exception {

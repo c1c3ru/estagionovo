@@ -16,12 +16,14 @@ class ApproveOrRejectTimeLogUsecase {
     String? rejectionReason,
   }) async {
     if (timeLogId.isEmpty) {
-      return Left(ValidationFailure('O ID do registo de tempo não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O ID do registo de tempo não pode estar vazio.'));
     }
     if (supervisorId.isEmpty) {
-      return Left(ValidationFailure('O ID do supervisor é obrigatório.'));
+      return const Left(ValidationFailure('O ID do supervisor é obrigatório.'));
     }
-    if (!approved && (rejectionReason == null || rejectionReason.trim().isEmpty)) {
+    if (!approved &&
+        (rejectionReason == null || rejectionReason.trim().isEmpty)) {
       // Poderia ser uma regra de negócio que a rejeição requer um motivo.
       // return Left(ValidationFailure('Um motivo é obrigatório ao rejeitar um registo de tempo.'));
     }

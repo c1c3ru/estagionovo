@@ -4,6 +4,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../bloc/student_bloc.dart';
+import '../bloc/student_event.dart';
+import '../bloc/student_state.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
 import 'time_log_page.dart';
 import 'contract_page.dart';
@@ -19,7 +21,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<StudentBloc>().add(StudentLoadCurrentRequested());
+    context
+        .read<StudentBloc>()
+        .add(const LoadStudentDashboardDataEvent(userId: 'current-user-id'));
   }
 
   @override
@@ -47,18 +51,20 @@ class _StudentHomePageState extends State<StudentHomePage> {
       ),
       body: BlocBuilder<StudentBloc, StudentState>(
         builder: (context, state) {
-          if (state is StudentSelecting) {
+          if (state is StudentLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          if (state is StudentLoadCurrentSuccess) {
+          if (state is StudentDashboardLoadSuccess) {
             final student = state.student;
-            
+
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<StudentBloc>().add(StudentLoadCurrentRequested());
+                context.read<StudentBloc>().add(
+                    const LoadStudentDashboardDataEvent(
+                        userId: 'current-user-id'));
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -77,12 +83,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
             );
           }
 
-          if (state is StudentSelectError) {
+          if (state is StudentOperationFailure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.error_outline,
                     size: 64,
                     color: AppColors.error,
@@ -105,7 +111,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<StudentBloc>().add(StudentLoadCurrentRequested());
+                      context.read<StudentBloc>().add(
+                          const LoadStudentDashboardDataEvent(
+                              userId: 'current-user-id'));
                     },
                     child: const Text('Tentar novamente'),
                   ),
@@ -132,7 +140,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: AppColors.primary,
-                  child: Icon(
+                  child: const Icon(
                     Icons.person,
                     size: 32,
                     color: AppColors.white,
@@ -149,7 +157,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Matrícula: ${student.registration}',
+                        'Matrícula: ${student.registrationNumber}',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -170,6 +178,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 children: [
                   Icon(
                     Icons.school,
+                    size: 20,
                     color: AppColors.primary,
                   ),
                   const SizedBox(width: 8),
@@ -184,7 +193,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           ),
                         ),
                         Text(
-                          '${student.semester}º Semestre',
+                          'Estudante',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -272,8 +281,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 child: Icon(
                   icon,
+                  size: 20,
                   color: color,
-                  size: 32,
                 ),
               ),
               const SizedBox(height: 12),
@@ -315,7 +324,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
               children: [
                 _buildInfoRow(
                   'Matrícula',
-                  student.registration,
+                  student.registrationNumber,
                   Icons.badge,
                 ),
                 const Divider(),
@@ -326,9 +335,9 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 ),
                 const Divider(),
                 _buildInfoRow(
-                  'Semestre',
-                  '${student.semester}º',
-                  Icons.calendar_today,
+                  'Nome',
+                  student.fullName,
+                  Icons.person,
                 ),
                 const Divider(),
                 _buildInfoRow(
@@ -339,7 +348,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 const Divider(),
                 _buildInfoRow(
                   'Turno do Estágio',
-                  _getShiftText(student.internshipShift.value),
+                  _getShiftText(student.internshipShift1.value),
                   Icons.work,
                 ),
               ],
@@ -398,4 +407,3 @@ class _StudentHomePageState extends State<StudentHomePage> {
     }
   }
 }
-

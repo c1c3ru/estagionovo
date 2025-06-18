@@ -7,7 +7,7 @@ class GetAuthStateChangesUsecase {
 
   GetAuthStateChangesUsecase(this._repository);
 
-  Stream<UserEntity?> call() {
+  Stream<UserEntity?>? call() {
     return _repository.authStateChanges;
   }
 }

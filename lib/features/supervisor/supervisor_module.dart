@@ -1,9 +1,9 @@
 // lib/features/supervisor/supervisor_module.dart
-import 'package:estagio/features/supervisor/bloc/supervisor_bloc.dart';
-import 'package:estagio/features/supervisor/pages/student_details_page.dart';
-import 'package:estagio/features/supervisor/pages/student_edit_page.dart';
-import 'package:estagio/features/supervisor/pages/supervisor_dashboard_page.dart';
+
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/student_details_page.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/student_edit_page.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/supervisor_dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
 // Datasources

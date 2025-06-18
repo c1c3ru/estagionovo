@@ -1,3 +1,4 @@
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ContractDatasource {
@@ -5,16 +6,14 @@ class ContractDatasource {
 
   ContractDatasource(this._supabaseClient);
 
-  Future<List<Map<String, dynamic>>> getAllContracts() async {
+  Future<List<Map<String, dynamic>>> getAllContracts(
+      {ContractStatus? status, String? studentId, String? supervisorId}) async {
     try {
-      final response = await _supabaseClient
-          .from('contracts')
-          .select('''
+      final response = await _supabaseClient.from('contracts').select('''
             *,
             students(*),
             supervisors(*)
-          ''')
-          .order('created_at', ascending: false);
+          ''').order('created_at', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -24,15 +23,11 @@ class ContractDatasource {
 
   Future<Map<String, dynamic>?> getContractById(String id) async {
     try {
-      final response = await _supabaseClient
-          .from('contracts')
-          .select('''
+      final response = await _supabaseClient.from('contracts').select('''
             *,
             students(*),
             supervisors(*)
-          ''')
-          .eq('id', id)
-          .maybeSingle();
+          ''').eq('id', id).maybeSingle();
 
       return response;
     } catch (e) {
@@ -40,7 +35,8 @@ class ContractDatasource {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getContractsByStudent(String studentId) async {
+  Future<List<Map<String, dynamic>>> getContractsByStudent(
+      String studentId) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -54,7 +50,8 @@ class ContractDatasource {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getContractsBySupervisor(String supervisorId) async {
+  Future<List<Map<String, dynamic>>> getContractsBySupervisor(
+      String supervisorId) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -73,15 +70,11 @@ class ContractDatasource {
 
   Future<List<Map<String, dynamic>>> getActiveContracts() async {
     try {
-      final response = await _supabaseClient
-          .from('contracts')
-          .select('''
+      final response = await _supabaseClient.from('contracts').select('''
             *,
             students(*),
             supervisors(*)
-          ''')
-          .eq('status', 'active')
-          .order('created_at', ascending: false);
+          ''').eq('status', 'active').order('created_at', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -91,15 +84,11 @@ class ContractDatasource {
 
   Future<List<Map<String, dynamic>>> getContractsByStatus(String status) async {
     try {
-      final response = await _supabaseClient
-          .from('contracts')
-          .select('''
+      final response = await _supabaseClient.from('contracts').select('''
             *,
             students(*),
             supervisors(*)
-          ''')
-          .eq('status', status)
-          .order('created_at', ascending: false);
+          ''').eq('status', status).order('created_at', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -110,7 +99,7 @@ class ContractDatasource {
   Future<List<Map<String, dynamic>>> getExpiringContracts(int daysAhead) async {
     try {
       final futureDate = DateTime.now().add(Duration(days: daysAhead));
-      
+
       final response = await _supabaseClient
           .from('contracts')
           .select('''
@@ -128,7 +117,8 @@ class ContractDatasource {
     }
   }
 
-  Future<Map<String, dynamic>> createContract(Map<String, dynamic> contractData) async {
+  Future<Map<String, dynamic>> createContract(
+      Map<String, dynamic> contractData) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -142,7 +132,8 @@ class ContractDatasource {
     }
   }
 
-  Future<Map<String, dynamic>> updateContract(String id, Map<String, dynamic> contractData) async {
+  Future<Map<String, dynamic>> updateContract(
+      String id, Map<String, dynamic> contractData) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -159,16 +150,14 @@ class ContractDatasource {
 
   Future<void> deleteContract(String id) async {
     try {
-      await _supabaseClient
-          .from('contracts')
-          .delete()
-          .eq('id', id);
+      await _supabaseClient.from('contracts').delete().eq('id', id);
     } catch (e) {
       throw Exception('Erro ao excluir contrato: $e');
     }
   }
 
-  Future<Map<String, dynamic>> updateContractStatus(String id, String status) async {
+  Future<Map<String, dynamic>> updateContractStatus(
+      String id, String status) async {
     try {
       final updateData = {
         'status': status,
@@ -204,7 +193,8 @@ class ContractDatasource {
     return await updateContractStatus(id, 'cancelled');
   }
 
-  Future<Map<String, dynamic>?> getActiveContractByStudent(String studentId) async {
+  Future<Map<String, dynamic>?> getActiveContractByStudent(
+      String studentId) async {
     try {
       final response = await _supabaseClient
           .from('contracts')
@@ -221,20 +211,22 @@ class ContractDatasource {
 
   Future<Map<String, dynamic>> getContractStatistics() async {
     try {
-      final response = await _supabaseClient
-          .rpc('get_contract_statistics');
+      final response = await _supabaseClient.rpc('get_contract_statistics');
 
       return response as Map<String, dynamic>;
     } catch (e) {
       // Fallback para cálculo manual se a função RPC não existir
       final allContracts = await getAllContracts();
-      
+
       final stats = {
         'total': allContracts.length,
         'active': allContracts.where((c) => c['status'] == 'active').length,
-        'completed': allContracts.where((c) => c['status'] == 'completed').length,
-        'suspended': allContracts.where((c) => c['status'] == 'suspended').length,
-        'cancelled': allContracts.where((c) => c['status'] == 'cancelled').length,
+        'completed':
+            allContracts.where((c) => c['status'] == 'completed').length,
+        'suspended':
+            allContracts.where((c) => c['status'] == 'suspended').length,
+        'cancelled':
+            allContracts.where((c) => c['status'] == 'cancelled').length,
       };
 
       return stats;
@@ -251,9 +243,7 @@ class ContractDatasource {
     DateTime? endDateTo,
   }) async {
     try {
-      var query = _supabaseClient
-          .from('contracts')
-          .select('''
+      var query = _supabaseClient.from('contracts').select('''
             *,
             students(*),
             supervisors(*)
@@ -295,4 +285,3 @@ class ContractDatasource {
     }
   }
 }
-

@@ -1,6 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/create_supervisor_usecase.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/delete_supervisor_usecase.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/get_all_supervisors_usecase.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/get_supervisor_by_id_usecase.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
+import 'package:student_supervisor_app/domain/usecases/supervisor/update_supervisor_usecase.dart';
 import '../../../domain/entities/supervisor_entity.dart';
+import '../../../domain/repositories/i_supervisor_repository.dart';
 
 // Events
 abstract class SupervisorEvent extends Equatable {
@@ -172,6 +179,7 @@ class SupervisorDeleteError extends SupervisorState {
 
 // BLoC
 class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
+  final ISupervisorRepository _supervisorRepository;
   final GetAllSupervisorsUsecase getAllSupervisorsUsecase;
   final GetSupervisorByIdUsecase getSupervisorByIdUsecase;
   final GetSupervisorByUserIdUsecase getSupervisorByUserIdUsecase;
@@ -180,13 +188,15 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
   final DeleteSupervisorUsecase deleteSupervisorUsecase;
 
   SupervisorBloc({
+    required ISupervisorRepository supervisorRepository,
     required this.getAllSupervisorsUsecase,
     required this.getSupervisorByIdUsecase,
     required this.getSupervisorByUserIdUsecase,
     required this.createSupervisorUsecase,
     required this.updateSupervisorUsecase,
     required this.deleteSupervisorUsecase,
-  }) : super(SupervisorInitial()) {
+  })  : _supervisorRepository = supervisorRepository,
+        super(SupervisorInitial()) {
     on<SupervisorLoadAllRequested>(_onSupervisorLoadAllRequested);
     on<SupervisorLoadByIdRequested>(_onSupervisorLoadByIdRequested);
     on<SupervisorLoadByUserIdRequested>(_onSupervisorLoadByUserIdRequested);
@@ -202,8 +212,8 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorSelecting());
     try {
       // TODO: Implement supervisor loading logic
-      // final supervisors = await _supervisorRepository.getAllSupervisors();
-      // emit(SupervisorLoadAllSuccess(supervisors: supervisors));
+      final supervisors = await _supervisorRepository.getAllSupervisors();
+      emit(SupervisorLoadAllSuccess(supervisors: supervisors));
       emit(SupervisorLoadAllSuccess(supervisors: []));
     } catch (e) {
       emit(SupervisorSelectError(message: e.toString()));
@@ -217,8 +227,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorSelecting());
     try {
       // TODO: Implement supervisor loading by id logic
-      // final supervisor = await _supervisorRepository.getSupervisorById(event.id);
-      // emit(SupervisorLoadByIdSuccess(supervisor: supervisor));
+      final supervisor =
+          await _supervisorRepository.getSupervisorById(event.id);
+      emit(SupervisorLoadByIdSuccess(supervisor: supervisor));
       emit(SupervisorLoadByIdSuccess(supervisor: null));
     } catch (e) {
       emit(SupervisorSelectError(message: e.toString()));
@@ -232,8 +243,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorSelecting());
     try {
       // TODO: Implement supervisor loading by user id logic
-      // final supervisor = await _supervisorRepository.getSupervisorByUserId(event.userId);
-      // emit(SupervisorLoadByUserIdSuccess(supervisor: supervisor));
+      final supervisor =
+          await _supervisorRepository.getSupervisorByUserId(event.userId);
+      emit(SupervisorLoadByUserIdSuccess(supervisor: supervisor));
       emit(SupervisorLoadByUserIdSuccess(supervisor: null));
     } catch (e) {
       emit(SupervisorSelectError(message: e.toString()));
@@ -247,8 +259,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorInserting());
     try {
       // TODO: Implement supervisor creation logic
-      // final supervisor = await _supervisorRepository.createSupervisor(event.supervisor);
-      // emit(SupervisorCreateSuccess(supervisor: supervisor));
+      final supervisor =
+          await _supervisorRepository.createSupervisor(event.supervisor);
+      emit(SupervisorCreateSuccess(supervisor: supervisor));
       emit(SupervisorCreateSuccess(supervisor: event.supervisor));
     } catch (e) {
       emit(SupervisorInsertError(message: e.toString()));
@@ -262,8 +275,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorUpdating());
     try {
       // TODO: Implement supervisor update logic
-      // final supervisor = await _supervisorRepository.updateSupervisor(event.supervisor);
-      // emit(SupervisorUpdateSuccess(supervisor: supervisor));
+      final supervisor =
+          await _supervisorRepository.updateSupervisor(event.supervisor);
+      emit(SupervisorUpdateSuccess(supervisor: supervisor));
       emit(SupervisorUpdateSuccess(supervisor: event.supervisor));
     } catch (e) {
       emit(SupervisorUpdateError(message: e.toString()));
@@ -277,20 +291,10 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     emit(SupervisorDeleting());
     try {
       // TODO: Implement supervisor deletion logic
-      // await _supervisorRepository.deleteSupervisor(event.id);
+      await _supervisorRepository.deleteSupervisor(event.id);
       emit(SupervisorDeleteSuccess(deletedId: event.id));
     } catch (e) {
       emit(SupervisorDeleteError(message: e.toString()));
     }
   }
 }
-
-
-import '../../../domain/usecases/supervisor/get_all_supervisors_usecase.dart';
-import '../../../domain/usecases/supervisor/get_supervisor_by_id_usecase.dart';
-import '../../../domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
-import '../../../domain/usecases/supervisor/create_supervisor_usecase.dart';
-import '../../../domain/usecases/supervisor/update_supervisor_usecase.dart';
-import '../../../domain/usecases/supervisor/delete_supervisor_usecase.dart';
-
-

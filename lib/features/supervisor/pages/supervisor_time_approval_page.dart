@@ -1,11 +1,13 @@
 // lib/features/supervisor/presentation/pages/supervisor_time_approval_page.dart
-import 'package:estagio/core/widgets/app_text_field.dart';
-import 'package:estagio/features/auth/bloc/auth_bloc.dart';
-import 'package:estagio/features/auth/bloc/auth_state.dart' as auth_state;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
+import 'package:student_supervisor_app/core/widgets/app_text_field.dart';
+import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
+import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart'
+    as auth_state;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -13,13 +15,13 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../domain/entities/time_log_entity.dart';
 import '../../../../domain/entities/student_entity.dart'; // Para mostrar o nome do estudante
-import '../bloc/supervisor_bloc.dart';
-import '../bloc/supervisor_event.dart';
-import '../bloc/supervisor_state.dart';
+import '../bloc/supervisor_bloc.dart' as bloc;
+import '../bloc/supervisor_event.dart' as event;
+import '../bloc/supervisor_state.dart' as state;
 import '../widgets/supervisor_app_drawer.dart';
 
 class SupervisorTimeApprovalPage extends StatefulWidget {
-  const SupervisorTimeApprovalPage({Key? key}) : super(key: key);
+  const SupervisorTimeApprovalPage({super.key});
 
   @override
   State<SupervisorTimeApprovalPage> createState() =>
@@ -28,15 +30,15 @@ class SupervisorTimeApprovalPage extends StatefulWidget {
 
 class _SupervisorTimeApprovalPageState
     extends State<SupervisorTimeApprovalPage> {
-  late SupervisorBloc _supervisorBloc;
+  late bloc.SupervisorBloc _supervisorBloc;
   late AuthBloc _authBloc;
   String? _supervisorId;
-  Map<String, String> _studentNames = {}; // Cache para nomes de estudantes
+  final Map<String, String> _studentNames = {};
 
   @override
   void initState() {
     super.initState();
-    _supervisorBloc = Modular.get<SupervisorBloc>();
+    _supervisorBloc = Modular.get<bloc.SupervisorBloc>();
     _authBloc = Modular.get<AuthBloc>();
 
     final currentAuthState = _authBloc.state;
@@ -64,7 +66,7 @@ class _SupervisorTimeApprovalPageState
   Future<void> _loadPendingApprovals() async {
     // Carrega apenas os logs pendentes por padrão
     _supervisorBloc
-        .add(const LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
+        .add(const event.LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
   }
 
   String _formatTimeOfDay(TimeOfDay? time) {
@@ -78,12 +80,12 @@ class _SupervisorTimeApprovalPageState
   // Na prática, a lista de logs do BLoC/Usecase poderia já vir com os nomes dos estudantes (via join).
   // Esta é uma solução alternativa se a TimeLogEntity só tiver studentId.
   Future<String> _getStudentName(
-      String studentId, SupervisorState currentState) async {
+      String studentId, state.SupervisorState currentState) async {
     if (_studentNames.containsKey(studentId)) {
       return _studentNames[studentId]!;
     }
     // Se o estado atual do dashboard tiver a lista de estudantes, podemos usá-la
-    if (currentState is SupervisorDashboardLoadSuccess) {
+    if (currentState is state.SupervisorDashboardLoadSuccess) {
       try {
         final student =
             currentState.students.firstWhere((s) => s.id == studentId);
@@ -128,7 +130,7 @@ class _SupervisorTimeApprovalPageState
               backgroundColor: Theme.of(pageContext).colorScheme.error,
               onPressed: () {
                 if (_supervisorId != null) {
-                  _supervisorBloc.add(ApproveOrRejectTimeLogEvent(
+                  _supervisorBloc.add(event.ApproveOrRejectTimeLogEvent(
                     timeLogId: timeLogId,
                     approved: false,
                     supervisorId: _supervisorId!,
@@ -162,22 +164,22 @@ class _SupervisorTimeApprovalPageState
           currentIndex: 2), // Ajuste o currentIndex conforme sua navegação
       bottomNavigationBar: const SupervisorBottomNavBar(
           currentIndex: 2), // Ajuste o currentIndex
-      body: BlocConsumer<SupervisorBloc, SupervisorState>(
+      body: BlocConsumer<bloc.SupervisorBloc, state.SupervisorState>(
         bloc: _supervisorBloc,
-        listener: (context, state) {
-          if (state is SupervisorOperationFailure) {
+        listener: (context, currentState) {
+          if (currentState is state.SupervisorOperationFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(
-                  content: Text(state.message),
+                  content: Text(currentState.message),
                   backgroundColor: theme.colorScheme.error));
-          } else if (state is SupervisorOperationSuccess &&
-              (state.entity is TimeLogEntity ||
-                  state.message.contains("Registo de tempo"))) {
+          } else if (currentState is state.SupervisorOperationSuccess &&
+              (currentState.entity is TimeLogEntity ||
+                  currentState.message.contains("Registo de tempo"))) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(
-                  content: Text(state.message),
+                  content: Text(currentState.message),
                   backgroundColor: AppColors.success));
             // Recarrega a lista após uma ação de aprovação/rejeição
             // A lógica no BLoC já deve atualizar a lista se o estado for SupervisorTimeLogsForApprovalLoadSuccess
@@ -185,17 +187,17 @@ class _SupervisorTimeApprovalPageState
             // _loadPendingApprovals();
           }
         },
-        builder: (context, state) {
-          if (state is SupervisorLoading &&
-              state is! SupervisorTimeLogsForApprovalLoadSuccess) {
+        builder: (context, currentState) {
+          if (currentState is state.SupervisorLoading &&
+              currentState is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
             if (_supervisorBloc.state
-                is! SupervisorTimeLogsForApprovalLoadSuccess) {
+                is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
               return const LoadingIndicator();
             }
           }
 
-          if (state is SupervisorTimeLogsForApprovalLoadSuccess) {
-            if (state.timeLogs.isEmpty) {
+          if (currentState is state.SupervisorTimeLogsForApprovalLoadSuccess) {
+            if (currentState.timeLogs.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -232,15 +234,15 @@ class _SupervisorTimeApprovalPageState
               onRefresh: _loadPendingApprovals,
               child: ListView.builder(
                 padding: const EdgeInsets.all(12.0),
-                itemCount: state.timeLogs.length,
+                itemCount: currentState.timeLogs.length,
                 itemBuilder: (context, index) {
-                  final log = state.timeLogs[index];
+                  final log = currentState.timeLogs[index];
                   // Para obter o nome do estudante, você pode fazer um FutureBuilder aqui
                   // ou garantir que a entidade TimeLogEntity já venha com o nome do estudante.
                   // Por simplicidade, vou usar a função _getStudentName que pode ser otimizada.
                   return FutureBuilder<String>(
                       future: _getStudentName(
-                          log.studentId, state), // Passa o estado atual
+                          log.studentId, currentState), // Passa o estado atual
                       builder: (context, snapshot) {
                         final studentName =
                             snapshot.data ?? 'A carregar nome...';
@@ -252,10 +254,10 @@ class _SupervisorTimeApprovalPageState
             );
           }
 
-          if (state is SupervisorOperationFailure &&
+          if (currentState is state.SupervisorOperationFailure &&
               _supervisorBloc.state
-                  is! SupervisorTimeLogsForApprovalLoadSuccess) {
-            return _buildErrorStatePage(context, state.message);
+                  is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
+            return _buildErrorStatePage(context, currentState.message);
           }
 
           return const LoadingIndicator();
@@ -350,10 +352,10 @@ class _SupervisorTimeApprovalPageState
             if (!log.approved &&
                 _supervisorId !=
                     null) // Mostra botões apenas se não aprovado e supervisorId estiver disponível
-              BlocBuilder<SupervisorBloc, SupervisorState>(
+              BlocBuilder<bloc.SupervisorBloc, state.SupervisorState>(
                 bloc: _supervisorBloc, // Usa o BLoC da página
                 builder: (context, state) {
-                  bool isLoadingAction = state is SupervisorLoading &&
+                  bool isLoadingAction = state is state.SupervisorLoading &&
                       state.loadingMessage ==
                           null; // Loading genérico para ações
 
@@ -368,8 +370,8 @@ class _SupervisorTimeApprovalPageState
                         type: AppButtonType.text,
                         foregroundColor: theme.colorScheme.error,
                         isLoading: isLoadingAction &&
-                            _supervisorBloc.state
-                                is SupervisorLoading, // Verifica se este log específico está a ser processado
+                            _supervisorBloc.state is state
+                                .SupervisorLoading, // Verifica se este log específico está a ser processado
                       ),
                       const SizedBox(width: 8),
                       AppButton(
@@ -379,7 +381,7 @@ class _SupervisorTimeApprovalPageState
                             : () {
                                 if (_supervisorId != null) {
                                   _supervisorBloc
-                                      .add(ApproveOrRejectTimeLogEvent(
+                                      .add(event.ApproveOrRejectTimeLogEvent(
                                     timeLogId: log.id,
                                     approved: true,
                                     supervisorId: _supervisorId!,
@@ -387,7 +389,7 @@ class _SupervisorTimeApprovalPageState
                                 }
                               },
                         isLoading: isLoadingAction &&
-                            _supervisorBloc.state is SupervisorLoading,
+                            _supervisorBloc.state is state.SupervisorLoading,
                       ),
                     ],
                   );
@@ -403,11 +405,6 @@ class _SupervisorTimeApprovalPageState
                       style: TextStyle(
                           color: AppColors.success,
                           fontWeight: FontWeight.bold)),
-                  if (log.supervisorId != null)
-                    Text(' por ${_getSupervisorName(log.supervisorId!)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme
-                                .hintColor)), // TODO: Implementar _getSupervisorName
                 ],
               )
           ],
@@ -433,11 +430,5 @@ class _SupervisorTimeApprovalPageState
         ],
       ),
     );
-  }
-
-  // Placeholder - você precisaria de uma forma de buscar o nome do supervisor pelo ID
-  String _getSupervisorName(String supervisorId) {
-    // No futuro, buscar do AuthBloc ou de uma lista de supervisores se disponível
-    return 'Supervisor (${supervisorId.substring(0, 4)}...)';
   }
 }
