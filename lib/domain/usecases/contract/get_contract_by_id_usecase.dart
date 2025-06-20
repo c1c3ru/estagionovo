@@ -2,7 +2,6 @@
 import 'package:dartz/dartz.dart' show Either, Left;
 
 import '../../../core/errors/app_exceptions.dart';
-import '../../entities/contract_entity.dart';
 import '../../repositories/i_contract_repository.dart';
 
 class GetContractByIdUsecase {

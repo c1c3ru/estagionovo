@@ -1,17 +1,18 @@
 import 'package:dartz/dartz.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../domain/entities/student_entity.dart';
+import '../../domain/entities/supervisor_entity.dart';
 import '../../domain/repositories/i_supervisor_repository.dart';
+import '../datasources/supabase/supervisor_datasource.dart';
 import '../models/student_model.dart';
 import '../models/supervisor_model.dart';
 import '../models/contract_model.dart';
 import '../models/time_log_model.dart';
-import '../datasources/supabase/supervisor_datasource.dart';
 import '../datasources/supabase/student_datasource.dart';
 import '../datasources/supabase/contract_datasource.dart';
 import '../datasources/supabase/time_log_datasource.dart';
 import '../../domain/entities/time_log_entity.dart';
-import '../../domain/entities/supervisor_entity.dart';
+import '../../domain/entities/contract_entity.dart';
 import '../../domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
 
 class SupervisorRepository implements ISupervisorRepository {
@@ -20,73 +21,129 @@ class SupervisorRepository implements ISupervisorRepository {
   SupervisorRepository(this._supervisorDatasource);
 
   @override
-  Future<List<SupervisorEntity>> getAllSupervisors() async {
+  Future<Either<AppFailure, List<SupervisorEntity>>> getAllSupervisors() async {
     try {
       final supervisorsData = await _supervisorDatasource.getAllSupervisors();
-      return supervisorsData
+      final supervisors = supervisorsData
           .map((data) => SupervisorModel.fromJson(data).toEntity())
           .toList();
+      return Right(supervisors);
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar supervisores: $e');
+      return Left(ServerFailure(message: 'Erro ao buscar supervisores: $e'));
     }
   }
 
   @override
-  Future<SupervisorEntity?> getSupervisorById(String id) async {
+  Future<Either<AppFailure, SupervisorEntity>> getSupervisorById(
+      String id) async {
     try {
       final supervisorData = await _supervisorDatasource.getSupervisorById(id);
-      if (supervisorData == null) return null;
-      return SupervisorModel.fromJson(supervisorData).toEntity();
+      if (supervisorData == null) {
+        return Left(ServerFailure(message: 'Supervisor não encontrado'));
+      }
+      return Right(SupervisorModel.fromJson(supervisorData).toEntity());
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar supervisor: $e');
+      return Left(ServerFailure(message: 'Erro ao buscar supervisor: $e'));
     }
   }
 
   @override
-  Future<SupervisorEntity?> getSupervisorByUserId(String userId) async {
+  Future<Either<AppFailure, SupervisorEntity?>> getSupervisorByUserId(
+      String userId) async {
     try {
       final supervisorData =
           await _supervisorDatasource.getSupervisorByUserId(userId);
-      if (supervisorData == null) return null;
-      return SupervisorModel.fromJson(supervisorData).toEntity();
+      if (supervisorData == null) {
+        return const Right(null);
+      }
+      return Right(SupervisorModel.fromJson(supervisorData).toEntity());
     } catch (e) {
-      throw Exception(
-          'Erro no repositório ao buscar supervisor por usuário: $e');
+      return Left(
+          ServerFailure(message: 'Erro ao buscar supervisor por usuário: $e'));
     }
   }
 
   @override
-  Future<SupervisorEntity> createSupervisor(SupervisorEntity supervisor) async {
+  Future<Either<AppFailure, SupervisorEntity>> createSupervisor(
+      SupervisorEntity supervisor) async {
     try {
       final supervisorModel = SupervisorModel.fromEntity(supervisor);
       final createdData = await _supervisorDatasource
           .createSupervisor(supervisorModel.toJson());
-      return SupervisorModel.fromJson(createdData).toEntity();
+      return Right(SupervisorModel.fromJson(createdData).toEntity());
     } catch (e) {
-      throw Exception('Erro no repositório ao criar supervisor: $e');
+      return Left(ServerFailure(message: 'Erro ao criar supervisor: $e'));
     }
   }
 
   @override
-  Future<SupervisorEntity> updateSupervisor(SupervisorEntity supervisor) async {
+  Future<Either<AppFailure, SupervisorEntity>> updateSupervisor(
+      SupervisorEntity supervisor) async {
     try {
       final supervisorModel = SupervisorModel.fromEntity(supervisor);
       final updatedData = await _supervisorDatasource.updateSupervisor(
         supervisor.id,
         supervisorModel.toJson(),
       );
-      return SupervisorModel.fromJson(updatedData).toEntity();
+      return Right(SupervisorModel.fromJson(updatedData).toEntity());
     } catch (e) {
-      throw Exception('Erro no repositório ao atualizar supervisor: $e');
+      return Left(ServerFailure(message: 'Erro ao atualizar supervisor: $e'));
     }
   }
 
   @override
-  Future<void> deleteSupervisor(String id) async {
+  Future<Either<AppFailure, void>> deleteSupervisor(String id) async {
     try {
       await _supervisorDatasource.deleteSupervisor(id);
+      return const Right(null);
     } catch (e) {
-      throw Exception('Erro no repositório ao excluir supervisor: $e');
+      return Left(ServerFailure(message: 'Erro ao excluir supervisor: $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudentsForSupervisor(
+      String supervisorId) async {
+    try {
+      final studentsData = await _supervisorDatasource.getAllStudents(
+          supervisorId: supervisorId);
+      final students = studentsData
+          .map((data) => StudentModel.fromJson(data).toEntity())
+          .toList();
+      return Right(students);
+    } catch (e) {
+      return Left(ServerFailure(
+          message: 'Erro ao buscar estudantes do supervisor: $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, StudentEntity>> getStudentDetailsForSupervisor(
+      String studentId) async {
+    try {
+      final studentData = await _supervisorDatasource.getStudentById(studentId);
+      if (studentData == null) {
+        return Left(ServerFailure(message: 'Estudante não encontrado'));
+      }
+      return Right(StudentModel.fromJson(studentData).toEntity());
+    } catch (e) {
+      return Left(
+          ServerFailure(message: 'Erro ao buscar detalhes do estudante: $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, StudentEntity>> updateStudentBySupervisor(
+      StudentEntity student) async {
+    try {
+      final studentModel = StudentModel.fromEntity(student);
+      final updatedData = await _supervisorDatasource.updateStudent(
+        student.id,
+        studentModel.toJson(),
+      );
+      return Right(StudentModel.fromJson(updatedData).toEntity());
+    } catch (e) {
+      return Left(ServerFailure(message: 'Erro ao atualizar estudante: $e'));
     }
   }
 
@@ -111,14 +168,14 @@ class SupervisorRepository implements ISupervisorRepository {
 
   @override
   Future<Either<AppFailure, StudentEntity>> createStudent(
-      StudentEntity studentData) async {
+      StudentEntity student) async {
     try {
-      final studentModel = StudentModel.fromEntity(studentData);
+      final studentModel = StudentModel.fromEntity(student);
       final createdStudent =
           await _supervisorDatasource.createStudent(studentModel.toJson());
       return Right(StudentModel.fromJson(createdStudent).toEntity());
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(message: 'Erro ao criar estudante: $e'));
     }
   }
 
@@ -166,20 +223,6 @@ class SupervisorRepository implements ISupervisorRepository {
   }
 
   @override
-  Future<Either<AppFailure, StudentEntity>> getStudentDetails(
-      String studentId) async {
-    try {
-      final student = await _supervisorDatasource.getStudentById(studentId);
-      if (student == null) {
-        return const Left(ServerFailure(message: 'Estudante não encontrado'));
-      }
-      return Right(StudentModel.fromJson(student).toEntity());
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
   Future<Either<AppFailure, SupervisorEntity>> getSupervisorDetails(
       String supervisorId) async {
     try {
@@ -195,15 +238,24 @@ class SupervisorRepository implements ISupervisorRepository {
   }
 
   @override
-  Future<Either<AppFailure, StudentEntity>> updateStudent(
-      StudentEntity student) async {
+  Future<
+          Either<AppFailure,
+              (StudentEntity, List<TimeLogEntity>, List<ContractEntity>)>>
+      getStudentDetails(String studentId) async {
     try {
-      final studentModel = StudentModel.fromEntity(student);
-      final updatedStudent = await _supervisorDatasource.updateStudent(
-        student.id,
-        studentModel.toJson(),
-      );
-      return Right(StudentModel.fromJson(updatedStudent).toEntity());
+      final studentData = await _supervisorDatasource.getStudentById(studentId);
+      if (studentData == null) {
+        return Left(ServerFailure(message: 'Estudante não encontrado'));
+      }
+
+      final student = StudentModel.fromJson(studentData).toEntity();
+
+      // TODO: Implement fetching time logs and contracts for the student
+      // For now, returning empty lists
+      final timeLogs = <TimeLogEntity>[];
+      final contracts = <ContractEntity>[];
+
+      return Right((student, timeLogs, contracts));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

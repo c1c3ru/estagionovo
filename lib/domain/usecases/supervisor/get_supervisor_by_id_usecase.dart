@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 import '../../repositories/i_supervisor_repository.dart';
 import '../../entities/supervisor_entity.dart';
 
@@ -6,15 +8,11 @@ class GetSupervisorByIdUsecase {
 
   GetSupervisorByIdUsecase(this._supervisorRepository);
 
-  Future<SupervisorEntity?> call(String id) async {
-    try {
-      if (id.isEmpty) {
-        throw Exception('ID do supervisor não pode estar vazio');
-      }
-      return await _supervisorRepository.getSupervisorById(id);
-    } catch (e) {
-      throw Exception('Erro ao buscar supervisor: $e');
+  Future<Either<AppFailure, SupervisorEntity>> call(String id) async {
+    if (id.isEmpty) {
+      return const Left(
+          ValidationFailure('ID do supervisor não pode estar vazio'));
     }
+    return await _supervisorRepository.getSupervisorById(id);
   }
 }
-

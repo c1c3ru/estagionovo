@@ -1,11 +1,11 @@
 // lib/features/auth/pages/supervisor_register_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_state.dart' hide AuthState;
+import '../bloc/auth_state.dart';
 import '../widgets/supervisor_register_form.dart';
 
 class SupervisorRegisterPage extends StatelessWidget {
@@ -16,33 +16,33 @@ class SupervisorRegisterPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(AppStrings.registerSupervisorPage ?? 'Register Supervisor'),
+        title: const Text('Registrar Supervisor'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthFailure) {
+          if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message ?? 'An error occurred'),
+                content: Text(state.message),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
-          } else if (state is AuthSuccessState) {
+          } else if (state is AuthAuthenticated) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(AppStrings.registrationSuccessful),
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.of(context).pushReplacementNamed('/home');
+            Modular.to.pushReplacementNamed('/supervisor/');
           }
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            if (state is AuthLoadingState) {
+            if (state is AuthLoading) {
               return const Center(child: LoadingIndicator());
             }
 
@@ -52,7 +52,6 @@ class SupervisorRegisterPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Logo ou ícone
                     Container(
                       height: 80,
                       width: 80,
@@ -69,13 +68,8 @@ class SupervisorRegisterPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Formulário de cadastro
                     const SupervisorRegisterForm(),
-
                     const SizedBox(height: 24),
-
-                    // Link para login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -84,18 +78,13 @@ class SupervisorRegisterPage extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context)
-                                .pushReplacementNamed('/login');
-                          },
+                          onPressed: () =>
+                              Modular.to.pushReplacementNamed('/auth/login'),
                           child: const Text(AppStrings.login),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 16),
-
-                    // Link para cadastro de estudante
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -104,10 +93,8 @@ class SupervisorRegisterPage extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context)
-                                .pushReplacementNamed('/register');
-                          },
+                          onPressed: () =>
+                              Modular.to.pushReplacementNamed('/auth/register'),
                           child: const Text('Cadastre-se como estudante'),
                         ),
                       ],

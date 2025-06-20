@@ -6,6 +6,8 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_button.dart';
 
@@ -32,16 +34,20 @@ class _LoginPageState extends State<LoginPage> {
   void _onLoginPressed() {
     if (_formKey.currentState?.validate() ?? false) {
       Modular.get<AuthBloc>().add(
-            AuthLoginRequested(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+        AuthLoginRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
 
   void _onRegisterPressed() {
-    Modular.to.pushNamed('/register');
+    Modular.to.pushNamed('/auth/register');
+  }
+
+  void _onForgotPasswordPressed() {
+    Modular.to.pushNamed('/auth/forgot-password');
   }
 
   @override
@@ -51,12 +57,11 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            // Navigate based on user role
-            final route = state.user.role == UserRole.student 
-                ? '/student' 
-                : '/supervisor';
+            final route = state.user.role == UserRole.student
+                ? '/student/'
+                : '/supervisor/';
             Modular.to.pushReplacementNamed(route);
-          } else if (state is AuthLoginError) {
+          } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -65,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else if (state is AuthLogoutSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text('Logout realizado com sucesso'),
                 backgroundColor: AppColors.success,
               ),
@@ -82,14 +87,13 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Logo/Title
-                    Icon(
+                    const Icon(
                       Icons.school,
                       size: 80,
                       color: AppColors.primary,
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       AppStrings.appName,
                       style: AppTextStyles.h3,
                       textAlign: TextAlign.center,
@@ -103,8 +107,6 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-
-                    // Email Field
                     AuthTextField(
                       controller: _emailController,
                       label: AppStrings.email,
@@ -122,8 +124,6 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Password Field
                     AuthTextField(
                       controller: _passwordController,
                       label: AppStrings.password,
@@ -149,26 +149,23 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     const SizedBox(height: 24),
-
-                    // Login Button
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
                         return AuthButton(
                           text: AppStrings.login,
-                          onPressed: (state is AuthLoggingIn) ? null : _onLoginPressed,
-                          isLoading: state is AuthLoggingIn,
+                          onPressed:
+                              state is AuthLoading ? null : _onLoginPressed,
+                          isLoading: state is AuthLoading,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Register Link
                     TextButton(
                       onPressed: _onRegisterPressed,
                       child: RichText(
                         text: TextSpan(
                           style: AppTextStyles.bodyMedium,
-                          children: [
+                          children: const [
                             TextSpan(
                               text: 'Não tem uma conta? ',
                               style: TextStyle(color: AppColors.textSecondary),
@@ -184,12 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-
-                    // Forgot Password
                     TextButton(
-                      onPressed: () {
-                        // TODO: Implement forgot password
-                      },
+                      onPressed: _onForgotPasswordPressed,
                       child: Text(
                         AppStrings.forgotPassword,
                         style: AppTextStyles.bodyMedium.copyWith(
@@ -207,4 +200,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-

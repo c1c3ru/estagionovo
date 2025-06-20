@@ -6,6 +6,8 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_button.dart';
 
@@ -38,13 +40,13 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onRegisterPressed() {
     if (_formKey.currentState?.validate() ?? false) {
       Modular.get<AuthBloc>().add(
-            AuthRegisterRequested(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              name: _nameController.text.trim(),
-              role: _selectedRole.value,
-            ),
-          );
+        AuthRegisterRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          fullName: _nameController.text.trim(),
+          role: _selectedRole.name,
+        ),
+      );
     }
   }
 
@@ -67,12 +69,11 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            // Navigate based on user role
-            final route = state.user.role == UserRole.student 
-                ? '/student' 
-                : '/supervisor';
+            final route = state.user.role == UserRole.student
+                ? '/student/'
+                : '/supervisor/';
             Modular.to.pushReplacementNamed(route);
-          } else if (state is AuthRegisterError) {
+          } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -91,8 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Title
-                    Text(
+                    const Text(
                       'Criar Conta',
                       style: AppTextStyles.h3,
                       textAlign: TextAlign.center,
@@ -106,8 +106,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
-
-                    // Name Field
                     AuthTextField(
                       controller: _nameController,
                       label: 'Nome Completo',
@@ -124,8 +122,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Email Field
                     AuthTextField(
                       controller: _emailController,
                       label: AppStrings.email,
@@ -143,8 +139,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Role Selection
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -180,8 +174,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    // Password Field
                     AuthTextField(
                       controller: _passwordController,
                       label: AppStrings.password,
@@ -210,8 +202,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Confirm Password Field
                     AuthTextField(
                       controller: _confirmPasswordController,
                       label: AppStrings.confirmPassword,
@@ -240,26 +230,23 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                     const SizedBox(height: 24),
-
-                    // Register Button
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
                         return AuthButton(
                           text: AppStrings.register,
-                          onPressed: (state is AuthRegistering) ? null : _onRegisterPressed,
-                          isLoading: state is AuthRegistering,
+                          onPressed:
+                              state is AuthLoading ? null : _onRegisterPressed,
+                          isLoading: state is AuthLoading,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Login Link
                     TextButton(
                       onPressed: _onLoginPressed,
                       child: RichText(
                         text: TextSpan(
                           style: AppTextStyles.bodyMedium,
-                          children: [
+                          children: const [
                             TextSpan(
                               text: 'Já tem uma conta? ',
                               style: TextStyle(color: AppColors.textSecondary),
@@ -285,4 +272,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-

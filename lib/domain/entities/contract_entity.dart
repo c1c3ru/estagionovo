@@ -7,6 +7,8 @@ class ContractEntity extends Equatable {
   final String supervisorId;
   final String company;
   final String position;
+  final String? description;
+  final double? salary;
   final DateTime startDate;
   final DateTime endDate;
   final double totalHoursRequired;
@@ -23,6 +25,8 @@ class ContractEntity extends Equatable {
     required this.supervisorId,
     required this.company,
     required this.position,
+    this.description,
+    this.salary,
     required this.startDate,
     required this.endDate,
     required this.totalHoursRequired,
@@ -45,6 +49,8 @@ class ContractEntity extends Equatable {
         supervisorId,
         company,
         position,
+        description,
+        salary,
         startDate,
         endDate,
         totalHoursRequired,
@@ -62,6 +68,8 @@ class ContractEntity extends Equatable {
     String? supervisorId,
     String? company,
     String? position,
+    String? description,
+    double? salary,
     DateTime? startDate,
     DateTime? endDate,
     double? totalHoursRequired,

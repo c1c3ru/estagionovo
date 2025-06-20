@@ -16,14 +16,16 @@ class StudentRepository implements IStudentRepository {
   StudentRepository(this._studentDatasource, this._timeLogDatasource);
 
   @override
-  Future<List<StudentEntity>> getAllStudents() async {
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents() async {
     try {
       final studentsData = await _studentDatasource.getAllStudents();
-      return studentsData
+      final students = studentsData
           .map((data) => StudentModel.fromJson(data).toEntity())
           .toList();
+      return Right(students);
     } catch (e) {
-      throw Exception('Erro no repositório ao buscar estudantes: $e');
+      return Left(ServerFailure(
+          message: 'Erro no repositório ao buscar estudantes: $e'));
     }
   }
 
@@ -168,16 +170,27 @@ class StudentRepository implements IStudentRepository {
   }
 
   @override
-  Future<Either<AppFailure, List<TimeLogEntity>>> getStudentTimeLogs(
-      {required String studentId,
-      DateTime? startDate,
-      DateTime? endDate}) async {
+  Future<Either<AppFailure, List<TimeLogEntity>>> getStudentTimeLogs({
+    required String studentId,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
-      // Implementação temporária
-      return const Left(
-          ServerFailure(message: 'Método getStudentTimeLogs não implementado'));
+      final List<Map<String, dynamic>> timeLogsData;
+      if (startDate != null && endDate != null) {
+        timeLogsData = await _timeLogDatasource.getTimeLogsByDateRange(
+            studentId, startDate, endDate);
+      } else {
+        timeLogsData = await _timeLogDatasource.getTimeLogsByStudent(studentId);
+      }
+
+      final timeLogs = timeLogsData
+          .map((data) => TimeLogModel.fromJson(data).toEntity())
+          .toList();
+      return Right(timeLogs);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Left(ServerFailure(
+          message: 'Erro no repositório ao buscar logs de tempo: $e'));
     }
   }
 
@@ -199,6 +212,19 @@ class StudentRepository implements IStudentRepository {
       // Implementação temporária
       return const Left(
           ServerFailure(message: 'Método updateTimeLog não implementado'));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, Map<String, dynamic>>> getStudentDashboard(
+      String studentId) async {
+    try {
+      // TODO: Implementar a lógica para buscar os dados do dashboard
+      // Isso pode envolver múltiplas chamadas ao datasource
+      return const Left(ServerFailure(
+          message: 'Método getStudentDashboard não implementado'));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
 
 class SupervisorHomePage extends StatelessWidget {
   const SupervisorHomePage({super.key});
@@ -233,7 +234,8 @@ class SupervisorHomePage extends StatelessWidget {
                   final activity = activities[index];
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: (activity['color'] as Color).withOpacity(0.1),
+                      backgroundColor:
+                          (activity['color'] as Color).withOpacity(0.1),
                       child: Icon(
                         activity['icon'] as IconData,
                         color: activity['color'] as Color,
@@ -333,4 +335,3 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-

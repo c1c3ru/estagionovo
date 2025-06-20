@@ -7,6 +7,8 @@ import '../bloc/student_bloc.dart';
 import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
 import '../../../features/auth/bloc/auth_bloc.dart';
+import '../../../features/auth/bloc/auth_event.dart';
+import '../../../features/auth/bloc/auth_state.dart';
 import 'time_log_page.dart';
 import 'contract_page.dart';
 
@@ -36,14 +38,14 @@ class _StudentHomePageState extends State<StudentHomePage> {
         actions: [
           BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
-              if (state is AuthLogoutSuccess) {
+              if (state is AuthUnauthenticated) {
                 Navigator.of(context).pushReplacementNamed('/login');
               }
             },
             child: IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                context.read<AuthBloc>().add(AuthLogoutRequested());
+                context.read<AuthBloc>().add(const AuthLogoutRequested());
               },
             ),
           ),
@@ -137,10 +139,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
           children: [
             Row(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 30,
                   backgroundColor: AppColors.primary,
-                  child: const Icon(
+                  child: Icon(
                     Icons.person,
                     size: 32,
                     color: AppColors.white,
@@ -151,7 +153,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Bem-vindo!',
                         style: AppTextStyles.h6,
                       ),
@@ -176,7 +178,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.school,
                     size: 20,
                     color: AppColors.primary,
@@ -214,7 +216,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Ações Rápidas',
           style: AppTextStyles.h6,
         ),
@@ -312,7 +314,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Informações do Estudante',
           style: AppTextStyles.h6,
         ),

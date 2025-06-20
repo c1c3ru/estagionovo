@@ -18,20 +18,20 @@ class AuthRepository implements IAuthRepository {
         _preferencesManager = preferencesManager;
 
   @override
-  Stream<UserEntity?> get authStateChanges => _authDatasource.authStateChanges
-      .map((user) => user != null ? UserModel.fromJson(user).toEntity() : null);
+  Stream<UserEntity?> get authStateChanges =>
+      _authDatasource.getAuthStateChanges().map((userData) =>
+          userData != null ? UserModel.fromJson(userData).toEntity() : null);
 
   @override
   Future<Either<AppFailure, UserEntity>> getCurrentUser() async {
     try {
-      final userModel = await _authDatasource.getCurrentUser();
-      if (userModel != null) {
-        // Cache user data locally
+      final userData = await _authDatasource.getCurrentUser();
+      if (userData != null) {
+        final userModel = UserModel.fromJson(userData);
         await _preferencesManager.saveUserData(userModel.toJson());
         return Right(userModel.toEntity());
       }
 
-      // Try to get from local cache if network fails
       final cachedUserData = _preferencesManager.getUserData();
       if (cachedUserData != null) {
         final userModel = UserModel.fromJson(cachedUserData);
@@ -40,7 +40,6 @@ class AuthRepository implements IAuthRepository {
 
       return Left(AuthFailure('Usuário não encontrado'));
     } catch (e) {
-      // Fallback to cached data
       final cachedUserData = _preferencesManager.getUserData();
       if (cachedUserData != null) {
         final userModel = UserModel.fromJson(cachedUserData);
@@ -56,11 +55,17 @@ class AuthRepository implements IAuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await _authDatasource.login(email, password);
-      await _preferencesManager.saveUserData(userModel.toJson());
-      return Right(userModel.toEntity());
+      final userData =
+          await _authDatasource.signInWithEmailAndPassword(email, password);
+      if (userData != null) {
+        final userModel = UserModel.fromJson(userData);
+        await _preferencesManager.saveUserData(userModel.toJson());
+        return Right(userModel.toEntity());
+      } else {
+        return const Left(AuthFailure('Credenciais inválidas'));
+      }
     } catch (e) {
-      return Left(AuthFailure(e.toString()));
+      return Left(AuthFailure('Erro no login: $e'));
     }
   }
 
@@ -72,27 +77,31 @@ class AuthRepository implements IAuthRepository {
     required UserRole role,
   }) async {
     try {
-      final userModel =
-          await _authDatasource.register(email, password, fullName, role.name);
+      final userData = await _authDatasource.signUpWithEmailAndPassword(
+        email: email,
+        password: password,
+        fullName: fullName,
+        role: role,
+      );
+      final userModel = UserModel.fromJson(userData);
       await _preferencesManager.saveUserData(userModel.toJson());
       return Right(userModel.toEntity());
     } catch (e) {
-      return Left(AuthFailure(e.toString()));
+      return Left(AuthFailure('Erro no registro: $e'));
     }
   }
 
   @override
   Future<Either<AppFailure, void>> logout() async {
     try {
-      await _authDatasource.logout();
+      await _authDatasource.signOut();
       await _preferencesManager.removeUserData();
       await _preferencesManager.removeUserToken();
       return const Right(null);
     } catch (e) {
-      // Even if network logout fails, clear local data
       await _preferencesManager.removeUserData();
       await _preferencesManager.removeUserToken();
-      return Left(AuthFailure(e.toString()));
+      return Left(AuthFailure('Erro no logout: $e'));
     }
   }
 
@@ -118,7 +127,7 @@ class AuthRepository implements IAuthRepository {
     String? profilePictureUrl,
   }) async {
     try {
-      final user = await _authDatasource.updateProfile(
+      final userData = await _authDatasource.updateProfile(
         userId: userId,
         fullName: fullName,
         email: email,
@@ -126,7 +135,7 @@ class AuthRepository implements IAuthRepository {
         phoneNumber: phoneNumber,
         profilePictureUrl: profilePictureUrl,
       );
-      return Right(UserModel.fromJson(user).toEntity());
+      return Right(UserModel.fromJson(userData).toEntity());
     } catch (e) {
       return Left(AuthFailure(e.toString()));
     }
@@ -135,9 +144,9 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<bool> isLoggedIn() async {
     try {
-      return await _authDatasource.isLoggedIn();
+      final userData = await _authDatasource.getCurrentUser();
+      return userData != null;
     } catch (e) {
-      // Fallback to local check
       final cachedUserData = _preferencesManager.getUserData();
       return cachedUserData != null;
     }

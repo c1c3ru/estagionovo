@@ -95,3 +95,12 @@ class AuthStateChangedEvent extends AuthEvent {
   @override
   List<Object?> get props => [isAuthenticated, user];
 }
+
+class AuthUserChanged extends AuthEvent {
+  final UserEntity? user;
+
+  const AuthUserChanged({this.user});
+
+  @override
+  List<Object?> get props => [user];
+}

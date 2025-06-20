@@ -208,7 +208,8 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
   ContractBloc({
     required GetContractsByStudentUsecase getContractsByStudentUsecase,
     required GetContractsBySupervisorUsecase getContractsBySupervisorUsecase,
-    required GetActiveContractByStudentUsecase getActiveContractByStudentUsecase,
+    required GetActiveContractByStudentUsecase
+        getActiveContractByStudentUsecase,
     required CreateContractUsecase createContractUsecase,
     required UpdateContractUsecase updateContractUsecase,
     required DeleteContractUsecase deleteContractUsecase,
@@ -223,7 +224,8 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
         super(ContractInitial()) {
     on<ContractLoadByStudentRequested>(_onContractLoadByStudentRequested);
     on<ContractLoadBySupervisorRequested>(_onContractLoadBySupervisorRequested);
-    on<ContractGetActiveByStudentRequested>(_onContractGetActiveByStudentRequested);
+    on<ContractGetActiveByStudentRequested>(
+        _onContractGetActiveByStudentRequested);
     on<ContractCreateRequested>(_onContractCreateRequested);
     on<ContractUpdateRequested>(_onContractUpdateRequested);
     on<ContractDeleteRequested>(_onContractDeleteRequested);
@@ -235,12 +237,11 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractSelecting());
-    try {
-      final contracts = await _getContractsByStudentUsecase(event.studentId);
-      emit(ContractLoadByStudentSuccess(contracts: contracts));
-    } catch (e) {
-      emit(ContractSelectError(message: e.toString()));
-    }
+    final result = await _getContractsByStudentUsecase(event.studentId);
+    result.fold(
+      (failure) => emit(ContractSelectError(message: failure.message)),
+      (contracts) => emit(ContractLoadByStudentSuccess(contracts: contracts)),
+    );
   }
 
   Future<void> _onContractLoadBySupervisorRequested(
@@ -248,12 +249,12 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractSelecting());
-    try {
-      final contracts = await _getContractsBySupervisorUsecase(event.supervisorId);
-      emit(ContractLoadBySupervisorSuccess(contracts: contracts));
-    } catch (e) {
-      emit(ContractSelectError(message: e.toString()));
-    }
+    final result = await _getContractsBySupervisorUsecase(event.supervisorId);
+    result.fold(
+      (failure) => emit(ContractSelectError(message: failure.message)),
+      (contracts) =>
+          emit(ContractLoadBySupervisorSuccess(contracts: contracts)),
+    );
   }
 
   Future<void> _onContractGetActiveByStudentRequested(
@@ -261,12 +262,11 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractSelecting());
-    try {
-      final contract = await _getActiveContractByStudentUsecase(event.studentId);
-      emit(ContractGetActiveByStudentSuccess(contract: contract));
-    } catch (e) {
-      emit(ContractSelectError(message: e.toString()));
-    }
+    final result = await _getActiveContractByStudentUsecase(event.studentId);
+    result.fold(
+      (failure) => emit(ContractSelectError(message: failure.message)),
+      (contract) => emit(ContractGetActiveByStudentSuccess(contract: contract)),
+    );
   }
 
   Future<void> _onContractCreateRequested(
@@ -274,12 +274,11 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractInserting());
-    try {
-      final contract = await _createContractUsecase(event.contract);
-      emit(ContractCreateSuccess(contract: contract));
-    } catch (e) {
-      emit(ContractInsertError(message: e.toString()));
-    }
+    final result = await _createContractUsecase(event.contract);
+    result.fold(
+      (failure) => emit(ContractInsertError(message: failure.message)),
+      (contract) => emit(ContractCreateSuccess(contract: contract)),
+    );
   }
 
   Future<void> _onContractUpdateRequested(
@@ -287,12 +286,11 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractUpdating());
-    try {
-      final contract = await _updateContractUsecase(event.contract);
-      emit(ContractUpdateSuccess(contract: contract));
-    } catch (e) {
-      emit(ContractUpdateError(message: e.toString()));
-    }
+    final result = await _updateContractUsecase(event.contract);
+    result.fold(
+      (failure) => emit(ContractUpdateError(message: failure.message)),
+      (contract) => emit(ContractUpdateSuccess(contract: contract)),
+    );
   }
 
   Future<void> _onContractDeleteRequested(
@@ -313,12 +311,11 @@ class ContractBloc extends Bloc<ContractEvent, ContractState> {
     Emitter<ContractState> emit,
   ) async {
     emit(ContractSelecting());
-    try {
-      final statistics = await _getContractStatisticsUsecase();
-      emit(ContractGetStatisticsSuccess(statistics: statistics));
-    } catch (e) {
-      emit(ContractSelectError(message: e.toString()));
-    }
+    final result = await _getContractStatisticsUsecase();
+    result.fold(
+      (failure) => emit(ContractSelectError(message: failure.message)),
+      (statistics) =>
+          emit(ContractGetStatisticsSuccess(statistics: statistics)),
+    );
   }
 }
-

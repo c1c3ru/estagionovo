@@ -42,6 +42,7 @@ import '../../domain/usecases/student/create_student_usecase.dart';
 import '../../domain/usecases/student/update_student_usecase.dart';
 import '../../domain/usecases/student/delete_student_usecase.dart';
 import '../../domain/usecases/student/get_students_by_supervisor_usecase.dart';
+import '../../domain/usecases/student/get_student_dashboard_usecase.dart';
 
 class StudentModule extends Module {
   @override
@@ -102,9 +103,12 @@ class StudentModule extends Module {
         () => DeleteStudentUsecase(i.get<IStudentRepository>()));
     i.add<GetStudentsBySupervisorUsecase>(
         () => GetStudentsBySupervisorUsecase(i.get<IStudentRepository>()));
+    i.add<GetStudentDashboardUsecase>(
+        () => GetStudentDashboardUsecase(i.get<IStudentRepository>()));
 
     // BLoC
     i.add<StudentBloc>(() => StudentBloc(
+          getStudentDashboardUsecase: i.get<GetStudentDashboardUsecase>(),
           getStudentDetailsUsecase: i.get<GetStudentDetailsUsecase>(),
           updateStudentProfileUsecase: i.get<UpdateStudentProfileUsecase>(),
           checkInUsecase: i.get<CheckInUsecase>(),

@@ -2,15 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
-
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../bloc/auth_bloc.dart' as bloc;
-import '../bloc/auth_event.dart' hide AuthEvent;
-import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -29,7 +27,6 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    // Obter o AuthBloc global registrado no AppModule
     _authBloc = Modular.get<AuthBloc>();
   }
 
@@ -42,31 +39,28 @@ class _LoginFormState extends State<LoginForm> {
 
   void _submitLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      _authBloc.add(LoginSubmittedEvent(
+      _authBloc.add(AuthLoginRequested(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-      ) as AuthEvent);
+      ));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      bloc: _authBloc, // Escuta o AuthBloc global
+      bloc: _authBloc,
       listener: (context, state) {
         if (state is AuthFailure) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message ?? 'An error occurred'),
+                content: Text(state.message),
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
         }
-        // A navegação em caso de AuthSuccess é geralmente tratada por um widget pai
-        // que ouve o AuthBloc (ex: AppWidget ou um wrapper de rota)
-        // ou por um AuthGuard.
       },
       child: Form(
         key: _formKey,
@@ -118,8 +112,8 @@ class _LoginFormState extends State<LoginForm> {
                 return AppButton(
                   text: AppStrings.login,
                   isLoading: state is AuthLoading,
-                  onPressed: _submitLogin,
-                  minWidth: double.infinity, // Botão com largura total
+                  onPressed: state is AuthLoading ? null : _submitLogin,
+                  minWidth: double.infinity,
                 );
               },
             ),

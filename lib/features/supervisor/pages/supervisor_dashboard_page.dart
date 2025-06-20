@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:dartz/dartz.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart'
+    as student_status_enum;
 import 'package:student_supervisor_app/core/enums/user_role.dart';
 import 'package:student_supervisor_app/core/enums/contract_status.dart';
 import 'package:student_supervisor_app/data/models/student_model.dart';
@@ -126,7 +127,8 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       final results = await Future.wait([
         _getAllStudentsForSupervisorUsecase.call(null),
         _getAllContractsUsecase.call(GetAllContractsParams()),
-        _getAllTimeLogsForSupervisorUsecase.call(pendingApprovalOnly: true),
+        _getAllTimeLogsForSupervisorUsecase
+            .call(GetAllTimeLogsParams(pendingOnly: true)),
       ]);
 
       final studentsResult =
@@ -151,10 +153,12 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       );
 
       final now = DateTime.now();
-      final activeStudents =
-          students.where((s) => s.status == StudentStatus.active).length;
-      final inactiveStudents =
-          students.where((s) => s.status == StudentStatus.inactive).length;
+      final activeStudents = students
+          .where((s) => s.status == student_status_enum.StudentStatus.active)
+          .length;
+      final inactiveStudents = students
+          .where((s) => s.status == student_status_enum.StudentStatus.inactive)
+          .length;
       final expiringContractsSoon = contracts
           .where((c) =>
               c.endDate.isAfter(now) &&
@@ -208,7 +212,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
         },
       );
     } else {
-      add(const LoadSupervisorDashboardDataEvent());
+      add(LoadSupervisorDashboardDataEvent());
     }
   }
 
@@ -252,9 +256,10 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     if (state is SupervisorDashboardLoadSuccess) {
       final currentDashboardState = state as SupervisorDashboardLoadSuccess;
       emit(currentDashboardState.copyWith(
-          showGanttView: event.showGanttView,
+          showGanttView: !currentDashboardState.showGanttView,
           isLoading: true,
-          appliedFilters: FilterStudentsParams(status: StudentStatus.active),
+          appliedFilters: FilterStudentsParams(
+              status: student_status_enum.StudentStatus.active),
           pendingApprovals: []));
     }
   }
@@ -269,25 +274,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     try {
       final studentResult =
           await _getStudentDetailsForSupervisorUsecase.call(event.studentId);
-      final StudentEntity student = await studentResult.fold(
+      final (student, timeLogs, contracts) = await studentResult.fold(
         (failure) => throw failure,
         (s) => s,
-      );
-
-      final timeLogsResult = await _getAllTimeLogsForSupervisorUsecase.call(
-          studentId: event.studentId, pendingApprovalOnly: null);
-      List<TimeLogEntity> timeLogs = [];
-      await timeLogsResult.fold(
-        (failure) => throw failure,
-        (tl) => timeLogs = tl,
-      );
-
-      final contractsResult = await _getAllContractsUsecase
-          .call(GetAllContractsParams(studentId: event.studentId));
-      List<ContractEntity> contracts = [];
-      await contractsResult.fold(
-        (failure) => throw failure,
-        (c) => contracts = c,
       );
 
       emit(SupervisorStudentDetailsLoadSuccess(
@@ -309,12 +298,12 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
   ) async {
     emit(const SupervisorLoading(loadingMessage: 'A criar estudante...'));
 
-    final authResult = await _registerAuthUserUsecase.call(RegisterParams(
+    final authResult = await _registerAuthUserUsecase.call(
+      fullName: event.studentData.fullName,
       email: event.initialEmail,
       password: event.initialPassword,
-      fullName: event.studentData.fullName,
       role: UserRole.student,
-    ));
+    );
 
     await authResult.fold(
       (failure) async {
@@ -324,11 +313,13 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       },
       (authUserEntity) async {
         try {
-          final studentToCreate =
-              event.studentData.copyWith(id: authUserEntity.id);
+          final studentToCreate = event.studentData.copyWith(
+              id: authUserEntity.id,
+              userId: authUserEntity.id,
+              email: authUserEntity.email);
 
-          final studentProfileResult = await _createStudentBySupervisorUsecase
-              .call(studentToCreate as StudentEntity);
+          final studentProfileResult =
+              await _createStudentBySupervisorUsecase.call(studentToCreate);
 
           studentProfileResult.fold(
             (profileFailure) {
@@ -340,7 +331,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
               emit(SupervisorOperationSuccess(
                   message: 'Estudante criado com sucesso!',
                   entity: createdStudent));
-              add(const LoadSupervisorDashboardDataEvent());
+              add(LoadSupervisorDashboardDataEvent());
             },
           );
         } catch (e) {
@@ -366,7 +357,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
         emit(SupervisorOperationSuccess(
             message: 'Estudante atualizado com sucesso!',
             entity: updatedStudent));
-        add(const LoadSupervisorDashboardDataEvent());
+        add(LoadSupervisorDashboardDataEvent());
       },
     );
   }
@@ -383,7 +374,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       (_) {
         emit(const SupervisorOperationSuccess(
             message: 'Estudante removido com sucesso!'));
-        add(const LoadSupervisorDashboardDataEvent());
+        add(LoadSupervisorDashboardDataEvent());
       },
     );
   }
@@ -447,23 +438,13 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     Emitter<SupervisorState> emit,
   ) async {
     emit(const SupervisorLoading(loadingMessage: 'A criar contrato...'));
-    final result = await _createContractUsecase.call(UpsertContractParams(
-      studentId: event.contractData.studentId,
-      supervisorId: event.contractData.supervisorId,
-      contractType: event.contractData.contractType,
-      status: event.contractData.status,
-      startDate: event.contractData.startDate,
-      endDate: event.contractData.endDate,
-      description: event.contractData.description,
-      documentUrl: event.contractData.documentUrl,
-      createdBy: event.createdBySupervisorId,
-    ));
+    final result = await _createContractUsecase.call(event.contract);
     result.fold(
         (failure) => emit(SupervisorOperationFailure(message: failure.message)),
         (newContract) {
       emit(SupervisorOperationSuccess(
           message: 'Contrato criado com sucesso!', entity: newContract));
-      add(const LoadSupervisorDashboardDataEvent());
+      add(LoadSupervisorDashboardDataEvent());
     });
   }
 
@@ -472,25 +453,14 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     Emitter<SupervisorState> emit,
   ) async {
     emit(const SupervisorLoading(loadingMessage: 'A atualizar contrato...'));
-    final result = await _updateContractUsecase.call(UpsertContractParams(
-      id: event.contractData.id,
-      studentId: event.contractData.studentId,
-      supervisorId: event.contractData.supervisorId,
-      contractType: event.contractData.contractType,
-      status: event.contractData.status,
-      startDate: event.contractData.startDate,
-      endDate: event.contractData.endDate,
-      description: event.contractData.description,
-      documentUrl: event.contractData.documentUrl,
-      createdBy: event.updatedBySupervisorId,
-    ));
+    final result = await _updateContractUsecase.call(event.contract);
     result.fold(
         (failure) => emit(SupervisorOperationFailure(message: failure.message)),
         (updatedContract) {
       emit(SupervisorOperationSuccess(
           message: 'Contrato atualizado com sucesso!',
           entity: updatedContract));
-      add(const LoadSupervisorDashboardDataEvent());
+      add(LoadSupervisorDashboardDataEvent());
     });
   }
 }

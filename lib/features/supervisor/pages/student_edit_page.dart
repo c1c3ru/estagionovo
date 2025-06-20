@@ -4,7 +4,9 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:student_supervisor_app/core/enums/class_shift.dart';
 import 'package:student_supervisor_app/core/enums/internship_shift.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart';
 import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -53,8 +55,7 @@ class _StudentEditPageState extends State<StudentEditPage> {
   DateTime? _selectedContractStartDate;
   DateTime? _selectedContractEndDate;
   ClassShift _selectedClassShift = ClassShift.morning;
-  InternshipShift _selectedInternshipShift1 = InternshipShift.morning;
-  InternshipShift _selectedInternshipShift2 = InternshipShift.morning;
+  InternshipShift _selectedInternshipShift = InternshipShift.morning;
   bool _selectedIsMandatoryInternship = false;
 
   @override
@@ -74,6 +75,7 @@ class _StudentEditPageState extends State<StudentEditPage> {
   void _populateFormFields(StudentEntity student) {
     _studentToEdit = student;
     _fullNameController.text = student.fullName;
+    _emailController.text = student.email;
     _registrationNumberController.text = student.registrationNumber;
     _courseController.text = student.course;
     _advisorNameController.text = student.advisorName;
@@ -81,8 +83,9 @@ class _StudentEditPageState extends State<StudentEditPage> {
     _phoneNumberController.text = student.phoneNumber ?? '';
 
     _selectedBirthDate = student.birthDate;
-    _birthDateController.text =
-        DateFormat('dd/MM/yyyy').format(student.birthDate);
+    _birthDateController.text = student.birthDate != null
+        ? DateFormat('dd/MM/yyyy').format(student.birthDate!)
+        : '';
 
     _selectedContractStartDate = student.contractStartDate;
     _contractStartDateController.text =
@@ -93,14 +96,12 @@ class _StudentEditPageState extends State<StudentEditPage> {
         DateFormat('dd/MM/yyyy').format(student.contractEndDate);
 
     _totalHoursRequiredController.text =
-        student.totalHoursRequired.toStringAsFixed(2);
+        student.totalHoursRequired.toStringAsFixed(1);
     _weeklyHoursTargetController.text =
-        student.weeklyHoursTarget.toStringAsFixed(2);
+        student.weeklyHoursTarget.toStringAsFixed(1);
 
     _selectedClassShift = student.classShift;
-    _selectedInternshipShift1 = student.internshipShift1;
-    _selectedInternshipShift2 =
-        student.internshipShift2 ?? InternshipShift.morning;
+    _selectedInternshipShift = student.internshipShift;
     _selectedIsMandatoryInternship = student.isMandatoryInternship;
 
     setState(() {
@@ -137,16 +138,18 @@ class _StudentEditPageState extends State<StudentEditPage> {
     }
 
     final studentEntityData = StudentEntity(
-      id: _isEditMode ? widget.studentId! : '',
+      id: _isEditMode ? _studentToEdit!.id : '',
+      userId: _isEditMode ? _studentToEdit!.userId : '',
+      email: _isEditMode ? _studentToEdit!.email : _emailController.text.trim(),
+      supervisorId: _isEditMode ? _studentToEdit!.supervisorId : 'TBD',
       fullName: _fullNameController.text.trim(),
       registrationNumber: _registrationNumberController.text.trim(),
       course: _courseController.text.trim(),
       advisorName: _advisorNameController.text.trim(),
       isMandatoryInternship: _selectedIsMandatoryInternship,
       classShift: _selectedClassShift,
-      internshipShift1: _selectedInternshipShift1,
-      internshipShift2: _selectedInternshipShift2,
-      birthDate: _selectedBirthDate ?? DateTime.now(),
+      internshipShift: _selectedInternshipShift,
+      birthDate: _selectedBirthDate,
       contractStartDate: _selectedContractStartDate ?? DateTime.now(),
       contractEndDate: _selectedContractEndDate ??
           DateTime.now().add(const Duration(days: 1)),
@@ -162,8 +165,8 @@ class _StudentEditPageState extends State<StudentEditPage> {
       phoneNumber: _phoneNumberController.text.trim().isNotEmpty
           ? _phoneNumberController.text.trim()
           : null,
-      role: UserRole.student,
-      createdAt: DateTime.now(),
+      isOnTrack: _isEditMode ? _studentToEdit!.isOnTrack : true,
+      createdAt: _isEditMode ? _studentToEdit!.createdAt : DateTime.now(),
     );
 
     if (_isEditMode) {
@@ -211,14 +214,14 @@ class _StudentEditPageState extends State<StudentEditPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: AppColors.error,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
           } else if (state is SupervisorOperationSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Operação realizada com sucesso!'),
-                backgroundColor: AppColors.success,
+                backgroundColor: Colors.green,
               ),
             );
             Modular.to.pop();
@@ -229,7 +232,8 @@ class _StudentEditPageState extends State<StudentEditPage> {
           }
         },
         builder: (context, state) {
-          if (_isLoadingData && _isEditMode) {
+          if ((state is SupervisorLoading || _isLoadingData) &&
+              _studentToEdit == null) {
             return const Center(
               child: LoadingIndicator(),
             );
@@ -261,10 +265,10 @@ class _StudentEditPageState extends State<StudentEditPage> {
             const SizedBox(height: 16),
             AppTextField(
               controller: _passwordController,
-              labelText: 'Senha',
+              labelText: 'Senha (mínimo 6 caracteres)',
               hintText: 'Digite a senha',
               obscureText: true,
-              validator: Validators.password,
+              validator: (val) => Validators.password(val, minLength: 6),
             ),
             const SizedBox(height: 16),
           ],
@@ -305,6 +309,8 @@ class _StudentEditPageState extends State<StudentEditPage> {
             labelText: 'Data de Nascimento',
             hintText: 'Selecione a data de nascimento',
             readOnly: true,
+            validator: (v) =>
+                Validators.required(v, fieldName: 'Data de Nascimento'),
             onTap: () => _selectDate(
               context,
               _birthDateController,
@@ -315,15 +321,15 @@ class _StudentEditPageState extends State<StudentEditPage> {
           const SizedBox(height: 16),
           AppTextField(
             controller: _phoneNumberController,
-            labelText: 'Telefone',
+            labelText: 'Telefone (Opcional)',
             hintText: 'Digite o telefone',
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: _profilePictureUrlController,
-            labelText: 'URL da Foto de Perfil',
-            hintText: 'Digite a URL da foto (opcional)',
+            labelText: 'URL da Foto de Perfil (Opcional)',
+            hintText: 'Digite a URL da foto',
           ),
           const SizedBox(height: 16),
           AppTextField(
@@ -331,6 +337,8 @@ class _StudentEditPageState extends State<StudentEditPage> {
             labelText: 'Data de Início do Contrato',
             hintText: 'Selecione a data de início',
             readOnly: true,
+            validator: (v) =>
+                Validators.required(v, fieldName: 'Data de Início'),
             onTap: () => _selectDate(
               context,
               _contractStartDateController,
@@ -344,6 +352,7 @@ class _StudentEditPageState extends State<StudentEditPage> {
             labelText: 'Data de Fim do Contrato',
             hintText: 'Selecione a data de fim',
             readOnly: true,
+            validator: (v) => Validators.required(v, fieldName: 'Data de Fim'),
             onTap: () => _selectDate(
               context,
               _contractEndDateController,
@@ -383,13 +392,13 @@ class _StudentEditPageState extends State<StudentEditPage> {
             }).toList(),
             onChanged: (value) {
               setState(() {
-                _selectedClassShift = value!;
+                if (value != null) _selectedClassShift = value;
               });
             },
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<InternshipShift>(
-            value: _selectedInternshipShift1,
+            value: _selectedInternshipShift,
             decoration: const InputDecoration(
               labelText: 'Turno do Estágio',
               border: OutlineInputBorder(),
@@ -402,26 +411,7 @@ class _StudentEditPageState extends State<StudentEditPage> {
             }).toList(),
             onChanged: (value) {
               setState(() {
-                _selectedInternshipShift1 = value!;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<InternshipShift>(
-            value: _selectedInternshipShift2,
-            decoration: const InputDecoration(
-              labelText: 'Turno do Estágio (Secundário)',
-              border: OutlineInputBorder(),
-            ),
-            items: InternshipShift.values.map((shift) {
-              return DropdownMenuItem(
-                value: shift,
-                child: Text(shift.displayName),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedInternshipShift2 = value!;
+                if (value != null) _selectedInternshipShift = value;
               });
             },
           ),
@@ -431,15 +421,19 @@ class _StudentEditPageState extends State<StudentEditPage> {
             value: _selectedIsMandatoryInternship,
             onChanged: (value) {
               setState(() {
-                _selectedIsMandatoryInternship = value!;
+                _selectedIsMandatoryInternship = value ?? false;
               });
             },
           ),
           const SizedBox(height: 32),
-          AppButton(
-            text: _isEditMode ? 'Atualizar' : 'Criar',
-            onPressed: _handleSave,
-          ),
+          BlocBuilder<SupervisorBloc, SupervisorState>(
+              builder: (context, state) {
+            return AppButton(
+              text: _isEditMode ? 'Atualizar' : 'Criar',
+              isLoading: state is SupervisorLoading,
+              onPressed: _handleSave,
+            );
+          }),
         ],
       ),
     );

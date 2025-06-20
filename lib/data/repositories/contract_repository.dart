@@ -27,7 +27,7 @@ class ContractRepository implements IContractRepository {
           .toList();
       return Right(contracts);
     } catch (e) {
-      return Left(AppFailure('Erro ao buscar contratos: $e'));
+      return Left(ServerFailure(message: 'Erro ao buscar contratos: $e'));
     }
   }
 
@@ -36,11 +36,11 @@ class ContractRepository implements IContractRepository {
     try {
       final contractData = await _contractDatasource.getContractById(id);
       if (contractData == null) {
-        return Left(AppFailure('Contrato não encontrado'));
+        return Left(ServerFailure(message: 'Contrato não encontrado'));
       }
       return Right(ContractModel.fromJson(contractData).toEntity());
     } catch (e) {
-      return Left(AppFailure('Erro ao buscar contrato: $e'));
+      return Left(ServerFailure(message: 'Erro ao buscar contrato: $e'));
     }
   }
 
@@ -55,7 +55,8 @@ class ContractRepository implements IContractRepository {
           .toList();
       return Right(contracts);
     } catch (e) {
-      return Left(AppFailure('Erro ao buscar contratos do estudante: $e'));
+      return Left(
+          ServerFailure(message: 'Erro ao buscar contratos do estudante: $e'));
     }
   }
 
@@ -70,7 +71,8 @@ class ContractRepository implements IContractRepository {
           .toList();
       return Right(contracts);
     } catch (e) {
-      return Left(AppFailure('Erro ao buscar contratos do supervisor: $e'));
+      return Left(
+          ServerFailure(message: 'Erro ao buscar contratos do supervisor: $e'));
     }
   }
 
@@ -94,7 +96,7 @@ class ContractRepository implements IContractRepository {
           await _contractDatasource.createContract(contractModel.toJson());
       return Right(ContractModel.fromJson(createdData).toEntity());
     } catch (e) {
-      return Left(AppFailure('Erro ao criar contrato: $e'));
+      return Left(ServerFailure(message: 'Erro ao criar contrato: $e'));
     }
   }
 
@@ -109,7 +111,7 @@ class ContractRepository implements IContractRepository {
       );
       return Right(ContractModel.fromJson(updatedData).toEntity());
     } catch (e) {
-      return Left(AppFailure('Erro ao atualizar contrato: $e'));
+      return Left(ServerFailure(message: 'Erro ao atualizar contrato: $e'));
     }
   }
 
@@ -119,7 +121,7 @@ class ContractRepository implements IContractRepository {
       await _contractDatasource.deleteContract(id);
       return const Right(null);
     } catch (e) {
-      return Left(AppFailure('Erro ao excluir contrato: $e'));
+      return Left(ServerFailure(message: 'Erro ao excluir contrato: $e'));
     }
   }
 
@@ -134,7 +136,8 @@ class ContractRepository implements IContractRepository {
       }
       return Right(ContractModel.fromJson(contractData).toEntity());
     } catch (e) {
-      return Left(AppFailure('Erro ao buscar contrato ativo do estudante: $e'));
+      return Left(ServerFailure(
+          message: 'Erro ao buscar contrato ativo do estudante: $e'));
     }
   }
 
@@ -198,7 +201,8 @@ class ContractRepository implements IContractRepository {
         'averageContractDurationInDays': averageContractDuration,
       });
     } catch (e) {
-      return Left(AppFailure('Erro ao obter estatísticas dos contratos: $e'));
+      return Left(ServerFailure(
+          message: 'Erro ao obter estatísticas dos contratos: $e'));
     }
   }
 }

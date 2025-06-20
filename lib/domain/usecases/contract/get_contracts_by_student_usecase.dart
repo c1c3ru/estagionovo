@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
+
 import '../../repositories/i_contract_repository.dart';
 import '../../entities/contract_entity.dart';
 
@@ -6,16 +9,8 @@ class GetContractsByStudentUsecase {
 
   GetContractsByStudentUsecase(this._contractRepository);
 
-  Future<List<ContractEntity>> call(String studentId) async {
-    try {
-      if (studentId.isEmpty) {
-        throw Exception('ID do estudante não pode estar vazio');
-      }
-      
-      return await _contractRepository.getContractsByStudent(studentId);
-    } catch (e) {
-      throw Exception('Erro ao buscar contratos do estudante: $e');
-    }
+  Future<Either<AppFailure, List<ContractEntity>>> call(
+      String studentId) async {
+    return await _contractRepository.getContractsByStudent(studentId);
   }
 }
-
