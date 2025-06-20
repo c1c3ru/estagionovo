@@ -17,7 +17,7 @@ import '../../../../domain/entities/time_log_entity.dart';
 import '../../../../domain/entities/student_entity.dart'; // Para mostrar o nome do estudante
 import '../bloc/supervisor_bloc.dart' as bloc;
 import '../bloc/supervisor_event.dart' as event;
-import '../bloc/supervisor_state.dart' as state;
+import '../bloc/supervisor_state.dart' as supervisor_state;
 import '../widgets/supervisor_app_drawer.dart';
 
 class SupervisorTimeApprovalPage extends StatefulWidget {
@@ -80,12 +80,12 @@ class _SupervisorTimeApprovalPageState
   // Na prática, a lista de logs do BLoC/Usecase poderia já vir com os nomes dos estudantes (via join).
   // Esta é uma solução alternativa se a TimeLogEntity só tiver studentId.
   Future<String> _getStudentName(
-      String studentId, state.SupervisorState currentState) async {
+      String studentId, supervisor_state.SupervisorState currentState) async {
     if (_studentNames.containsKey(studentId)) {
       return _studentNames[studentId]!;
     }
     // Se o estado atual do dashboard tiver a lista de estudantes, podemos usá-la
-    if (currentState is state.SupervisorDashboardLoadSuccess) {
+    if (currentState is supervisor_state.SupervisorDashboardLoadSuccess) {
       try {
         final student =
             currentState.students.firstWhere((s) => s.id == studentId);
@@ -164,16 +164,17 @@ class _SupervisorTimeApprovalPageState
           currentIndex: 2), // Ajuste o currentIndex conforme sua navegação
       bottomNavigationBar: const SupervisorBottomNavBar(
           currentIndex: 2), // Ajuste o currentIndex
-      body: BlocConsumer<bloc.SupervisorBloc, state.SupervisorState>(
+      body: BlocConsumer<bloc.SupervisorBloc, supervisor_state.SupervisorState>(
         bloc: _supervisorBloc,
         listener: (context, currentState) {
-          if (currentState is state.SupervisorOperationFailure) {
+          if (currentState is supervisor_state.SupervisorOperationFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(
                   content: Text(currentState.message),
                   backgroundColor: theme.colorScheme.error));
-          } else if (currentState is state.SupervisorOperationSuccess &&
+          } else if (currentState
+                  is supervisor_state.SupervisorOperationSuccess &&
               (currentState.entity is TimeLogEntity ||
                   currentState.message.contains("Registo de tempo"))) {
             ScaffoldMessenger.of(context)
@@ -188,15 +189,17 @@ class _SupervisorTimeApprovalPageState
           }
         },
         builder: (context, currentState) {
-          if (currentState is state.SupervisorLoading &&
-              currentState is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
+          if (currentState is supervisor_state.SupervisorLoading &&
+              currentState is! supervisor_state
+                  .SupervisorTimeLogsForApprovalLoadSuccess) {
             if (_supervisorBloc.state
-                is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
+                is! supervisor_state.SupervisorTimeLogsForApprovalLoadSuccess) {
               return const LoadingIndicator();
             }
           }
 
-          if (currentState is state.SupervisorTimeLogsForApprovalLoadSuccess) {
+          if (currentState
+              is supervisor_state.SupervisorTimeLogsForApprovalLoadSuccess) {
             if (currentState.timeLogs.isEmpty) {
               return Center(
                 child: Padding(
@@ -254,9 +257,9 @@ class _SupervisorTimeApprovalPageState
             );
           }
 
-          if (currentState is state.SupervisorOperationFailure &&
-              _supervisorBloc.state
-                  is! state.SupervisorTimeLogsForApprovalLoadSuccess) {
+          if (currentState is supervisor_state.SupervisorOperationFailure &&
+              _supervisorBloc.state is! supervisor_state
+                  .SupervisorTimeLogsForApprovalLoadSuccess) {
             return _buildErrorStatePage(context, currentState.message);
           }
 
@@ -352,12 +355,14 @@ class _SupervisorTimeApprovalPageState
             if (!log.approved &&
                 _supervisorId !=
                     null) // Mostra botões apenas se não aprovado e supervisorId estiver disponível
-              BlocBuilder<bloc.SupervisorBloc, state.SupervisorState>(
+              BlocBuilder<bloc.SupervisorBloc,
+                  supervisor_state.SupervisorState>(
                 bloc: _supervisorBloc, // Usa o BLoC da página
                 builder: (context, state) {
-                  bool isLoadingAction = state is state.SupervisorLoading &&
-                      state.loadingMessage ==
-                          null; // Loading genérico para ações
+                  bool isLoadingAction =
+                      state is supervisor_state.SupervisorLoading &&
+                          state.loadingMessage ==
+                              null; // Loading genérico para ações
 
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -370,7 +375,7 @@ class _SupervisorTimeApprovalPageState
                         type: AppButtonType.text,
                         foregroundColor: theme.colorScheme.error,
                         isLoading: isLoadingAction &&
-                            _supervisorBloc.state is state
+                            _supervisorBloc.state is supervisor_state
                                 .SupervisorLoading, // Verifica se este log específico está a ser processado
                       ),
                       const SizedBox(width: 8),
@@ -389,7 +394,8 @@ class _SupervisorTimeApprovalPageState
                                 }
                               },
                         isLoading: isLoadingAction &&
-                            _supervisorBloc.state is state.SupervisorLoading,
+                            _supervisorBloc.state
+                                is supervisor_state.SupervisorLoading,
                       ),
                     ],
                   );

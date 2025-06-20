@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:student_supervisor_app/core/enums/user_role.dart';
 import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart'
-    as auth_state;
+import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart';
 
 /// Um RouteGuard que verifica se o utilizador autenticado tem um dos papéis permitidos.
 /// Se não estiver autenticado ou não tiver o papel correto, redireciona.
@@ -21,7 +20,7 @@ class RoleGuard extends RouteGuard {
     final authBloc = Modular.get<AuthBloc>();
     final currentState = authBloc.state;
 
-    if (currentState is auth_state.AuthSuccess) {
+    if (currentState is AuthAuthenticated) {
       // Utilizador está autenticado, verifica o papel
       final UserRole currentUserRole =
           currentState.user.role; // Access role through the user object

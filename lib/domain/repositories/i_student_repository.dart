@@ -8,7 +8,7 @@ import 'package:student_supervisor_app/domain/entities/time_log_entity.dart';
 import '../entities/student_entity.dart';
 
 abstract class IStudentRepository {
-  Future<List<StudentEntity>> getAllStudents();
+  Future<Either<AppFailure, List<StudentEntity>>> getAllStudents();
   Future<StudentEntity?> getStudentById(String id);
   Future<StudentEntity?> getStudentByUserId(String userId);
   Future<StudentEntity> createStudent(StudentEntity student);
@@ -43,4 +43,7 @@ abstract class IStudentRepository {
 
   Future<Either<AppFailure, TimeLogEntity>> updateTimeLog(
       TimeLogEntity timeLog);
+
+  Future<Either<AppFailure, Map<String, dynamic>>> getStudentDashboard(
+      String studentId);
 }

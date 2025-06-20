@@ -1,300 +1,465 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/create_supervisor_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/delete_supervisor_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/get_all_supervisors_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/get_supervisor_by_id_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/update_supervisor_usecase.dart';
-import '../../../domain/entities/supervisor_entity.dart';
-import '../../../domain/repositories/i_supervisor_repository.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:dartz/dartz.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart'
+    as student_status_enum;
+import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:student_supervisor_app/data/models/student_model.dart';
+import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_event.dart';
+import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
 
-// Events
-abstract class SupervisorEvent extends Equatable {
-  const SupervisorEvent();
+import '../../../../core/errors/app_exceptions.dart';
+import '../../../../domain/entities/student_entity.dart';
+import '../../../../domain/entities/supervisor_entity.dart';
+import '../../../../domain/entities/time_log_entity.dart';
+import '../../../../domain/entities/contract_entity.dart';
+import '../../../../domain/entities/user_entity.dart';
+import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
+import '../../../../domain/usecases/contract/get_all_contracts_usecase.dart';
+import '../../../../domain/usecases/contract/upsert_contract_usecase.dart';
+import '../../../../domain/repositories/i_supervisor_repository.dart';
 
-  @override
-  List<Object?> get props => [];
-}
+// Usecases de Supervisor
+import '../../../../domain/usecases/supervisor/get_supervisor_details_usecase.dart';
+import '../../../../domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/get_student_details_for_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/create_student_by_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/update_student_by_supervisor_usecase.dart';
+import '../../../../domain/usecases/supervisor/delete_student_by_supervisor_usecase.dart';
+// import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
+// import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
 
-class SupervisorLoadAllRequested extends SupervisorEvent {}
+// Usecases de Contrato (usados pelo Supervisor)
+import '../../../../domain/usecases/contract/create_contract_usecase.dart';
+import '../../../../domain/usecases/contract/update_contract_usecase.dart';
+import '../../../../domain/usecases/contract/delete_contract_usecase.dart';
 
-class SupervisorLoadByIdRequested extends SupervisorEvent {
-  final String id;
+// Usecases de Auth
+import '../../../../domain/usecases/auth/register_usecase.dart';
+import '../../../../domain/repositories/i_auth_repository.dart'
+    show RegisterParams;
+import '../../../../data/models/student_model.dart' show FilterStudentsParams;
+// import '../../../../domain/repositories/i_contract_repository.dart'
+//     show UpsertContractParams;
 
-  const SupervisorLoadByIdRequested({required this.id});
-
-  @override
-  List<Object> get props => [id];
-}
-
-class SupervisorLoadByUserIdRequested extends SupervisorEvent {
-  final String userId;
-
-  const SupervisorLoadByUserIdRequested({required this.userId});
-
-  @override
-  List<Object> get props => [userId];
-}
-
-class SupervisorCreateRequested extends SupervisorEvent {
-  final SupervisorEntity supervisor;
-
-  const SupervisorCreateRequested({required this.supervisor});
-
-  @override
-  List<Object> get props => [supervisor];
-}
-
-class SupervisorUpdateRequested extends SupervisorEvent {
-  final SupervisorEntity supervisor;
-
-  const SupervisorUpdateRequested({required this.supervisor});
-
-  @override
-  List<Object> get props => [supervisor];
-}
-
-class SupervisorDeleteRequested extends SupervisorEvent {
-  final String id;
-
-  const SupervisorDeleteRequested({required this.id});
-
-  @override
-  List<Object> get props => [id];
-}
-
-// States
-abstract class SupervisorState extends Equatable {
-  const SupervisorState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class SupervisorInitial extends SupervisorState {}
-
-// Loading States
-class SupervisorLoading extends SupervisorState {}
-
-class SupervisorSelecting extends SupervisorState {}
-
-class SupervisorInserting extends SupervisorState {}
-
-class SupervisorUpdating extends SupervisorState {}
-
-class SupervisorDeleting extends SupervisorState {}
-
-// Success States
-class SupervisorLoadAllSuccess extends SupervisorState {
-  final List<SupervisorEntity> supervisors;
-
-  const SupervisorLoadAllSuccess({required this.supervisors});
-
-  @override
-  List<Object> get props => [supervisors];
-}
-
-class SupervisorLoadByIdSuccess extends SupervisorState {
-  final SupervisorEntity? supervisor;
-
-  const SupervisorLoadByIdSuccess({required this.supervisor});
-
-  @override
-  List<Object?> get props => [supervisor];
-}
-
-class SupervisorLoadByUserIdSuccess extends SupervisorState {
-  final SupervisorEntity? supervisor;
-
-  const SupervisorLoadByUserIdSuccess({required this.supervisor});
-
-  @override
-  List<Object?> get props => [supervisor];
-}
-
-class SupervisorCreateSuccess extends SupervisorState {
-  final SupervisorEntity supervisor;
-
-  const SupervisorCreateSuccess({required this.supervisor});
-
-  @override
-  List<Object> get props => [supervisor];
-}
-
-class SupervisorUpdateSuccess extends SupervisorState {
-  final SupervisorEntity supervisor;
-
-  const SupervisorUpdateSuccess({required this.supervisor});
-
-  @override
-  List<Object> get props => [supervisor];
-}
-
-class SupervisorDeleteSuccess extends SupervisorState {
-  final String deletedId;
-
-  const SupervisorDeleteSuccess({required this.deletedId});
-
-  @override
-  List<Object> get props => [deletedId];
-}
-
-// Error States
-class SupervisorSelectError extends SupervisorState {
-  final String message;
-
-  const SupervisorSelectError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class SupervisorInsertError extends SupervisorState {
-  final String message;
-
-  const SupervisorInsertError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class SupervisorUpdateError extends SupervisorState {
-  final String message;
-
-  const SupervisorUpdateError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class SupervisorDeleteError extends SupervisorState {
-  final String message;
-
-  const SupervisorDeleteError({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-// BLoC
 class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
-  final ISupervisorRepository _supervisorRepository;
-  final GetAllSupervisorsUsecase getAllSupervisorsUsecase;
-  final GetSupervisorByIdUsecase getSupervisorByIdUsecase;
-  final GetSupervisorByUserIdUsecase getSupervisorByUserIdUsecase;
-  final CreateSupervisorUsecase createSupervisorUsecase;
-  final UpdateSupervisorUsecase updateSupervisorUsecase;
-  final DeleteSupervisorUsecase deleteSupervisorUsecase;
+  // Usecases
+  final GetSupervisorDetailsUsecase _getSupervisorDetailsUsecase;
+  final GetAllStudentsForSupervisorUsecase _getAllStudentsForSupervisorUsecase;
+  final GetStudentDetailsForSupervisorUsecase
+      _getStudentDetailsForSupervisorUsecase;
+  final CreateStudentBySupervisorUsecase _createStudentBySupervisorUsecase;
+  final UpdateStudentBySupervisorUsecase _updateStudentBySupervisorUsecase;
+  final DeleteStudentBySupervisorUsecase _deleteStudentBySupervisorUsecase;
+  final GetAllTimeLogsForSupervisorUsecase _getAllTimeLogsForSupervisorUsecase;
+  final ApproveOrRejectTimeLogUsecase _approveOrRejectTimeLogUsecase;
+  final GetAllContractsUsecase _getAllContractsUsecase;
+  final CreateContractUsecase _createContractUsecase;
+  final UpdateContractUsecase _updateContractUsecase;
+  final DeleteContractUsecase _deleteContractUsecase;
+  final RegisterUsecase _registerAuthUserUsecase;
 
   SupervisorBloc({
-    required ISupervisorRepository supervisorRepository,
-    required this.getAllSupervisorsUsecase,
-    required this.getSupervisorByIdUsecase,
-    required this.getSupervisorByUserIdUsecase,
-    required this.createSupervisorUsecase,
-    required this.updateSupervisorUsecase,
-    required this.deleteSupervisorUsecase,
-  })  : _supervisorRepository = supervisorRepository,
-        super(SupervisorInitial()) {
-    on<SupervisorLoadAllRequested>(_onSupervisorLoadAllRequested);
-    on<SupervisorLoadByIdRequested>(_onSupervisorLoadByIdRequested);
-    on<SupervisorLoadByUserIdRequested>(_onSupervisorLoadByUserIdRequested);
-    on<SupervisorCreateRequested>(_onSupervisorCreateRequested);
-    on<SupervisorUpdateRequested>(_onSupervisorUpdateRequested);
-    on<SupervisorDeleteRequested>(_onSupervisorDeleteRequested);
+    required GetSupervisorDetailsUsecase getSupervisorDetailsUsecase,
+    required GetAllStudentsForSupervisorUsecase
+        getAllStudentsForSupervisorUsecase,
+    required GetStudentDetailsForSupervisorUsecase
+        getStudentDetailsForSupervisorUsecase,
+    required CreateStudentBySupervisorUsecase createStudentBySupervisorUsecase,
+    required UpdateStudentBySupervisorUsecase updateStudentBySupervisorUsecase,
+    required DeleteStudentBySupervisorUsecase deleteStudentBySupervisorUsecase,
+    required GetAllTimeLogsForSupervisorUsecase
+        getAllTimeLogsForSupervisorUsecase,
+    required ApproveOrRejectTimeLogUsecase approveOrRejectTimeLogUsecase,
+    required GetAllContractsUsecase getAllContractsUsecase,
+    required CreateContractUsecase createContractUsecase,
+    required UpdateContractUsecase updateContractUsecase,
+    required DeleteContractUsecase deleteContractUsecase,
+    required RegisterUsecase registerAuthUserUsecase,
+  })  : _getSupervisorDetailsUsecase = getSupervisorDetailsUsecase,
+        _getAllStudentsForSupervisorUsecase =
+            getAllStudentsForSupervisorUsecase,
+        _getStudentDetailsForSupervisorUsecase =
+            getStudentDetailsForSupervisorUsecase,
+        _createStudentBySupervisorUsecase = createStudentBySupervisorUsecase,
+        _updateStudentBySupervisorUsecase = updateStudentBySupervisorUsecase,
+        _deleteStudentBySupervisorUsecase = deleteStudentBySupervisorUsecase,
+        _getAllTimeLogsForSupervisorUsecase =
+            getAllTimeLogsForSupervisorUsecase,
+        _approveOrRejectTimeLogUsecase = approveOrRejectTimeLogUsecase,
+        _getAllContractsUsecase = getAllContractsUsecase,
+        _createContractUsecase = createContractUsecase,
+        _updateContractUsecase = updateContractUsecase,
+        _deleteContractUsecase = deleteContractUsecase,
+        _registerAuthUserUsecase = registerAuthUserUsecase,
+        super(const SupervisorInitial()) {
+    on<LoadSupervisorDashboardDataEvent>(_onLoadSupervisorDashboardData);
+    on<FilterStudentsEvent>(_onFilterStudents);
+    on<LoadStudentDetailsForSupervisorEvent>(
+        _onLoadStudentDetailsForSupervisor);
+    on<CreateStudentBySupervisorEvent>(_onCreateStudentBySupervisor);
+    on<UpdateStudentBySupervisorEvent>(_onUpdateStudentBySupervisor);
+    on<DeleteStudentBySupervisorEvent>(_onDeleteStudentBySupervisor);
+    on<LoadAllTimeLogsForApprovalEvent>(_onLoadAllTimeLogsForApproval);
+    on<ApproveOrRejectTimeLogEvent>(_onApproveOrRejectTimeLog);
+    on<LoadAllContractsEvent>(_onLoadAllContracts);
+    on<CreateContractBySupervisorEvent>(_onCreateContractBySupervisor);
+    on<UpdateContractBySupervisorEvent>(_onUpdateContractBySupervisor);
+    on<ToggleDashboardViewEvent>(_onToggleDashboardView);
   }
 
-  Future<void> _onSupervisorLoadAllRequested(
-    SupervisorLoadAllRequested event,
+  Future<void> _onLoadSupervisorDashboardData(
+    LoadSupervisorDashboardDataEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(SupervisorSelecting());
+    if (state is! SupervisorDashboardLoadSuccess) {
+      emit(const SupervisorLoading(
+          loadingMessage: 'A carregar dados do dashboard...'));
+    }
+
     try {
-      // TODO: Implement supervisor loading logic
-      final supervisors = await _supervisorRepository.getAllSupervisors();
-      emit(SupervisorLoadAllSuccess(supervisors: supervisors));
-      emit(SupervisorLoadAllSuccess(supervisors: []));
+      final results = await Future.wait([
+        _getAllStudentsForSupervisorUsecase.call(null),
+        _getAllContractsUsecase.call(GetAllContractsParams()),
+        _getAllTimeLogsForSupervisorUsecase
+            .call(GetAllTimeLogsParams(pendingOnly: true)),
+      ]);
+
+      final studentsResult =
+          results[0] as Either<AppFailure, List<StudentEntity>>;
+      final List<StudentEntity> students = studentsResult.fold(
+        (failure) => throw failure,
+        (studentList) => studentList,
+      );
+
+      final contractsResult =
+          results[1] as Either<AppFailure, List<ContractEntity>>;
+      final List<ContractEntity> contracts = contractsResult.fold(
+        (failure) => throw failure,
+        (contractList) => contractList,
+      );
+
+      final timeLogsResult =
+          results[2] as Either<AppFailure, List<TimeLogEntity>>;
+      final List<TimeLogEntity> pendingApprovals = timeLogsResult.fold(
+        (failure) => throw failure,
+        (timeLogList) => timeLogList,
+      );
+
+      final now = DateTime.now();
+      final activeStudents = students
+          .where((s) => s.status == student_status_enum.StudentStatus.active)
+          .length;
+      final inactiveStudents = students
+          .where((s) => s.status == student_status_enum.StudentStatus.inactive)
+          .length;
+      final expiringContractsSoon = contracts
+          .where((c) =>
+              c.endDate.isAfter(now) &&
+              c.endDate.isBefore(now.add(const Duration(days: 30))))
+          .length;
+
+      final stats = SupervisorDashboardStats(
+        totalStudents: students.length,
+        activeStudents: activeStudents,
+        inactiveStudents: inactiveStudents,
+        expiringContractsSoon: expiringContractsSoon,
+      );
+
+      emit(SupervisorDashboardLoadSuccess(
+        students: students,
+        contracts: contracts,
+        stats: stats,
+        pendingApprovals: pendingApprovals,
+        showGanttView: (state is SupervisorDashboardLoadSuccess)
+            ? (state as SupervisorDashboardLoadSuccess).showGanttView
+            : false,
+      ));
+    } on AppFailure catch (e) {
+      emit(SupervisorOperationFailure(message: e.message));
     } catch (e) {
-      emit(SupervisorSelectError(message: e.toString()));
+      emit(SupervisorOperationFailure(
+          message:
+              'Ocorreu um erro inesperado ao carregar o dashboard: ${e.toString()}'));
     }
   }
 
-  Future<void> _onSupervisorLoadByIdRequested(
-    SupervisorLoadByIdRequested event,
+  Future<void> _onFilterStudents(
+    FilterStudentsEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(SupervisorSelecting());
-    try {
-      // TODO: Implement supervisor loading by id logic
-      final supervisor =
-          await _supervisorRepository.getSupervisorById(event.id);
-      emit(SupervisorLoadByIdSuccess(supervisor: supervisor));
-      emit(SupervisorLoadByIdSuccess(supervisor: null));
-    } catch (e) {
-      emit(SupervisorSelectError(message: e.toString()));
+    final currentState = state;
+    if (currentState is SupervisorDashboardLoadSuccess) {
+      emit(currentState.copyWith(isLoading: true));
+
+      final result =
+          await _getAllStudentsForSupervisorUsecase.call(event.params);
+
+      result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (filteredStudents) {
+          emit(currentState.copyWith(
+            students: filteredStudents,
+            isLoading: false,
+            appliedFilters: event.params,
+          ));
+        },
+      );
+    } else {
+      add(LoadSupervisorDashboardDataEvent());
     }
   }
 
-  Future<void> _onSupervisorLoadByUserIdRequested(
-    SupervisorLoadByUserIdRequested event,
+  Future<void> _onApproveOrRejectTimeLog(
+    ApproveOrRejectTimeLogEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(SupervisorSelecting());
-    try {
-      // TODO: Implement supervisor loading by user id logic
-      final supervisor =
-          await _supervisorRepository.getSupervisorByUserId(event.userId);
-      emit(SupervisorLoadByUserIdSuccess(supervisor: supervisor));
-      emit(SupervisorLoadByUserIdSuccess(supervisor: null));
-    } catch (e) {
-      emit(SupervisorSelectError(message: e.toString()));
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
+
+      try {
+        final result = await _approveOrRejectTimeLogUsecase.call(
+          ApproveOrRejectTimeLogParams(
+            timeLogId: event.timeLogId,
+            approved: event.approved,
+            supervisorId: event.supervisorId,
+            rejectionReason: event.rejectionReason,
+          ),
+        );
+
+        result.fold(
+          (failure) =>
+              emit(SupervisorOperationFailure(message: failure.message)),
+          (_) {
+            // Recarrega os logs pendentes após aprovar/rejeitar
+            add(LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
+          },
+        );
+      } catch (e) {
+        emit(SupervisorOperationFailure(
+            message: 'Erro ao processar o registro de tempo: ${e.toString()}'));
+      }
     }
   }
 
-  Future<void> _onSupervisorCreateRequested(
-    SupervisorCreateRequested event,
+  void _onToggleDashboardView(
+    ToggleDashboardViewEvent event,
     Emitter<SupervisorState> emit,
-  ) async {
-    emit(SupervisorInserting());
-    try {
-      // TODO: Implement supervisor creation logic
-      final supervisor =
-          await _supervisorRepository.createSupervisor(event.supervisor);
-      emit(SupervisorCreateSuccess(supervisor: supervisor));
-      emit(SupervisorCreateSuccess(supervisor: event.supervisor));
-    } catch (e) {
-      emit(SupervisorInsertError(message: e.toString()));
+  ) {
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentDashboardState = state as SupervisorDashboardLoadSuccess;
+      emit(currentDashboardState.copyWith(
+          showGanttView: !currentDashboardState.showGanttView,
+          isLoading: true,
+          appliedFilters: FilterStudentsParams(
+              status: student_status_enum.StudentStatus.active),
+          pendingApprovals: []));
     }
   }
 
-  Future<void> _onSupervisorUpdateRequested(
-    SupervisorUpdateRequested event,
+  // --- Other Event Handlers (unchanged) ---
+  Future<void> _onLoadStudentDetailsForSupervisor(
+    LoadStudentDetailsForSupervisorEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(SupervisorUpdating());
+    emit(const SupervisorLoading(
+        loadingMessage: 'A carregar detalhes do estudante...'));
     try {
-      // TODO: Implement supervisor update logic
-      final supervisor =
-          await _supervisorRepository.updateSupervisor(event.supervisor);
-      emit(SupervisorUpdateSuccess(supervisor: supervisor));
-      emit(SupervisorUpdateSuccess(supervisor: event.supervisor));
+      final studentResult =
+          await _getStudentDetailsForSupervisorUsecase.call(event.studentId);
+      final (student, timeLogs, contracts) = await studentResult.fold(
+        (failure) => throw failure,
+        (s) => s,
+      );
+
+      emit(SupervisorStudentDetailsLoadSuccess(
+        student: student,
+        timeLogs: timeLogs,
+        contracts: contracts,
+      ));
     } catch (e) {
-      emit(SupervisorUpdateError(message: e.toString()));
+      emit(SupervisorOperationFailure(
+          message: e is AppFailure
+              ? e.message
+              : 'Erro ao carregar detalhes do estudante.'));
     }
   }
 
-  Future<void> _onSupervisorDeleteRequested(
-    SupervisorDeleteRequested event,
+  Future<void> _onCreateStudentBySupervisor(
+    CreateStudentBySupervisorEvent event,
     Emitter<SupervisorState> emit,
   ) async {
-    emit(SupervisorDeleting());
-    try {
-      // TODO: Implement supervisor deletion logic
-      await _supervisorRepository.deleteSupervisor(event.id);
-      emit(SupervisorDeleteSuccess(deletedId: event.id));
-    } catch (e) {
-      emit(SupervisorDeleteError(message: e.toString()));
+    emit(const SupervisorLoading(loadingMessage: 'A criar estudante...'));
+
+    final authResult = await _registerAuthUserUsecase.call(
+      fullName: event.studentData.fullName,
+      email: event.initialEmail,
+      password: event.initialPassword,
+      role: UserRole.student,
+    );
+
+    await authResult.fold(
+      (failure) async {
+        emit(SupervisorOperationFailure(
+            message:
+                'Falha ao criar utilizador de autenticação: ${failure.message}'));
+      },
+      (authUserEntity) async {
+        try {
+          final studentToCreate = event.studentData.copyWith(
+              id: authUserEntity.id,
+              userId: authUserEntity.id,
+              email: authUserEntity.email);
+
+          final studentProfileResult =
+              await _createStudentBySupervisorUsecase.call(studentToCreate);
+
+          studentProfileResult.fold(
+            (profileFailure) {
+              emit(SupervisorOperationFailure(
+                  message:
+                      'Utilizador auth criado, mas falha ao criar perfil de estudante: ${profileFailure.message}'));
+            },
+            (createdStudent) {
+              emit(SupervisorOperationSuccess(
+                  message: 'Estudante criado com sucesso!',
+                  entity: createdStudent));
+              add(LoadSupervisorDashboardDataEvent());
+            },
+          );
+        } catch (e) {
+          emit(SupervisorOperationFailure(
+              message: e is AppFailure
+                  ? e.message
+                  : 'Erro ao criar perfil de estudante.'));
+        }
+      },
+    );
+  }
+
+  Future<void> _onUpdateStudentBySupervisor(
+    UpdateStudentBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A atualizar estudante...'));
+    final result =
+        await _updateStudentBySupervisorUsecase.call(event.studentData);
+    result.fold(
+      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+      (updatedStudent) {
+        emit(SupervisorOperationSuccess(
+            message: 'Estudante atualizado com sucesso!',
+            entity: updatedStudent));
+        add(LoadSupervisorDashboardDataEvent());
+      },
+    );
+  }
+
+  Future<void> _onDeleteStudentBySupervisor(
+    DeleteStudentBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A remover estudante...'));
+    final result =
+        await _deleteStudentBySupervisorUsecase.call(event.studentId);
+    result.fold(
+      (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+      (_) {
+        emit(const SupervisorOperationSuccess(
+            message: 'Estudante removido com sucesso!'));
+        add(LoadSupervisorDashboardDataEvent());
+      },
+    );
+  }
+
+  Future<void> _onLoadAllTimeLogsForApproval(
+    LoadAllTimeLogsForApprovalEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
+
+      final result = await _getAllTimeLogsForSupervisorUsecase.call(
+        GetAllTimeLogsParams(
+          studentId: event.studentIdFilter,
+          pendingOnly: event.pendingOnly,
+        ),
+      );
+
+      result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (timeLogs) {
+          emit(currentState.copyWith(
+            pendingApprovals: timeLogs,
+            isLoading: false,
+          ));
+        },
+      );
     }
+  }
+
+  Future<void> _onLoadAllContracts(
+    LoadAllContractsEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    if (state is SupervisorDashboardLoadSuccess) {
+      final currentState = state as SupervisorDashboardLoadSuccess;
+      emit(currentState.copyWith(isLoading: true));
+
+      final result = await _getAllContractsUsecase.call(
+        GetAllContractsParams(
+          studentId: event.studentIdFilter,
+          status: event.statusFilter,
+        ),
+      );
+
+      result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (contracts) {
+          emit(currentState.copyWith(
+            contracts: contracts,
+            isLoading: false,
+          ));
+        },
+      );
+    }
+  }
+
+  Future<void> _onCreateContractBySupervisor(
+    CreateContractBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A criar contrato...'));
+    final result = await _createContractUsecase.call(event.contract);
+    result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (newContract) {
+      emit(SupervisorOperationSuccess(
+          message: 'Contrato criado com sucesso!', entity: newContract));
+      add(LoadSupervisorDashboardDataEvent());
+    });
+  }
+
+  Future<void> _onUpdateContractBySupervisor(
+    UpdateContractBySupervisorEvent event,
+    Emitter<SupervisorState> emit,
+  ) async {
+    emit(const SupervisorLoading(loadingMessage: 'A atualizar contrato...'));
+    final result = await _updateContractUsecase.call(event.contract);
+    result.fold(
+        (failure) => emit(SupervisorOperationFailure(message: failure.message)),
+        (updatedContract) {
+      emit(SupervisorOperationSuccess(
+          message: 'Contrato atualizado com sucesso!',
+          entity: updatedContract));
+      add(LoadSupervisorDashboardDataEvent());
+    });
   }
 }

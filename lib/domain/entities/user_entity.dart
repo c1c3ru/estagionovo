@@ -1,23 +1,38 @@
+import 'package:equatable/equatable.dart';
 import '../../core/enums/user_role.dart';
 
-class UserEntity {
+class UserEntity extends Equatable {
   final String id;
   final String email;
-  final String name;
+  final String fullName;
+  final String? phoneNumber;
+  final String? profilePictureUrl;
   final UserRole role;
-  final String? avatarUrl;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   const UserEntity({
     required this.id,
     required this.email,
-    required this.name,
+    required this.fullName,
+    this.phoneNumber,
+    this.profilePictureUrl,
     required this.role,
-    this.avatarUrl,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
   });
+
+  @override
+  List<Object?> get props => [
+        id,
+        email,
+        fullName,
+        phoneNumber,
+        profilePictureUrl,
+        role,
+        createdAt,
+        updatedAt,
+      ];
 
   @override
   bool operator ==(Object other) {
@@ -25,9 +40,10 @@ class UserEntity {
     return other is UserEntity &&
         other.id == id &&
         other.email == email &&
-        other.name == name &&
+        other.fullName == fullName &&
+        other.phoneNumber == phoneNumber &&
+        other.profilePictureUrl == profilePictureUrl &&
         other.role == role &&
-        other.avatarUrl == avatarUrl &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -36,16 +52,16 @@ class UserEntity {
   int get hashCode {
     return id.hashCode ^
         email.hashCode ^
-        name.hashCode ^
+        fullName.hashCode ^
+        phoneNumber.hashCode ^
+        profilePictureUrl.hashCode ^
         role.hashCode ^
-        avatarUrl.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, name: $name, role: $role, avatarUrl: $avatarUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserEntity(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
-

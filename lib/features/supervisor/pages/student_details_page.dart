@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:student_supervisor_app/core/enums/student_status.dart'
+    as student_status_enum;
 import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -53,17 +55,18 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     return DateFormat('HH:mm').format(dt);
   }
 
-  Color _getStatusColor(StudentStatus status, BuildContext context) {
+  Color _getStatusColor(
+      student_status_enum.StudentStatus status, BuildContext context) {
     switch (status) {
-      case StudentStatus.active:
+      case student_status_enum.StudentStatus.active:
         return AppColors.statusActive;
-      case StudentStatus.inactive:
+      case student_status_enum.StudentStatus.inactive:
         return AppColors.statusInactive;
-      case StudentStatus.pending:
+      case student_status_enum.StudentStatus.pending:
         return AppColors.statusPending;
-      case StudentStatus.completed:
+      case student_status_enum.StudentStatus.completed:
         return AppColors.statusCompleted;
-      case StudentStatus.terminated:
+      case student_status_enum.StudentStatus.terminated:
         return AppColors.statusTerminated;
       default:
         return Theme.of(context).disabledColor;
@@ -180,8 +183,9 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
     final bool isActiveBasedOnContract =
         student.contractEndDate.isAfter(DateTime.now()) &&
             student.contractStartDate.isBefore(DateTime.now());
-    final displayStatus =
-        isActiveBasedOnContract ? StudentStatus.active : StudentStatus.inactive;
+    final displayStatus = isActiveBasedOnContract
+        ? student_status_enum.StudentStatus.active
+        : student_status_enum.StudentStatus.inactive;
     final displayStatusColor = _getStatusColor(displayStatus, context);
 
     return Card(
@@ -251,8 +255,13 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
                     .id), // Assumindo que o ID do estudante é o email ou o user.email está no StudentEntity
             _buildInfoRow(context, Icons.phone_outlined, 'Telefone',
                 student.phoneNumber ?? 'Não informado'),
-            _buildInfoRow(context, Icons.cake_outlined, 'Nascimento',
-                DateFormat('dd/MM/yyyy').format(student.birthDate)),
+            _buildInfoRow(
+                context,
+                Icons.cake_outlined,
+                'Nascimento',
+                student.birthDate != null
+                    ? DateFormat('dd/MM/yyyy').format(student.birthDate!)
+                    : 'Não informado'),
             _buildInfoRow(context, Icons.supervisor_account_outlined,
                 'Orientador(a)', student.advisorName),
           ],

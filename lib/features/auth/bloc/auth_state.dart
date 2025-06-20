@@ -57,6 +57,16 @@ class AuthPasswordResetEmailSent extends AuthState {
   List<Object?> get props => [message];
 }
 
+/// Estado de sucesso no envio de email de redefinição de senha.
+class AuthPasswordResetSent extends AuthState {
+  final String message;
+
+  const AuthPasswordResetSent({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
 /// Estado de falha em qualquer operação de autenticação.
 class AuthError extends AuthState {
   final String message;
@@ -71,6 +81,34 @@ class AuthError extends AuthState {
 class AuthProfileUpdateSuccess extends AuthState {
   final UserEntity updatedUser;
   const AuthProfileUpdateSuccess({required this.updatedUser});
+
+  @override
+  List<Object?> get props => [updatedUser];
+}
+
+class AuthSuccess extends AuthState {
+  final UserEntity user;
+  const AuthSuccess({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
+class AuthFailure extends AuthState {
+  final String message;
+  const AuthFailure({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthLogoutSuccess extends AuthState {
+  const AuthLogoutSuccess();
+}
+
+class AuthProfileUpdated extends AuthState {
+  final UserEntity updatedUser;
+  const AuthProfileUpdated({required this.updatedUser});
 
   @override
   List<Object?> get props => [updatedUser];

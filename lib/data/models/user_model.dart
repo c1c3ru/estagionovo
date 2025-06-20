@@ -1,38 +1,31 @@
 import '../../core/enums/user_role.dart';
 import '../../domain/entities/user_entity.dart';
 
-class UserModel {
-  final String id;
-  final String email;
-  final String fullName;
-  final String? phoneNumber;
-  final String? profilePictureUrl;
-  final UserRole role;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-
+class UserModel extends UserEntity {
   const UserModel({
-    required this.id,
-    required this.email,
-    required this.fullName,
-    this.phoneNumber,
-    this.profilePictureUrl,
-    required this.role,
-    required this.createdAt,
-    this.updatedAt,
+    required super.id,
+    required super.email,
+    required super.fullName,
+    super.phoneNumber,
+    super.profilePictureUrl,
+    required super.role,
+    required super.createdAt,
+    super.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
-      fullName: json['fullName'] as String,
-      phoneNumber: json['phoneNumber'] as String?,
-      profilePictureUrl: json['profilePictureUrl'] as String?,
+      fullName: json['full_name'] ?? json['fullName'] as String,
+      phoneNumber: json['phone_number'] as String?,
+      profilePictureUrl:
+          json['profile_picture_url'] ?? json['avatar_url'] as String?,
       role: UserRole.fromString(json['role'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
+      createdAt:
+          DateTime.parse(json['created_at'] ?? json['createdAt'] as String),
+      updatedAt: json['updated_at'] != null || json['updatedAt'] != null
+          ? DateTime.parse(json['updated_at'] ?? json['updatedAt'] as String)
           : null,
     );
   }
@@ -41,12 +34,12 @@ class UserModel {
     return {
       'id': id,
       'email': email,
-      'fullName': fullName,
-      'phoneNumber': phoneNumber,
-      'profilePictureUrl': profilePictureUrl,
+      'full_name': fullName,
+      'phone_number': phoneNumber,
+      'profile_picture_url': profilePictureUrl,
       'role': role.toString(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
@@ -76,6 +69,7 @@ class UserModel {
     );
   }
 
+  @override
   UserModel copyWith({
     String? id,
     String? email,

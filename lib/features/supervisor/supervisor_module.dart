@@ -4,9 +4,12 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/student_details_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/student_edit_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/supervisor_dashboard_page.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/supervisor_home_page.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/supervisor_time_approval_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
 // Datasources
+import '../../data/datasources/local/preferences_manager.dart';
 import '../../data/datasources/supabase/supervisor_datasource.dart';
 import '../../data/datasources/supabase/student_datasource.dart';
 import '../../data/datasources/supabase/time_log_datasource.dart';
@@ -41,41 +44,26 @@ import '../../domain/usecases/contract/create_contract_usecase.dart';
 import '../../domain/usecases/contract/update_contract_usecase.dart';
 import '../../domain/usecases/contract/delete_contract_usecase.dart';
 import '../../domain/usecases/auth/register_usecase.dart';
+import '../../domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
+import '../../domain/usecases/supervisor/update_supervisor_usecase.dart';
+import '../../domain/usecases/supervisor/get_student_details_for_supervisor_usecase.dart';
 
 class SupervisorModule extends Module {
   @override
   void binds(Injector i) {
-    // --- Datasources ---
-    // Register all datasources needed within this module's scope.
-    // The injector will resolve them. If they are already provided in a parent
-    // module, consider if they should be here at all. For clarity, we will
-    // register them here unconditionally.
-    i.add<IAuthSupabaseDatasource>(
-        () => AuthSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<ISupervisorSupabaseDatasource>(
-        () => SupervisorSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<IStudentSupabaseDatasource>(
-        () => StudentSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<ITimeLogSupabaseDatasource>(
-        () => TimeLogSupabaseDatasource(i.get<SupabaseClient>()));
-    i.add<IContractSupabaseDatasource>(
-        () => ContractSupabaseDatasource(i.get<SupabaseClient>()));
-
     // --- Repositories ---
-    i.add<IAuthRepository>(
-        () => AuthRepository(i.get<IAuthSupabaseDatasource>()));
+    i.add<IAuthRepository>(() => AuthRepository(
+          authDatasource: i.get<AuthDatasource>(),
+          preferencesManager: i.get<PreferencesManager>(),
+        ));
     i.add<IStudentRepository>(() => StudentRepository(
-        i.get<IStudentSupabaseDatasource>(),
-        i.get<ITimeLogSupabaseDatasource>()));
+        i.get<StudentDatasource>(), i.get<TimeLogDatasource>()));
     i.add<ITimeLogRepository>(
-        () => TimeLogRepository(i.get<ITimeLogSupabaseDatasource>()));
+        () => TimeLogRepository(i.get<TimeLogDatasource>()));
     i.add<IContractRepository>(
-        () => ContractRepository(i.get<IContractSupabaseDatasource>()));
+        () => ContractRepository(i.get<ContractDatasource>()));
     i.add<ISupervisorRepository>(() => SupervisorRepository(
-          i.get<ISupervisorSupabaseDatasource>(),
-          i.get<IStudentSupabaseDatasource>(),
-          i.get<ITimeLogSupabaseDatasource>(),
-          i.get<IContractSupabaseDatasource>(),
+          i.get<SupervisorDatasource>(),
         ));
 
     // --- Usecases ---
@@ -104,6 +92,8 @@ class SupervisorModule extends Module {
         () => UpdateContractUsecase(i.get<IContractRepository>()));
     i.add<DeleteContractUsecase>(
         () => DeleteContractUsecase(i.get<IContractRepository>()));
+    i.add<UpdateSupervisorUsecase>(
+        () => UpdateSupervisorUsecase(i.get<ISupervisorRepository>()));
 
     // --- BLoC ---
     i.add<SupervisorBloc>(() => SupervisorBloc(
@@ -133,7 +123,7 @@ class SupervisorModule extends Module {
   void routes(RouteManager r) {
     r.child(
       Modular.initialRoute,
-      child: (_) => const SupervisorDashboardPage(),
+      child: (_) => const SupervisorHomePage(),
       transition: TransitionType.fadeIn,
     );
     r.child(

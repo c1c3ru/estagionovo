@@ -8,8 +8,8 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart' hide AuthEvent;
-import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -37,9 +37,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   void _submitForgotPassword() {
     if (_formKey.currentState?.validate() ?? false) {
-      _authBloc.add(PasswordResetRequestedEvent(
+      _authBloc.add(AuthResetPasswordRequested(
         email: _emailController.text.trim(),
-      ) as AuthEvent);
+      ));
     }
   }
 
@@ -60,20 +60,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
-                  content: Text(state.message ?? 'Erro desconhecido'),
+                  content: Text(state.message),
                   backgroundColor: theme.colorScheme.error,
                 ),
               );
-          } else if (state is AuthPasswordResetEmailSent) {
+          } else if (state is AuthPasswordResetSent) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 SnackBar(
-                  content: Text(state.message ?? 'Email enviado com sucesso'),
+                  content: Text(state.message),
                   backgroundColor: Colors.green,
                 ),
               );
-            Modular.to.pop(); // Volta para a tela de login
+            Modular.to.pop();
           }
         },
         child: Center(

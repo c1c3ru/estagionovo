@@ -2,12 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:student_supervisor_app/core/enums/user_role.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart' hide AuthEvent;
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class SupervisorRegisterForm extends StatefulWidget {
   const SupervisorRegisterForm({super.key});
@@ -52,24 +54,17 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
 
   void _onRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      final authBloc = context.read<AuthBloc>();
-      authBloc.add(
-        RegisterSupervisorEvent(
-          fullName: _fullNameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          siapeRegistration: _siapeRegistrationController.text.trim(),
-          phoneNumber: _phoneNumberController.text.trim().isEmpty
-              ? null
-              : _phoneNumberController.text.trim(),
-          department: _departmentController.text.trim().isEmpty
-              ? null
-              : _departmentController.text.trim(),
-          position: _positionController.text.trim().isEmpty
-              ? null
-              : _positionController.text.trim(),
-        ) as AuthEvent,
-      );
+      context.read<AuthBloc>().add(
+            AuthRegisterRequested(
+              fullName: _fullNameController.text.trim(),
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              role: UserRole.supervisor.name,
+            ),
+          );
+      // Nota: Os dados específicos do supervisor (SIAPE, etc.) precisarão ser salvos
+      // em um passo separado, possivelmente ouvindo o estado AuthAuthenticated
+      // e disparando um evento para um SupervisorBloc.
     }
   }
 
@@ -125,7 +120,6 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
             onChanged: _onSiapeChanged,
             prefixIcon: Icons.badge_outlined,
             suffixIcon: _isSiapeValid ? Icons.check_circle : null,
-            onSuffixIconPressed: null,
           ),
           const SizedBox(height: 16),
 

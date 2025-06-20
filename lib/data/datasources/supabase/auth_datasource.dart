@@ -1,14 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../core/enums/user_role.dart';
 import '../../../core/errors/app_exceptions.dart';
+import '../../../domain/repositories/i_auth_datasource.dart';
 import '../../models/user_model.dart';
 
-class AuthDatasource {
+class AuthDatasource implements IAuthDatasource {
   final SupabaseClient _supabaseClient;
 
   AuthDatasource(this._supabaseClient);
 
-  Stream<Map<String, dynamic>?> get authStateChanges =>
+  @override
+  Stream<Map<String, dynamic>?> getAuthStateChanges() =>
       _supabaseClient.auth.onAuthStateChange.map((event) {
         final session = event.session;
         if (session == null) return null;
@@ -26,7 +28,8 @@ class AuthDatasource {
         };
       });
 
-  Future<Map<String, dynamic>> register({
+  @override
+  Future<Map<String, dynamic>> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String fullName,
@@ -61,10 +64,11 @@ class AuthDatasource {
     }
   }
 
-  Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
-  }) async {
+  @override
+  Future<Map<String, dynamic>> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
     try {
       final response = await _supabaseClient.auth.signInWithPassword(
         email: email,
@@ -92,7 +96,8 @@ class AuthDatasource {
     }
   }
 
-  Future<void> logout() async {
+  @override
+  Future<void> signOut() async {
     try {
       await _supabaseClient.auth.signOut();
     } catch (e) {
@@ -100,6 +105,7 @@ class AuthDatasource {
     }
   }
 
+  @override
   Future<Map<String, dynamic>?> getCurrentUser() async {
     try {
       final user = _supabaseClient.auth.currentUser;
@@ -122,7 +128,8 @@ class AuthDatasource {
     }
   }
 
-  Future<void> resetPassword({required String email}) async {
+  @override
+  Future<void> resetPassword(String email) async {
     try {
       await _supabaseClient.auth.resetPasswordForEmail(
         email,
@@ -133,6 +140,7 @@ class AuthDatasource {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> updateProfile({
     required String userId,
     String? fullName,

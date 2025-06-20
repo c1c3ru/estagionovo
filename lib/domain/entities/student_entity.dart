@@ -11,6 +11,9 @@ class StudentEntity extends Equatable {
   final String userId;
   final String fullName;
   final String email;
+  final String? phoneNumber;
+  final String? profilePictureUrl;
+  final DateTime? birthDate;
   final String course;
   final String advisorName;
   final String registrationNumber;
@@ -33,6 +36,9 @@ class StudentEntity extends Equatable {
     required this.userId,
     required this.fullName,
     required this.email,
+    this.phoneNumber,
+    this.profilePictureUrl,
+    this.birthDate,
     required this.course,
     required this.advisorName,
     required this.registrationNumber,
@@ -90,6 +96,9 @@ class StudentEntity extends Equatable {
         userId,
         fullName,
         email,
+        phoneNumber,
+        profilePictureUrl,
+        birthDate,
         course,
         advisorName,
         registrationNumber,
@@ -113,6 +122,9 @@ class StudentEntity extends Equatable {
     String? userId,
     String? fullName,
     String? email,
+    String? phoneNumber,
+    String? profilePictureUrl,
+    DateTime? birthDate,
     String? course,
     String? advisorName,
     String? registrationNumber,
@@ -135,6 +147,9 @@ class StudentEntity extends Equatable {
       userId: userId ?? this.userId,
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
+      birthDate: birthDate ?? this.birthDate,
       course: course ?? this.course,
       advisorName: advisorName ?? this.advisorName,
       registrationNumber: registrationNumber ?? this.registrationNumber,
@@ -163,6 +178,9 @@ class StudentEntity extends Equatable {
         other.userId == userId &&
         other.fullName == fullName &&
         other.email == email &&
+        other.phoneNumber == phoneNumber &&
+        other.profilePictureUrl == profilePictureUrl &&
+        other.birthDate == birthDate &&
         other.course == course &&
         other.advisorName == advisorName &&
         other.registrationNumber == registrationNumber &&
@@ -187,6 +205,9 @@ class StudentEntity extends Equatable {
         userId.hashCode ^
         fullName.hashCode ^
         email.hashCode ^
+        phoneNumber.hashCode ^
+        profilePictureUrl.hashCode ^
+        birthDate.hashCode ^
         course.hashCode ^
         advisorName.hashCode ^
         registrationNumber.hashCode ^

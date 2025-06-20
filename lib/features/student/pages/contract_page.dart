@@ -179,7 +179,7 @@ class _ContractPageState extends State<ContractPage> {
                       Expanded(
                         child: _buildInfoItem(
                           'Horas/Semana',
-                          '${activeContract.weeklyHours}h',
+                          '${activeContract.weeklyHoursTarget}h',
                           Icons.schedule,
                         ),
                       ),
@@ -426,7 +426,7 @@ class _ContractCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${contract.weeklyHours}h/sem',
+                  '${contract.weeklyHoursTarget}h/sem',
                   style: AppTextStyles.bodySmall,
                 ),
               ],

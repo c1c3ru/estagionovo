@@ -17,6 +17,7 @@ import '../../../domain/usecases/student/create_student_usecase.dart';
 import '../../../domain/usecases/student/update_student_usecase.dart';
 import '../../../domain/usecases/student/delete_student_usecase.dart';
 import '../../../domain/usecases/student/get_students_by_supervisor_usecase.dart';
+import '../../../domain/usecases/student/get_student_dashboard_usecase.dart';
 
 // Importar eventos e estados dos arquivos separados
 import 'student_event.dart';
@@ -40,6 +41,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final UpdateTimeLogUsecase _updateTimeLogUsecase;
   final DeleteTimeLogUsecase _deleteTimeLogUsecase;
   final GetContractsForStudentUsecase _getContractsForStudentUsecase;
+  final GetStudentDashboardUsecase _getStudentDashboardUsecase;
 
   StudentBloc({
     required GetAllStudentsUsecase getAllStudentsUsecase,
@@ -58,6 +60,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     required UpdateTimeLogUsecase updateTimeLogUsecase,
     required DeleteTimeLogUsecase deleteTimeLogUsecase,
     required GetContractsForStudentUsecase getContractsForStudentUsecase,
+    required GetStudentDashboardUsecase getStudentDashboardUsecase,
   })  : _getAllStudentsUsecase = getAllStudentsUsecase,
         _getStudentByIdUsecase = getStudentByIdUsecase,
         _getStudentByUserIdUsecase = getStudentByUserIdUsecase,
@@ -74,6 +77,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
         _updateTimeLogUsecase = updateTimeLogUsecase,
         _deleteTimeLogUsecase = deleteTimeLogUsecase,
         _getContractsForStudentUsecase = getContractsForStudentUsecase,
+        _getStudentDashboardUsecase = getStudentDashboardUsecase,
         super(StudentInitial()) {
     // Registrar handlers para os eventos
     on<LoadStudentDashboardDataEvent>(_onLoadStudentDashboardData);
@@ -92,13 +96,19 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     LoadStudentDashboardDataEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(StudentDashboardLoading());
+
     try {
-      // Implementar lógica para carregar dados do dashboard
-      // Por enquanto, apenas emitir estado de loading
-      emit(StudentLoading());
+      // Assumindo que você tenha um use case para carregar dados do dashboard
+      final result = await _getStudentDashboardUsecase(event.userId);
+
+      result.fold(
+        (failure) => emit(StudentDashboardError(message: failure.message)),
+        (dashboardData) =>
+            emit(StudentDashboardLoaded(dashboardData: dashboardData)),
+      );
     } catch (e) {
-      emit(StudentOperationFailure(message: e.toString()));
+      emit(StudentDashboardError(message: 'Erro inesperado: $e'));
     }
   }
 

@@ -9,8 +9,8 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart' hide AuthEvent;
-import '../bloc/auth_state.dart' hide AuthState, AuthLoading;
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({Key? key}) : super(key: key);
@@ -25,7 +25,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  UserRole _selectedRole = UserRole.student; // Papel padrão
+  UserRole _selectedRole = UserRole.student;
 
   late AuthBloc _authBloc;
 
@@ -46,12 +46,12 @@ class _RegisterFormState extends State<RegisterForm> {
 
   void _submitRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      _authBloc.add(RegisterSubmittedEvent(
+      _authBloc.add(AuthRegisterRequested(
         fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        role: _selectedRole,
-      ) as AuthEvent);
+        role: _selectedRole.name,
+      ));
     }
   }
 
@@ -66,7 +66,7 @@ class _RegisterFormState extends State<RegisterForm> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message ?? 'Error occurred'),
+                content: Text(state.message),
                 backgroundColor: theme.colorScheme.error,
               ),
             );
@@ -75,13 +75,11 @@ class _RegisterFormState extends State<RegisterForm> {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(state.message ?? 'Registration successful'),
-                backgroundColor: Colors.green, // Ou theme.colorScheme.primary
+                content: Text(state.message),
+                backgroundColor: Colors.green,
               ),
             );
-          // Opcional: Redirecionar para login ou uma página de "verifique seu email"
-          Modular.to.popAndPushNamed(
-              '/auth/login'); // Volta para o login após registo
+          Modular.to.popAndPushNamed('/auth/login');
         }
       },
       child: Form(
@@ -142,10 +140,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 border: theme.inputDecorationTheme.border,
               ),
               items: UserRole.values
-                  .where((role) =>
-                      role !=
-                      UserRole
-                          .supervisor) // Não permite registar como administrator
+                  .where((role) => role != UserRole.supervisor)
                   .map((UserRole role) {
                 return DropdownMenuItem<UserRole>(
                   value: role,
@@ -169,7 +164,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 return AppButton(
                   text: AppStrings.register,
                   isLoading: state is AuthLoading,
-                  onPressed: _submitRegister,
+                  onPressed: state is AuthLoading ? null : _submitRegister,
                   minWidth: double.infinity,
                 );
               },

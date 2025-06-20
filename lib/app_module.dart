@@ -58,6 +58,14 @@ import 'domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
 import 'domain/usecases/supervisor/create_supervisor_usecase.dart';
 import 'domain/usecases/supervisor/update_supervisor_usecase.dart';
 import 'domain/usecases/supervisor/delete_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/get_supervisor_details_usecase.dart';
+import 'domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/get_student_details_for_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/create_student_by_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/update_student_by_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/delete_student_by_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
+import 'domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
 
 // Use Cases - TimeLog
 import 'domain/usecases/time_log/clock_in_usecase.dart';
@@ -165,6 +173,22 @@ class AppModule extends Module {
         () => UpdateSupervisorUsecase(i()));
     i.addLazySingleton<DeleteSupervisorUsecase>(
         () => DeleteSupervisorUsecase(i()));
+    i.addLazySingleton<GetSupervisorDetailsUsecase>(
+        () => GetSupervisorDetailsUsecase(i()));
+    i.addLazySingleton<GetAllStudentsForSupervisorUsecase>(
+        () => GetAllStudentsForSupervisorUsecase(i()));
+    i.addLazySingleton<GetStudentDetailsForSupervisorUsecase>(
+        () => GetStudentDetailsForSupervisorUsecase(i()));
+    i.addLazySingleton<CreateStudentBySupervisorUsecase>(
+        () => CreateStudentBySupervisorUsecase(i()));
+    i.addLazySingleton<UpdateStudentBySupervisorUsecase>(
+        () => UpdateStudentBySupervisorUsecase(i()));
+    i.addLazySingleton<DeleteStudentBySupervisorUsecase>(
+        () => DeleteStudentBySupervisorUsecase(i()));
+    i.addLazySingleton<GetAllTimeLogsForSupervisorUsecase>(
+        () => GetAllTimeLogsForSupervisorUsecase(i()));
+    i.addLazySingleton<ApproveOrRejectTimeLogUsecase>(
+        () => ApproveOrRejectTimeLogUsecase(i()));
 
     // Use Cases - TimeLog
     i.addLazySingleton<ClockInUsecase>(() => ClockInUsecase(i()));
@@ -195,9 +219,13 @@ class AppModule extends Module {
           registerUsecase: i(),
           logoutUsecase: i(),
           getCurrentUserUsecase: i(),
+          resetPasswordUsecase: i(),
+          updateProfileUsecase: i(),
+          getAuthStateChangesUsecase: i(),
         ));
 
     i.addLazySingleton<StudentBloc>(() => StudentBloc(
+          getStudentDashboardUsecase: i(),
           getAllStudentsUsecase: i(),
           getStudentByIdUsecase: i(),
           getStudentByUserIdUsecase: i(),
@@ -217,12 +245,19 @@ class AppModule extends Module {
         ));
 
     i.addLazySingleton<SupervisorBloc>(() => SupervisorBloc(
-          getAllSupervisorsUsecase: i(),
-          getSupervisorByIdUsecase: i(),
-          getSupervisorByUserIdUsecase: i(),
-          createSupervisorUsecase: i(),
-          updateSupervisorUsecase: i(),
-          deleteSupervisorUsecase: i(),
+          getSupervisorDetailsUsecase: i(),
+          getAllStudentsForSupervisorUsecase: i(),
+          getStudentDetailsForSupervisorUsecase: i(),
+          createStudentBySupervisorUsecase: i(),
+          updateStudentBySupervisorUsecase: i(),
+          deleteStudentBySupervisorUsecase: i(),
+          getAllTimeLogsForSupervisorUsecase: i(),
+          approveOrRejectTimeLogUsecase: i(),
+          getAllContractsUsecase: i(),
+          createContractUsecase: i(),
+          updateContractUsecase: i(),
+          deleteContractUsecase: i(),
+          registerAuthUserUsecase: i(),
         ));
 
     i.addLazySingleton<TimeLogBloc>(() => TimeLogBloc(

@@ -19,7 +19,8 @@ class StudentTimeStats extends Equatable {
   });
 
   @override
-  List<Object?> get props => [hoursThisWeek, hoursThisMonth, recentLogs, activeTimeLog];
+  List<Object?> get props =>
+      [hoursThisWeek, hoursThisMonth, recentLogs, activeTimeLog];
 
   StudentTimeStats copyWith({
     double? hoursThisWeek,
@@ -32,11 +33,12 @@ class StudentTimeStats extends Equatable {
       hoursThisWeek: hoursThisWeek ?? this.hoursThisWeek,
       hoursThisMonth: hoursThisMonth ?? this.hoursThisMonth,
       recentLogs: recentLogs ?? this.recentLogs,
-      activeTimeLog: clearActiveTimeLog == true ? null : activeTimeLog ?? this.activeTimeLog,
+      activeTimeLog: clearActiveTimeLog == true
+          ? null
+          : activeTimeLog ?? this.activeTimeLog,
     );
   }
 }
-
 
 abstract class StudentState extends Equatable {
   const StudentState();
@@ -101,7 +103,8 @@ class StudentTimeLogOperationSuccess extends StudentState {
   final TimeLogEntity timeLog; // O log que foi criado/atualizado
   final String message;
 
-  const StudentTimeLogOperationSuccess({required this.timeLog, required this.message});
+  const StudentTimeLogOperationSuccess(
+      {required this.timeLog, required this.message});
 
   @override
   List<Object?> get props => [timeLog, message];
@@ -110,18 +113,20 @@ class StudentTimeLogOperationSuccess extends StudentState {
 /// Estado de sucesso para remoção de log de tempo.
 class StudentTimeLogDeleteSuccess extends StudentState {
   final String message;
-  const StudentTimeLogDeleteSuccess({this.message = 'Registo de tempo removido com sucesso.'});
-   @override
+  const StudentTimeLogDeleteSuccess(
+      {this.message = 'Registo de tempo removido com sucesso.'});
+  @override
   List<Object?> get props => [message];
 }
-
 
 /// Estado de sucesso na atualização do perfil do estudante.
 class StudentProfileUpdateSuccess extends StudentState {
   final StudentEntity updatedStudent;
   final String message;
 
-  const StudentProfileUpdateSuccess({required this.updatedStudent, this.message = 'Perfil atualizado com sucesso!'});
+  const StudentProfileUpdateSuccess(
+      {required this.updatedStudent,
+      this.message = 'Perfil atualizado com sucesso!'});
 
   @override
   List<Object?> get props => [updatedStudent, message];
@@ -145,4 +150,30 @@ class StudentOperationFailure extends StudentState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class StudentDetailsLoaded extends StudentState {
+  final StudentEntity student;
+  const StudentDetailsLoaded({required this.student});
+
+  @override
+  List<Object> get props => [student];
+}
+
+class StudentDashboardLoading extends StudentState {}
+
+class StudentDashboardLoaded extends StudentState {
+  final Map<String, dynamic> dashboardData;
+  const StudentDashboardLoaded({required this.dashboardData});
+
+  @override
+  List<Object> get props => [dashboardData];
+}
+
+class StudentDashboardError extends StudentState {
+  final String message;
+  const StudentDashboardError({required this.message});
+
+  @override
+  List<Object> get props => [message];
 }

@@ -42,11 +42,17 @@ class LoadStudentDetailsForSupervisorEvent extends SupervisorEvent {
 /// O StudentEntity aqui conteria os dados do formulário de criação.
 class CreateStudentBySupervisorEvent extends SupervisorEvent {
   final StudentEntity studentData;
+  final String initialEmail;
+  final String initialPassword;
 
-  const CreateStudentBySupervisorEvent({required this.studentData});
+  const CreateStudentBySupervisorEvent({
+    required this.studentData,
+    required this.initialEmail,
+    required this.initialPassword,
+  });
 
   @override
-  List<Object?> get props => [studentData];
+  List<Object?> get props => [studentData, initialEmail, initialPassword];
 }
 
 /// Evento para o supervisor atualizar os dados de um estudante.
@@ -118,22 +124,22 @@ class LoadAllContractsEvent extends SupervisorEvent {
 
 /// Evento para o supervisor criar um novo contrato.
 class CreateContractBySupervisorEvent extends SupervisorEvent {
-  final UpsertContractParams params;
+  final ContractEntity contract;
 
-  const CreateContractBySupervisorEvent({required this.params});
+  const CreateContractBySupervisorEvent({required this.contract});
 
   @override
-  List<Object?> get props => [params];
+  List<Object?> get props => [contract];
 }
 
 /// Evento para o supervisor atualizar um contrato existente.
 class UpdateContractBySupervisorEvent extends SupervisorEvent {
-  final UpsertContractParams params;
+  final ContractEntity contract;
 
-  const UpdateContractBySupervisorEvent({required this.params});
+  const UpdateContractBySupervisorEvent({required this.contract});
 
   @override
-  List<Object?> get props => [params];
+  List<Object?> get props => [contract];
 }
 
 /// Evento para alternar a visualização no dashboard (ex: Lista vs Gantt).
