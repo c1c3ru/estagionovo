@@ -1,9 +1,9 @@
 // lib/features/supervisor/presentation/bloc/supervisor_event.dart
 import 'package:equatable/equatable.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 import '../../../core/enums/contract_status.dart';
 import '../../../domain/entities/contract_entity.dart';
 import '../../../domain/entities/student_entity.dart';
-import '../../../data/models/student_model.dart' show FilterStudentsParams;
 // Importe UserRole e StudentStatus dos seus enums centrais
 
 abstract class SupervisorEvent extends Equatable {

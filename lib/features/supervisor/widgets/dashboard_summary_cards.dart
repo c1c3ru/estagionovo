@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gestao_de_estagio/core/enums/student_status.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/supervisor_bloc.dart';
 import '../bloc/supervisor_event.dart';
 import '../bloc/supervisor_state.dart';
-import '../../../../data/models/student_model.dart';
 
 class DashboardSummaryCards extends StatelessWidget {
   final SupervisorDashboardStats stats;

@@ -1,5 +1,6 @@
 // lib/features/supervisor/presentation/bloc/supervisor_state.dart
 import 'package:equatable/equatable.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 import '../../../domain/entities/supervisor_entity.dart';
 import '../../../domain/entities/student_entity.dart';
 import '../../../domain/entities/time_log_entity.dart';

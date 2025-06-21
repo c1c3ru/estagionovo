@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../domain/entities/student_entity.dart';
 import '../../domain/entities/supervisor_entity.dart';

@@ -4,6 +4,9 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:gestao_de_estagio/core/enums/class_shift.dart';
 import 'package:gestao_de_estagio/core/enums/internship_shift.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/enums/student_status.dart'
+    as student_status_enum;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/validators.dart';
@@ -135,10 +138,14 @@ class _StudentEditPageState extends State<StudentEditPage> {
 
     final studentEntityData = StudentEntity(
       id: _isEditMode ? _studentToEdit!.id : '',
-      userId: _isEditMode ? _studentToEdit!.userId : '',
       email: _isEditMode ? _studentToEdit!.email : _emailController.text.trim(),
-      supervisorId: _isEditMode ? _studentToEdit!.supervisorId : 'TBD',
       fullName: _fullNameController.text.trim(),
+      role: UserRole.student,
+      status: _isEditMode
+          ? _studentToEdit!.status
+          : student_status_enum.StudentStatus.pending,
+      createdAt: _isEditMode ? _studentToEdit!.createdAt : DateTime.now(),
+      supervisorId: _isEditMode ? _studentToEdit!.supervisorId : '',
       registrationNumber: _registrationNumberController.text.trim(),
       course: _courseController.text.trim(),
       advisorName: _advisorNameController.text.trim(),
@@ -162,7 +169,6 @@ class _StudentEditPageState extends State<StudentEditPage> {
           ? _phoneNumberController.text.trim()
           : null,
       isOnTrack: _isEditMode ? _studentToEdit!.isOnTrack : true,
-      createdAt: _isEditMode ? _studentToEdit!.createdAt : DateTime.now(),
     );
 
     if (_isEditMode) {

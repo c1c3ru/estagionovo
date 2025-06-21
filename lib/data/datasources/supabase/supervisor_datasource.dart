@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../data/models/student_model.dart';
+import '../../../domain/entities/filter_students_params.dart';
 
 class SupervisorDatasource {
   final SupabaseClient _supabaseClient;

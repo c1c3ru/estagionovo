@@ -5,7 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:gestao_de_estagio/core/enums/student_status.dart'
     as student_status_enum;
 import 'package:gestao_de_estagio/core/enums/user_role.dart';
-import 'package:gestao_de_estagio/data/models/student_model.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 import 'package:gestao_de_estagio/features/supervisor/bloc/supervisor_event.dart';
 import 'package:gestao_de_estagio/features/supervisor/bloc/supervisor_state.dart';
 
@@ -35,7 +35,6 @@ import '../../../../domain/usecases/contract/delete_contract_usecase.dart';
 // Usecases de Auth
 import '../../../../domain/usecases/auth/register_usecase.dart';
 
-import '../../../../data/models/student_model.dart' show FilterStudentsParams;
 // import '../../../../domain/repositories/i_contract_repository.dart'
 //     show UpsertContractParams;
 
@@ -304,10 +303,8 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       },
       (authUserEntity) async {
         try {
-          final studentToCreate = event.studentData.copyWith(
-              id: authUserEntity.id,
-              userId: authUserEntity.id,
-              email: authUserEntity.email);
+          final studentToCreate = event.studentData
+              .copyWith(id: authUserEntity.id, email: authUserEntity.email);
 
           final studentProfileResult =
               await _createStudentBySupervisorUsecase.call(studentToCreate);

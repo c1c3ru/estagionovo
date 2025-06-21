@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import 'package:gestao_de_estagio/core/errors/app_exceptions.dart';
-import 'package:gestao_de_estagio/data/models/student_model.dart';
+import 'package:gestao_de_estagio/domain/entities/filter_students_params.dart';
 import 'package:gestao_de_estagio/domain/entities/student_entity.dart';
 
 import 'package:gestao_de_estagio/domain/entities/time_log_entity.dart';
