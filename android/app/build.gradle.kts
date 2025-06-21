@@ -6,8 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.estagiobloc"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.student_supervisor_app"
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
