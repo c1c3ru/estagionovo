@@ -12,10 +12,10 @@ class ContractGanttChart extends StatelessWidget {
   final List<StudentEntity> students; // Para obter nomes dos estudantes
 
   const ContractGanttChart({
-    Key? key,
+    super.key,
     required this.contracts,
     required this.students,
-  }) : super(key: key);
+  });
 
   // Encontra o nome do estudante pelo ID
   String _getStudentName(String studentId) {

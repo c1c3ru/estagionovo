@@ -117,9 +117,9 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     try {
       final results = await Future.wait([
         _getAllStudentsForSupervisorUsecase.call(null),
-        _getAllContractsUsecase.call(GetAllContractsParams()),
+        _getAllContractsUsecase.call(const GetAllContractsParams()),
         _getAllTimeLogsForSupervisorUsecase
-            .call(GetAllTimeLogsParams(pendingOnly: true)),
+            .call(const GetAllTimeLogsParams(pendingOnly: true)),
       ]);
 
       final studentsResult =
@@ -230,7 +230,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
               emit(SupervisorOperationFailure(message: failure.message)),
           (_) {
             // Recarrega os logs pendentes após aprovar/rejeitar
-            add(LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
+            add(const LoadAllTimeLogsForApprovalEvent(pendingOnly: true));
           },
         );
       } catch (e) {
@@ -249,7 +249,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
       emit(currentDashboardState.copyWith(
           showGanttView: !currentDashboardState.showGanttView,
           isLoading: true,
-          appliedFilters: FilterStudentsParams(
+          appliedFilters: const FilterStudentsParams(
               status: student_status_enum.StudentStatus.active),
           pendingApprovals: []));
     }

@@ -23,7 +23,7 @@ class SupervisorHomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthBloc>().add(AuthLogoutRequested());
+              context.read<AuthBloc>().add(const AuthLogoutRequested());
             },
           ),
         ],
@@ -42,10 +42,10 @@ class SupervisorHomePage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 30,
                           backgroundColor: AppColors.primary,
-                          child: const Icon(
+                          child: Icon(
                             Icons.supervisor_account,
                             color: AppColors.white,
                             size: 30,
@@ -56,7 +56,7 @@ class SupervisorHomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Bem-vindo, Supervisor!',
                                 style: AppTextStyles.h6,
                               ),
@@ -79,12 +79,12 @@ class SupervisorHomePage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Statistics Cards
-            Text(
+            const Text(
               'Estatísticas',
               style: AppTextStyles.h6,
             ),
             const SizedBox(height: 12),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: _StatCard(
@@ -94,7 +94,7 @@ class SupervisorHomePage extends StatelessWidget {
                     color: AppColors.primary,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     title: 'Ativos Hoje',
@@ -106,7 +106,7 @@ class SupervisorHomePage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: _StatCard(
@@ -116,7 +116,7 @@ class SupervisorHomePage extends StatelessWidget {
                     color: AppColors.warning,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     title: 'Pendentes',
@@ -130,7 +130,7 @@ class SupervisorHomePage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Quick Actions
-            Text(
+            const Text(
               'Ações Rápidas',
               style: AppTextStyles.h6,
             ),
@@ -139,9 +139,9 @@ class SupervisorHomePage extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: CircleAvatar(
+                    leading: const CircleAvatar(
                       backgroundColor: AppColors.primaryLight,
-                      child: const Icon(
+                      child: Icon(
                         Icons.people,
                         color: AppColors.primary,
                       ),
@@ -155,9 +155,9 @@ class SupervisorHomePage extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    leading: CircleAvatar(
+                    leading: const CircleAvatar(
                       backgroundColor: AppColors.secondaryLight,
-                      child: const Icon(
+                      child: Icon(
                         Icons.assessment,
                         color: AppColors.secondary,
                       ),
@@ -173,7 +173,7 @@ class SupervisorHomePage extends StatelessWidget {
                   ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppColors.warning.withOpacity(0.2),
-                      child: Icon(
+                      child: const Icon(
                         Icons.description,
                         color: AppColors.warning,
                       ),
@@ -191,7 +191,7 @@ class SupervisorHomePage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Recent Activities
-            Text(
+            const Text(
               'Atividades Recentes',
               style: AppTextStyles.h6,
             ),

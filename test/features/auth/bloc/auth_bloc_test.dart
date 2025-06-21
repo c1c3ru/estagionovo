@@ -36,7 +36,7 @@ void main() {
     late MockUpdateProfileUsecase mockUpdateProfileUsecase;
     late MockGetAuthStateChangesUsecase mockGetAuthStateChangesUsecase;
 
-    final mockUserEntity = UserEntity(
+    const mockUserEntity = UserEntity(
       id: '1',
       email: 'test@test.com',
       fullName: 'Test User',

@@ -10,9 +10,9 @@ class DashboardSummaryCards extends StatelessWidget {
   final SupervisorDashboardStats stats;
 
   const DashboardSummaryCards({
-    Key? key,
+    super.key,
     required this.stats,
-  }) : super(key: key);
+  });
 
   Widget _buildStatCard({
     required BuildContext context,

@@ -87,10 +87,10 @@ class StudentListWidget extends StatelessWidget {
         // A lógica de status do estudante (ativo, inativo, etc.) pode depender da data do contrato
         // ou de um campo 'is_active' na tabela 'users' ou 'students'.
         // Para este exemplo, vou usar a data do contrato para um status visual simples.
-        final bool isActiveBasedOnContract = student.contractEndDate != null &&
+        final bool isActiveBasedOnContract =
             student.contractStartDate != null &&
-            student.contractEndDate!.isAfter(DateTime.now()) &&
-            student.contractStartDate!.isBefore(DateTime.now());
+                student.contractEndDate.isAfter(DateTime.now()) &&
+                student.contractStartDate.isBefore(DateTime.now());
         final displayStatus = isActiveBasedOnContract
             ? StudentStatus.active
             : StudentStatus.inactive; // Simplificação
@@ -165,7 +165,7 @@ class StudentListWidget extends StatelessWidget {
                     Expanded(
                       child: Text(
                         student.contractEndDate != null
-                            ? _getDaysRemainingText(student.contractEndDate!)
+                            ? _getDaysRemainingText(student.contractEndDate)
                             : 'Sem data de término',
                         style: theme.textTheme.bodySmall
                             ?.copyWith(color: theme.hintColor),

@@ -88,24 +88,33 @@ class Validators {
     return null;
   }
 
-  /// Validador para matrícula SIAPE (exatamente 7 dígitos).
+  /// Validador para matrícula SIAPE (exatamente 6 dígitos).
   static String? siapeRegistration(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Matrícula SIAPE é obrigatória.';
     }
-
-    // Remove espaços e caracteres não numéricos
     final cleanValue = value.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (cleanValue.length != 7) {
-      return 'Matrícula SIAPE deve ter exatamente 7 dígitos.';
+    if (cleanValue.length != 6) {
+      return 'Matrícula SIAPE deve ter exatamente 6 dígitos.';
     }
-
-    // Verifica se todos os caracteres são dígitos
-    if (!RegExp(r'^[0-9]{7}$').hasMatch(cleanValue)) {
+    if (!RegExp(r'^[0-9]{6}$').hasMatch(cleanValue)) {
       return 'Matrícula SIAPE deve conter apenas números.';
     }
+    return null;
+  }
 
+  /// Validador para matrícula de aluno (exatamente 12 dígitos).
+  static String? studentRegistration(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Matrícula de aluno é obrigatória.';
+    }
+    final cleanValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanValue.length != 12) {
+      return 'Matrícula de aluno deve ter exatamente 12 dígitos.';
+    }
+    if (!RegExp(r'^[0-9]{12}$').hasMatch(cleanValue)) {
+      return 'Matrícula de aluno deve conter apenas números.';
+    }
     return null;
   }
 

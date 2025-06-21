@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onLoginPressed() {
     if (_formKey.currentState?.validate() ?? false) {
-      Modular.get<AuthBloc>().add(
+      BlocProvider.of<AuthBloc>(context).add(
         AuthLoginRequested(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -43,23 +43,25 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onRegisterPressed() {
-    Modular.to.pushNamed('/auth/register');
+    Modular.to.pushNamed('/register');
   }
 
   void _onForgotPasswordPressed() {
-    Modular.to.pushNamed('/auth/forgot-password');
+    Modular.to.pushNamed('/forgot-password');
   }
 
   @override
   Widget build(BuildContext context) {
+    print('🟢 LoginPage: BUILD chamado');
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
+          print('🟢 LoginPage: Estado recebido: $state');
           if (state is AuthAuthenticated) {
             final route = state.user.role == UserRole.student
-                ? '/student/'
-                : '/supervisor/';
+                ? '/student'
+                : '/supervisor';
             Modular.to.pushReplacementNamed(route);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -161,23 +163,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: _onRegisterPressed,
-                      child: RichText(
-                        text: TextSpan(
-                          style: AppTextStyles.bodyMedium,
-                          children: const [
-                            TextSpan(
-                              text: 'Não tem uma conta? ',
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
-                            TextSpan(
-                              text: AppStrings.register,
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                      onPressed: () => Modular.to.pushNamed('/register'),
+                      child: Text(
+                        'Não tem uma conta? ${AppStrings.register}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.primary,
                         ),
                       ),
                     ),

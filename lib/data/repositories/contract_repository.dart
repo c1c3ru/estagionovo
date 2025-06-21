@@ -36,7 +36,7 @@ class ContractRepository implements IContractRepository {
     try {
       final contractData = await _contractDatasource.getContractById(id);
       if (contractData == null) {
-        return Left(ServerFailure(message: 'Contrato não encontrado'));
+        return const Left(ServerFailure(message: 'Contrato não encontrado'));
       }
       return Right(ContractModel.fromJson(contractData).toEntity());
     } catch (e) {

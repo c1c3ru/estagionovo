@@ -94,7 +94,7 @@ class SupervisorRegisterPage extends StatelessWidget {
                         ),
                         TextButton(
                           onPressed: () =>
-                              Modular.to.pushReplacementNamed('/auth/register'),
+                              Modular.to.pushReplacementNamed('/register'),
                           child: const Text('Cadastre-se como estudante'),
                         ),
                       ],

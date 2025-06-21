@@ -244,9 +244,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextButton(
                       onPressed: _onLoginPressed,
                       child: RichText(
-                        text: TextSpan(
+                        text: const TextSpan(
                           style: AppTextStyles.bodyMedium,
-                          children: const [
+                          children: [
                             TextSpan(
                               text: 'Já tem uma conta? ',
                               style: TextStyle(color: AppColors.textSecondary),

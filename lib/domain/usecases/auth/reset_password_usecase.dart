@@ -10,7 +10,7 @@ class ResetPasswordUsecase {
 
   Future<Either<AppFailure, void>> call({required String email}) async {
     if (!_isValidEmail(email)) {
-      return Left(ValidationFailure('Formato de email inválido.'));
+      return const Left(ValidationFailure('Formato de email inválido.'));
     }
     return await _repository.resetPassword(email: email);
   }

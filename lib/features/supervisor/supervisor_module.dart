@@ -5,8 +5,7 @@ import 'package:student_supervisor_app/features/supervisor/pages/student_details
 import 'package:student_supervisor_app/features/supervisor/pages/student_edit_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/supervisor_dashboard_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/supervisor_home_page.dart';
-import 'package:student_supervisor_app/features/supervisor/pages/supervisor_time_approval_page.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
+// Para SupabaseClient
 
 // Datasources
 import '../../data/datasources/local/preferences_manager.dart';
@@ -44,9 +43,7 @@ import '../../domain/usecases/contract/create_contract_usecase.dart';
 import '../../domain/usecases/contract/update_contract_usecase.dart';
 import '../../domain/usecases/contract/delete_contract_usecase.dart';
 import '../../domain/usecases/auth/register_usecase.dart';
-import '../../domain/usecases/supervisor/get_supervisor_by_user_id_usecase.dart';
 import '../../domain/usecases/supervisor/update_supervisor_usecase.dart';
-import '../../domain/usecases/supervisor/get_student_details_for_supervisor_usecase.dart';
 
 class SupervisorModule extends Module {
   @override

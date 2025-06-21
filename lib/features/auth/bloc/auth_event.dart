@@ -13,6 +13,10 @@ class AuthCheckRequested extends AuthEvent {
   const AuthCheckRequested();
 }
 
+class AuthInitializeRequested extends AuthEvent {
+  const AuthInitializeRequested();
+}
+
 class AuthLoginRequested extends AuthEvent {
   final String email;
   final String password;

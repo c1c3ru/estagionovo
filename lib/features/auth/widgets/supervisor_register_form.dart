@@ -29,8 +29,8 @@ class _SupervisorRegisterFormState extends State<SupervisorRegisterForm> {
   final _departmentController = TextEditingController();
   final _positionController = TextEditingController();
 
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+  final bool _isPasswordVisible = false;
+  final bool _isConfirmPasswordVisible = false;
   bool _isSiapeValid = false;
 
   @override

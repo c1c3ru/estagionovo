@@ -13,7 +13,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({Key? key}) : super(key: key);
+  const RegisterForm({super.key});
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
@@ -96,6 +96,16 @@ class _RegisterFormState extends State<RegisterForm> {
                   Validators.required(value, fieldName: 'Nome completo'),
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              controller: TextEditingController(),
+              labelText: 'Matrícula de aluno',
+              hintText: 'Digite sua matrícula (12 dígitos)',
+              prefixIcon: Icons.badge_outlined,
+              keyboardType: TextInputType.number,
+              validator: Validators.studentRegistration,
+              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
             AppTextField(

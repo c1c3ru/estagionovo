@@ -16,19 +16,19 @@ class RegisterUsecase {
     required UserRole role,
   }) async {
     if (email.isEmpty) {
-      return Left(ValidationFailure('E-mail é obrigatório'));
+      return const Left(ValidationFailure('E-mail é obrigatório'));
     }
 
     if (password.isEmpty) {
-      return Left(ValidationFailure('Senha é obrigatória'));
+      return const Left(ValidationFailure('Senha é obrigatória'));
     }
 
     if (fullName.isEmpty) {
-      return Left(ValidationFailure('Nome completo é obrigatório'));
+      return const Left(ValidationFailure('Nome completo é obrigatório'));
     }
 
     if (!_isValidEmail(email)) {
-      return Left(ValidationFailure('E-mail inválido'));
+      return const Left(ValidationFailure('E-mail inválido'));
     }
 
     return await _repository.register(

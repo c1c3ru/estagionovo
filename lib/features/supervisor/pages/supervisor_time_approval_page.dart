@@ -206,7 +206,7 @@ class _SupervisorTimeApprovalPageState
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.check_circle_outline_rounded,
+                      const Icon(Icons.check_circle_outline_rounded,
                           size: 80, color: AppColors.success),
                       const SizedBox(height: 24),
                       Text(
@@ -401,11 +401,11 @@ class _SupervisorTimeApprovalPageState
                 },
               )
             else if (log.approved)
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Icon(Icons.check_circle, color: AppColors.success, size: 18),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   Text('Aprovado',
                       style: TextStyle(
                           color: AppColors.success,

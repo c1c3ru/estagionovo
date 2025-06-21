@@ -191,7 +191,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   NotificationBloc() : super(NotificationInitial()) {
     on<NotificationLoadAllRequested>(_onNotificationLoadAllRequested);
     on<NotificationMarkAsReadRequested>(_onNotificationMarkAsReadRequested);
-    on<NotificationMarkAllAsReadRequested>(_onNotificationMarkAllAsReadRequested);
+    on<NotificationMarkAllAsReadRequested>(
+        _onNotificationMarkAllAsReadRequested);
     on<NotificationDeleteRequested>(_onNotificationDeleteRequested);
     on<NotificationClearAllRequested>(_onNotificationClearAllRequested);
     on<NotificationCreateRequested>(_onNotificationCreateRequested);
@@ -207,7 +208,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       // final notifications = await _notificationRepository.getAllNotifications();
       // final unreadCount = notifications.where((n) => !n.isRead).length;
       // emit(NotificationLoadAllSuccess(notifications: notifications, unreadCount: unreadCount));
-      
+
       // Mock data for now
       final mockNotifications = [
         NotificationEntity(
@@ -216,7 +217,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           message: 'João Silva foi cadastrado no sistema',
           type: 'info',
           isRead: false,
-          createdAt: DateTime.now().subtract(Duration(minutes: 30)),
+          createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
         ),
         NotificationEntity(
           id: '2',
@@ -224,10 +225,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           message: 'Maria Oliveira registrou saída',
           type: 'time_log',
           isRead: true,
-          createdAt: DateTime.now().subtract(Duration(hours: 2)),
+          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
         ),
       ];
-      
+
       final unreadCount = mockNotifications.where((n) => !n.isRead).length;
       emit(NotificationLoadAllSuccess(
         notifications: mockNotifications,
@@ -309,4 +310,3 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 }
-

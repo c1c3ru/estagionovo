@@ -20,7 +20,7 @@ import '../bloc/student_event.dart';
 import '../bloc/student_state.dart';
 
 class StudentTimeLogPage extends StatefulWidget {
-  const StudentTimeLogPage({Key? key}) : super(key: key);
+  const StudentTimeLogPage({super.key});
 
   @override
   State<StudentTimeLogPage> createState() => _StudentTimeLogPageState();
@@ -79,18 +79,18 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
       return;
     }
 
-    final _formKey = GlobalKey<FormState>();
-    final _dateController = TextEditingController(
+    final formKey = GlobalKey<FormState>();
+    final dateController = TextEditingController(
         text: timeLog != null
             ? DateFormat('dd/MM/yyyy').format(timeLog.logDate)
             : DateFormat('dd/MM/yyyy').format(DateTime.now()));
-    final _checkInController = TextEditingController(
+    final checkInController = TextEditingController(
         text: timeLog != null ? _formatTimeOfDay(timeLog.checkInTime) : '');
-    final _checkOutController = TextEditingController(
+    final checkOutController = TextEditingController(
         text: timeLog?.checkOutTime != null
             ? _formatTimeOfDay(timeLog!.checkOutTime!)
             : '');
-    final _descriptionController =
+    final descriptionController =
         TextEditingController(text: timeLog?.description ?? '');
 
     DateTime selectedDate = timeLog?.logDate ?? DateTime.now();
@@ -105,14 +105,14 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
               ? 'Adicionar Registo de Tempo'
               : 'Editar Registo de Tempo'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   // Campo de Data
                   AppTextField(
-                    controller: _dateController,
+                    controller: dateController,
                     labelText: 'Data',
                     prefixIcon: Icons.calendar_today_outlined,
                     readOnly: true,
@@ -131,7 +131,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                         setState(() {
                           // setState do diálogo, não da página
                           selectedDate = picked;
-                          _dateController.text =
+                          dateController.text =
                               DateFormat('dd/MM/yyyy').format(picked);
                         });
                       }
@@ -140,7 +140,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                   const SizedBox(height: 16),
                   // Campo Check-in
                   AppTextField(
-                    controller: _checkInController,
+                    controller: checkInController,
                     labelText: 'Hora de Entrada',
                     prefixIcon: Icons.access_time_outlined,
                     readOnly: true,
@@ -155,7 +155,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                         setState(() {
                           // setState do diálogo
                           selectedCheckInTime = picked;
-                          _checkInController.text = _formatTimeOfDay(picked);
+                          checkInController.text = _formatTimeOfDay(picked);
                         });
                       }
                     },
@@ -163,7 +163,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                   const SizedBox(height: 16),
                   // Campo Check-out
                   AppTextField(
-                    controller: _checkOutController,
+                    controller: checkOutController,
                     labelText: 'Hora de Saída (Opcional)',
                     prefixIcon: Icons.access_time_filled_outlined,
                     readOnly: true,
@@ -176,7 +176,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                         setState(() {
                           // setState do diálogo
                           selectedCheckOutTime = picked;
-                          _checkOutController.text = _formatTimeOfDay(picked);
+                          checkOutController.text = _formatTimeOfDay(picked);
                         });
                       }
                     },
@@ -184,7 +184,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                   const SizedBox(height: 16),
                   // Campo Descrição
                   AppTextField(
-                    controller: _descriptionController,
+                    controller: descriptionController,
                     labelText: 'Descrição (Opcional)',
                     prefixIcon: Icons.description_outlined,
                     maxLines: 3,
@@ -204,7 +204,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
             AppButton(
               text: timeLog == null ? 'Adicionar' : AppStrings.save,
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
+                if (formKey.currentState?.validate() ?? false) {
                   if (selectedCheckInTime == null) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
                       const SnackBar(
@@ -221,7 +221,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                       logDate: selectedDate,
                       checkInTime: selectedCheckInTime!,
                       checkOutTime: selectedCheckOutTime,
-                      description: _descriptionController.text.trim(),
+                      description: descriptionController.text.trim(),
                     ));
                   } else {
                     // Editar existente
@@ -233,7 +233,7 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
                       logDate: selectedDate,
                       checkInTime: selectedCheckInTime,
                       checkOutTime: selectedCheckOutTime,
-                      description: _descriptionController.text.trim(),
+                      description: descriptionController.text.trim(),
                     ));
                   }
                   Navigator.of(dialogContext).pop();
@@ -309,8 +309,9 @@ class _StudentTimeLogPageState extends State<StudentTimeLogPage> {
           } else if (state is StudentTimeLogOperationSuccess ||
               state is StudentTimeLogDeleteSuccess) {
             String message = 'Operação realizada com sucesso!';
-            if (state is StudentTimeLogOperationSuccess)
+            if (state is StudentTimeLogOperationSuccess) {
               message = state.message;
+            }
             if (state is StudentTimeLogDeleteSuccess) message = state.message;
 
             ScaffoldMessenger.of(context)

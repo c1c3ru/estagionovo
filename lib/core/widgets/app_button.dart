@@ -55,7 +55,7 @@ class AppButton extends StatelessWidget {
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 18), // Tamanho do ícone ajustado
-                SizedBox(width: AppConstants.paddingSmall),
+                const SizedBox(width: AppConstants.paddingSmall),
               ],
               Text(text),
             ],

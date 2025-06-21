@@ -14,7 +14,7 @@ class StatusBadge extends StatelessWidget {
   final BorderRadiusGeometry borderRadius;
 
   const StatusBadge({
-    Key? key,
+    super.key,
     required this.text,
     required this.backgroundColor,
     this.textColor =
@@ -23,7 +23,7 @@ class StatusBadge extends StatelessWidget {
     this.fontSize = 10.0,
     this.padding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
     this.borderRadius = const BorderRadius.all(Radius.circular(12.0)),
-  }) : super(key: key);
+  });
 
   // Construtores de fábrica para status comuns (usando StudentStatus como exemplo)
   factory StatusBadge.fromStudentStatus(

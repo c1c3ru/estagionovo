@@ -33,7 +33,7 @@ class SupervisorRepository implements ISupervisorRepository {
     try {
       final supervisorData = await _supervisorDatasource.getSupervisorById(id);
       if (supervisorData == null) {
-        return Left(ServerFailure(message: 'Supervisor não encontrado'));
+        return const Left(ServerFailure(message: 'Supervisor não encontrado'));
       }
       return Right(SupervisorModel.fromJson(supervisorData).toEntity());
     } catch (e) {
@@ -117,7 +117,7 @@ class SupervisorRepository implements ISupervisorRepository {
     try {
       final studentData = await _supervisorDatasource.getStudentById(studentId);
       if (studentData == null) {
-        return Left(ServerFailure(message: 'Estudante não encontrado'));
+        return const Left(ServerFailure(message: 'Estudante não encontrado'));
       }
       return Right(StudentModel.fromJson(studentData).toEntity());
     } catch (e) {
@@ -239,7 +239,7 @@ class SupervisorRepository implements ISupervisorRepository {
     try {
       final studentData = await _supervisorDatasource.getStudentById(studentId);
       if (studentData == null) {
-        return Left(ServerFailure(message: 'Estudante não encontrado'));
+        return const Left(ServerFailure(message: 'Estudante não encontrado'));
       }
 
       final student = StudentModel.fromJson(studentData).toEntity();

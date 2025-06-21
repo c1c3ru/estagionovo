@@ -22,10 +22,10 @@ class TimeTrackerWidget extends StatefulWidget {
   final String? currentUserId; // Opcional, pode ser obtido do AuthBloc
 
   const TimeTrackerWidget({
-    Key? key,
+    super.key,
     this.activeTimeLogInitial,
     this.currentUserId,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeTrackerWidget> createState() => _TimeTrackerWidgetState();

@@ -13,15 +13,15 @@ class LoginUsecase {
     required String password,
   }) async {
     if (email.isEmpty) {
-      return Left(ValidationFailure('E-mail é obrigatório'));
+      return const Left(ValidationFailure('E-mail é obrigatório'));
     }
 
     if (password.isEmpty) {
-      return Left(ValidationFailure('Senha é obrigatória'));
+      return const Left(ValidationFailure('Senha é obrigatória'));
     }
 
     if (!_isValidEmail(email)) {
-      return Left(ValidationFailure('E-mail inválido'));
+      return const Left(ValidationFailure('E-mail inválido'));
     }
 
     return await _authRepository.login(

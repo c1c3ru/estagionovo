@@ -12,7 +12,7 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   StudentBloc({
     required GetStudentDashboardUsecase getStudentDashboardUsecase,
   })  : _getStudentDashboardUsecase = getStudentDashboardUsecase,
-        super(StudentInitial()) {
+        super(const StudentInitial()) {
     // Registrar handlers para os eventos
     on<LoadStudentDashboardDataEvent>(_onLoadStudentDashboardData);
     on<UpdateStudentProfileInfoEvent>(_onUpdateStudentProfileInfo);
@@ -50,10 +50,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     UpdateStudentProfileInfoEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para atualizar perfil
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -63,10 +63,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     StudentCheckInEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica de check-in
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -76,10 +76,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     StudentCheckOutEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica de check-out
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -89,10 +89,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     LoadStudentTimeLogsEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para carregar logs de tempo
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -102,10 +102,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     CreateManualTimeLogEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para criar log manual
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -115,10 +115,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     UpdateManualTimeLogEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para atualizar log manual
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -128,10 +128,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     DeleteTimeLogRequestedEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para deletar log
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }
@@ -141,10 +141,10 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
     FetchActiveTimeLogEvent event,
     Emitter<StudentState> emit,
   ) async {
-    emit(StudentLoading());
+    emit(const StudentLoading());
     try {
       // Implementar lógica para buscar log ativo
-      emit(StudentLoading());
+      emit(const StudentLoading());
     } catch (e) {
       emit(StudentOperationFailure(message: e.toString()));
     }

@@ -39,17 +39,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _resetPasswordUsecase = resetPasswordUsecase,
         _updateProfileUsecase = updateProfileUsecase,
         _getAuthStateChangesUsecase = getAuthStateChangesUsecase,
-        super(AuthInitial()) {
-    // Configurar listener do stream de autenticação
-    _authStateSubscription = _getAuthStateChangesUsecase().listen((userEntity) {
-      if (userEntity != null) {
-        add(AuthUserChanged(user: userEntity));
-      } else {
-        add(AuthLogoutRequested());
-      }
-    });
+        super(const AuthInitial()) {
+    print('🔵 AuthBloc: CONSTRUÍDO com sucesso');
 
     // Registrar handlers de eventos
+    print('🔵 AuthBloc: Registrando handlers de eventos...');
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
@@ -57,6 +51,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdateProfileRequested>(_onUpdateProfileRequested);
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthUserChanged>(_onAuthUserChanged);
+    on<AuthInitializeRequested>(_onInitializeRequested);
+    print('🔵 AuthBloc: Handlers registrados com sucesso');
   }
 
   @override
@@ -65,10 +61,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return super.close();
   }
 
+  void _onInitializeRequested(
+      AuthInitializeRequested event, Emitter<AuthState> emit) {
+    print('🔵 AuthBloc: Configurando listener do stream...');
+    _authStateSubscription = _getAuthStateChangesUsecase().listen((userEntity) {
+      print('🔵 AuthBloc: Mudança de usuário detectada: $userEntity');
+      if (userEntity != null) {
+        add(AuthUserChanged(user: userEntity));
+      } else if (state is! AuthUnauthenticated) {
+        add(const AuthLogoutRequested());
+      }
+    });
+    print('🔵 AuthBloc: Listener configurado com sucesso');
+  }
+
   Future<void> _onCheckRequested(
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('🔵 AuthBloc: _onCheckRequested chamado');
     emit(const AuthLoading());
     final result = await _getCurrentUserUsecase();
     result.fold(
@@ -83,6 +94,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('🔵 AuthBloc: _onLoginRequested chamado');
     emit(const AuthLoading());
     final result = await _loginUsecase(
       email: event.email,
@@ -98,6 +110,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('🔵 AuthBloc: _onLogoutRequested chamado');
     emit(const AuthLoading());
     final result = await _logoutUsecase();
     result.fold(
@@ -131,7 +144,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _resetPasswordUsecase(email: event.email);
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit(AuthPasswordResetSent(
+      (_) => emit(const AuthPasswordResetSent(
           message: 'E-mail de redefinição de senha enviado com sucesso.')),
     );
   }

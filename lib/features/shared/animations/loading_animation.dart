@@ -7,10 +7,10 @@ class LottieLoadingIndicator extends StatelessWidget {
   final String? message; // Mensagem opcional abaixo da animação
 
   const LottieLoadingIndicator({
-    Key? key,
+    super.key,
     this.size = 80.0,
     this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,8 @@ class LottieLoadingIndicator extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AppLottieAnimation(
-            assetPath: LottieAssetPaths.loadingDots, // Use o seu asset de loading
+            assetPath:
+                LottieAssetPaths.loadingDots, // Use o seu asset de loading
             width: size,
             height: size,
             repeat: true,
@@ -48,13 +49,13 @@ class LottieLoadingOverlay extends StatelessWidget {
   final String? loadingMessage;
 
   const LottieLoadingOverlay({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
     this.opacity = 0.3,
     this.backgroundColor,
     this.loadingMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
