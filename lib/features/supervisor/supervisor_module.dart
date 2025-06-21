@@ -62,6 +62,8 @@ class SupervisorModule extends Module {
         () => ContractRepository(i.get<ContractDatasource>()));
     i.add<ISupervisorRepository>(() => SupervisorRepository(
           i.get<SupervisorDatasource>(),
+          i.get<ITimeLogRepository>(),
+          i.get<IContractRepository>(),
         ));
 
     // --- Usecases ---

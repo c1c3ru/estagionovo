@@ -101,7 +101,7 @@ class _StudentColleaguesPageState extends State<StudentColleaguesPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        const Text(
                           'Online - Trabalhando agora',
                           style: AppTextStyles.bodyMedium,
                         ),

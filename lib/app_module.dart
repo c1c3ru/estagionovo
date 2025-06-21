@@ -9,6 +9,7 @@ import 'data/datasources/supabase/student_datasource.dart';
 import 'data/datasources/supabase/supervisor_datasource.dart';
 import 'data/datasources/supabase/time_log_datasource.dart';
 import 'data/datasources/supabase/contract_datasource.dart';
+import 'data/datasources/supabase/notification_datasource.dart';
 import 'data/datasources/local/preferences_manager.dart';
 import 'data/datasources/local/cache_manager.dart';
 import 'domain/repositories/i_auth_datasource.dart';
@@ -19,6 +20,7 @@ import 'data/repositories/student_repository.dart';
 import 'data/repositories/supervisor_repository.dart';
 import 'data/repositories/time_log_repository.dart';
 import 'data/repositories/contract_repository.dart';
+import 'data/repositories/notification_repository.dart';
 
 // Domain Repositories
 import 'domain/repositories/i_auth_repository.dart';
@@ -26,6 +28,7 @@ import 'domain/repositories/i_student_repository.dart';
 import 'domain/repositories/i_supervisor_repository.dart';
 import 'domain/repositories/i_time_log_repository.dart';
 import 'domain/repositories/i_contract_repository.dart';
+import 'domain/repositories/i_notification_repository.dart';
 
 // Use Cases - Auth
 import 'domain/usecases/auth/login_usecase.dart';
@@ -125,6 +128,8 @@ class AppModule extends Module {
     i.addLazySingleton<SupervisorDatasource>(() => SupervisorDatasource(i()));
     i.addLazySingleton<TimeLogDatasource>(() => TimeLogDatasource(i()));
     i.addLazySingleton<ContractDatasource>(() => ContractDatasource(i()));
+    i.addLazySingleton<NotificationDatasource>(
+        () => NotificationDatasource(i()));
     i.addLazySingleton<PreferencesManager>(() => PreferencesManager(null));
     i.addLazySingleton<CacheManager>(() => CacheManager());
 
@@ -134,9 +139,12 @@ class AppModule extends Module {
           preferencesManager: i(),
         ));
     i.addLazySingleton<IStudentRepository>(() => StudentRepository(i(), i()));
-    i.addLazySingleton<ISupervisorRepository>(() => SupervisorRepository(i()));
+    i.addLazySingleton<ISupervisorRepository>(
+        () => SupervisorRepository(i(), i(), i()));
     i.addLazySingleton<ITimeLogRepository>(() => TimeLogRepository(i()));
     i.addLazySingleton<IContractRepository>(() => ContractRepository(i()));
+    i.addLazySingleton<INotificationRepository>(
+        () => NotificationRepository(i()));
 
     // Use Cases - Auth
     i.addLazySingleton<LoginUsecase>(() => LoginUsecase(i()));
@@ -278,7 +286,10 @@ class AppModule extends Module {
           getContractStatisticsUsecase: i(),
         ));
 
-    i.addLazySingleton<NotificationBloc>(() => NotificationBloc());
+    i.addLazySingleton<NotificationBloc>(() => NotificationBloc(
+          notificationRepository: i(),
+          authRepository: i(),
+        ));
 
     // Guards
     i.addLazySingleton<AuthGuard>(() => AuthGuard(i<AuthBloc>()));

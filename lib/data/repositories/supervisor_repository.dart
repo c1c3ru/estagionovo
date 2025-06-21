@@ -8,11 +8,16 @@ import '../models/student_model.dart';
 import '../models/supervisor_model.dart';
 import '../../domain/entities/time_log_entity.dart';
 import '../../domain/entities/contract_entity.dart';
+import '../../domain/repositories/i_time_log_repository.dart';
+import '../../domain/repositories/i_contract_repository.dart';
 
 class SupervisorRepository implements ISupervisorRepository {
   final SupervisorDatasource _supervisorDatasource;
+  final ITimeLogRepository _timeLogRepository;
+  final IContractRepository _contractRepository;
 
-  SupervisorRepository(this._supervisorDatasource);
+  SupervisorRepository(this._supervisorDatasource, this._timeLogRepository,
+      this._contractRepository);
 
   @override
   Future<Either<AppFailure, List<SupervisorEntity>>> getAllSupervisors() async {
@@ -244,12 +249,15 @@ class SupervisorRepository implements ISupervisorRepository {
 
       final student = StudentModel.fromJson(studentData).toEntity();
 
-      // TODO: Implement fetching time logs and contracts for the student
-      // For now, returning empty lists
-      final timeLogs = <TimeLogEntity>[];
-      final contracts = <ContractEntity>[];
+      final timeLogs = await _timeLogRepository.getTimeLogsByStudent(studentId);
 
-      return Right((student, timeLogs, contracts));
+      final contractsResult =
+          await _contractRepository.getContractsByStudent(studentId);
+
+      return contractsResult.fold(
+        (failure) => Left(failure),
+        (contracts) => Right((student, timeLogs, contracts)),
+      );
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

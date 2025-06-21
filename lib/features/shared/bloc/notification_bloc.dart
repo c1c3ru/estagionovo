@@ -1,46 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
-// Notification Model
-class NotificationEntity {
-  final String id;
-  final String title;
-  final String message;
-  final String type;
-  final bool isRead;
-  final DateTime createdAt;
-  final Map<String, dynamic>? data;
-
-  const NotificationEntity({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.type,
-    required this.isRead,
-    required this.createdAt,
-    this.data,
-  });
-
-  NotificationEntity copyWith({
-    String? id,
-    String? title,
-    String? message,
-    String? type,
-    bool? isRead,
-    DateTime? createdAt,
-    Map<String, dynamic>? data,
-  }) {
-    return NotificationEntity(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      message: message ?? this.message,
-      type: type ?? this.type,
-      isRead: isRead ?? this.isRead,
-      createdAt: createdAt ?? this.createdAt,
-      data: data ?? this.data,
-    );
-  }
-}
+import '../../../domain/entities/notification_entity.dart';
+import '../../../domain/repositories/i_notification_repository.dart';
+import '../../../domain/repositories/i_auth_repository.dart'; // Assuming you have this
 
 // Events
 abstract class NotificationEvent extends Equatable {
@@ -188,7 +151,15 @@ class NotificationDeleteError extends NotificationState {
 
 // BLoC
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
-  NotificationBloc() : super(NotificationInitial()) {
+  final INotificationRepository _notificationRepository;
+  final IAuthRepository _authRepository; // To get current user
+
+  NotificationBloc({
+    required INotificationRepository notificationRepository,
+    required IAuthRepository authRepository,
+  })  : _notificationRepository = notificationRepository,
+        _authRepository = authRepository,
+        super(NotificationInitial()) {
     on<NotificationLoadAllRequested>(_onNotificationLoadAllRequested);
     on<NotificationMarkAsReadRequested>(_onNotificationMarkAsReadRequested);
     on<NotificationMarkAllAsReadRequested>(
@@ -198,42 +169,27 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationCreateRequested>(_onNotificationCreateRequested);
   }
 
+  Future<String> _getUserId() async {
+    final user = await _authRepository.getCurrentUser();
+    return user.fold((l) => throw l, (r) => r!.id);
+  }
+
   Future<void> _onNotificationLoadAllRequested(
     NotificationLoadAllRequested event,
     Emitter<NotificationState> emit,
   ) async {
     emit(NotificationSelecting());
     try {
-      // TODO: Implement notification loading logic
-      // final notifications = await _notificationRepository.getAllNotifications();
-      // final unreadCount = notifications.where((n) => !n.isRead).length;
-      // emit(NotificationLoadAllSuccess(notifications: notifications, unreadCount: unreadCount));
-
-      // Mock data for now
-      final mockNotifications = [
-        NotificationEntity(
-          id: '1',
-          title: 'Novo estudante cadastrado',
-          message: 'João Silva foi cadastrado no sistema',
-          type: 'info',
-          isRead: false,
-          createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-        ),
-        NotificationEntity(
-          id: '2',
-          title: 'Registro de horas',
-          message: 'Maria Oliveira registrou saída',
-          type: 'time_log',
-          isRead: true,
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-      ];
-
-      final unreadCount = mockNotifications.where((n) => !n.isRead).length;
-      emit(NotificationLoadAllSuccess(
-        notifications: mockNotifications,
-        unreadCount: unreadCount,
-      ));
+      final userId = await _getUserId();
+      final result = await _notificationRepository.getAllNotifications(userId);
+      result.fold(
+        (failure) => emit(NotificationSelectError(message: failure.message)),
+        (notifications) {
+          final unreadCount = notifications.where((n) => !n.isRead).length;
+          emit(NotificationLoadAllSuccess(
+              notifications: notifications, unreadCount: unreadCount));
+        },
+      );
     } catch (e) {
       emit(NotificationSelectError(message: e.toString()));
     }
@@ -245,9 +201,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     emit(NotificationUpdating());
     try {
-      // TODO: Implement mark as read logic
-      // await _notificationRepository.markAsRead(event.notificationId);
-      emit(NotificationMarkAsReadSuccess(notificationId: event.notificationId));
+      final result =
+          await _notificationRepository.markAsRead(event.notificationId);
+      result.fold(
+        (failure) => emit(NotificationUpdateError(message: failure.message)),
+        (_) => emit(NotificationMarkAsReadSuccess(
+            notificationId: event.notificationId)),
+      );
     } catch (e) {
       emit(NotificationUpdateError(message: e.toString()));
     }
@@ -259,9 +219,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     emit(NotificationUpdating());
     try {
-      // TODO: Implement mark all as read logic
-      // await _notificationRepository.markAllAsRead();
-      emit(NotificationMarkAllAsReadSuccess());
+      final userId = await _getUserId();
+      final result = await _notificationRepository.markAllAsRead(userId);
+      result.fold(
+        (failure) => emit(NotificationUpdateError(message: failure.message)),
+        (_) => emit(NotificationMarkAllAsReadSuccess()),
+      );
     } catch (e) {
       emit(NotificationUpdateError(message: e.toString()));
     }
@@ -273,9 +236,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     emit(NotificationDeleting());
     try {
-      // TODO: Implement notification deletion logic
-      // await _notificationRepository.deleteNotification(event.notificationId);
-      emit(NotificationDeleteSuccess(deletedId: event.notificationId));
+      final result = await _notificationRepository
+          .deleteNotification(event.notificationId);
+      result.fold(
+        (failure) => emit(NotificationDeleteError(message: failure.message)),
+        (_) => emit(NotificationDeleteSuccess(deletedId: event.notificationId)),
+      );
     } catch (e) {
       emit(NotificationDeleteError(message: e.toString()));
     }
@@ -287,9 +253,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     emit(NotificationDeleting());
     try {
-      // TODO: Implement clear all notifications logic
-      // await _notificationRepository.clearAllNotifications();
-      emit(NotificationClearAllSuccess());
+      final userId = await _getUserId();
+      final result =
+          await _notificationRepository.clearAllNotifications(userId);
+      result.fold(
+        (failure) => emit(NotificationDeleteError(message: failure.message)),
+        (_) => emit(NotificationClearAllSuccess()),
+      );
     } catch (e) {
       emit(NotificationDeleteError(message: e.toString()));
     }
@@ -301,10 +271,13 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   ) async {
     emit(NotificationInserting());
     try {
-      // TODO: Implement notification creation logic
-      // final notification = await _notificationRepository.createNotification(event.notification);
-      // emit(NotificationCreateSuccess(notification: notification));
-      emit(NotificationCreateSuccess(notification: event.notification));
+      final result =
+          await _notificationRepository.createNotification(event.notification);
+      result.fold(
+        (failure) => emit(NotificationInsertError(message: failure.message)),
+        (notification) =>
+            emit(NotificationCreateSuccess(notification: notification)),
+      );
     } catch (e) {
       emit(NotificationInsertError(message: e.toString()));
     }
