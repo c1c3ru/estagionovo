@@ -6,9 +6,24 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 import '../../auth/bloc/auth_state.dart';
+import '../bloc/supervisor_bloc.dart';
+import '../bloc/supervisor_event.dart';
+import '../bloc/supervisor_state.dart';
 
-class SupervisorHomePage extends StatelessWidget {
+class SupervisorHomePage extends StatefulWidget {
   const SupervisorHomePage({super.key});
+
+  @override
+  State<SupervisorHomePage> createState() => _SupervisorHomePageState();
+}
+
+class _SupervisorHomePageState extends State<SupervisorHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Carregar dados do dashboard
+    Modular.get<SupervisorBloc>().add(LoadSupervisorDashboardDataEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,251 +54,233 @@ class SupervisorHomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome Card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 30,
-                          backgroundColor: AppColors.primary,
-                          child: Icon(
-                            Icons.supervisor_account,
-                            color: AppColors.white,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+      body: BlocBuilder<SupervisorBloc, SupervisorState>(
+        builder: (context, state) {
+          if (state is SupervisorLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is SupervisorDashboardLoadSuccess) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Card
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              const Text(
-                                'Bem-vindo, Supervisor!',
-                                style: AppTextStyles.h6,
+                              const CircleAvatar(
+                                radius: 30,
+                                backgroundColor: AppColors.primary,
+                                child: Icon(
+                                  Icons.supervisor_account,
+                                  color: AppColors.white,
+                                  size: 30,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Prof. Maria Santos',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textSecondary,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Bem-vindo, Supervisor!',
+                                      style: AppTextStyles.h6,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Dashboard Ativo',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Statistics Cards
+                  const Text(
+                    'Estatísticas',
+                    style: AppTextStyles.h6,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          title: 'Estudantes',
+                          value: '${state.stats.totalStudents}',
+                          icon: Icons.people,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatCard(
+                          title: 'Ativos',
+                          value: '${state.stats.activeStudents}',
+                          icon: Icons.access_time,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _StatCard(
+                          title: 'Contratos',
+                          value: '${state.contracts.length}',
+                          icon: Icons.description,
+                          color: AppColors.warning,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatCard(
+                          title: 'Pendentes',
+                          value: '${state.pendingApprovals.length}',
+                          icon: Icons.pending,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Quick Actions
+                  const Text(
+                    'Ações Rápidas',
+                    style: AppTextStyles.h6,
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: AppColors.primaryLight,
+                            child: Icon(
+                              Icons.people,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          title: const Text('Gerenciar Estudantes'),
+                          subtitle:
+                              const Text('Visualizar e editar estudantes'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            // Navegar para lista de estudantes
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Funcionalidade em desenvolvimento'),
+                                backgroundColor: AppColors.warning,
+                              ),
+                            );
+                          },
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: AppColors.secondaryLight,
+                            child: Icon(
+                              Icons.access_time,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          title: const Text('Aprovar Horas'),
+                          subtitle: Text(
+                              '${state.pendingApprovals.length} registos pendentes'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            Modular.to.pushNamed('/supervisor/time-approval');
+                          },
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.warning.withOpacity(0.2),
+                            child: const Icon(
+                              Icons.description,
+                              color: AppColors.warning,
+                            ),
+                          ),
+                          title: const Text('Contratos'),
+                          subtitle: Text(
+                              '${state.contracts.length} contratos ativos'),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () {
+                            // Navegar para contratos
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Funcionalidade em desenvolvimento'),
+                                backgroundColor: AppColors.warning,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Statistics Cards
-            const Text(
-              'Estatísticas',
-              style: AppTextStyles.h6,
-            ),
-            const SizedBox(height: 12),
-            const Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    title: 'Estudantes',
-                    value: '12',
-                    icon: Icons.people,
-                    color: AppColors.primary,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(
-                    title: 'Ativos Hoje',
-                    value: '8',
-                    icon: Icons.access_time,
-                    color: AppColors.success,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    title: 'Contratos',
-                    value: '15',
-                    icon: Icons.description,
-                    color: AppColors.warning,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(
-                    title: 'Pendentes',
-                    value: '3',
-                    icon: Icons.pending,
-                    color: AppColors.error,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Quick Actions
-            const Text(
-              'Ações Rápidas',
-              style: AppTextStyles.h6,
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.primaryLight,
-                      child: Icon(
-                        Icons.people,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    title: const Text('Gerenciar Estudantes'),
-                    subtitle: const Text('Visualizar e editar estudantes'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      // TODO: Implementar página de gerenciamento de estudantes
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Funcionalidade em desenvolvimento'),
-                          backgroundColor: AppColors.warning,
-                        ),
-                      );
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.secondaryLight,
-                      child: Icon(
-                        Icons.assessment,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                    title: const Text('Relatórios'),
-                    subtitle: const Text('Visualizar relatórios de horas'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      // TODO: Implementar página de relatórios
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Funcionalidade em desenvolvimento'),
-                          backgroundColor: AppColors.warning,
-                        ),
-                      );
-                    },
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.warning.withOpacity(0.2),
-                      child: const Icon(
-                        Icons.description,
-                        color: AppColors.warning,
-                      ),
-                    ),
-                    title: const Text('Contratos'),
-                    subtitle: const Text('Gerenciar contratos de estágio'),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      // TODO: Implementar página de contratos
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Funcionalidade em desenvolvimento'),
-                          backgroundColor: AppColors.warning,
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
+            );
+          }
 
-            // Recent Activities
-            const Text(
-              'Atividades Recentes',
-              style: AppTextStyles.h6,
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 4,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final activities = [
-                    {
-                      'title': 'João Silva registrou entrada',
-                      'time': '08:30',
-                      'icon': Icons.login,
-                      'color': AppColors.success,
-                    },
-                    {
-                      'title': 'Maria Oliveira registrou saída',
-                      'time': '17:45',
-                      'icon': Icons.logout,
-                      'color': AppColors.error,
-                    },
-                    {
-                      'title': 'Novo contrato aprovado',
-                      'time': '14:20',
-                      'icon': Icons.check_circle,
-                      'color': AppColors.primary,
-                    },
-                    {
-                      'title': 'Pedro Santos atualizou perfil',
-                      'time': '11:15',
-                      'icon': Icons.person,
-                      'color': AppColors.warning,
-                    },
-                  ];
-
-                  final activity = activities[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          (activity['color'] as Color).withOpacity(0.1),
-                      child: Icon(
-                        activity['icon'] as IconData,
-                        color: activity['color'] as Color,
-                        size: 20,
-                      ),
+          if (state is SupervisorOperationFailure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro ao carregar dados',
+                    style: AppTextStyles.h6.copyWith(color: AppColors.error),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                    title: Text(
-                      activity['title'] as String,
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                    subtitle: Text(
-                      'Hoje às ${activity['time']}',
-                      style: AppTextStyles.bodySmall,
-                    ),
-                  );
-                },
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Modular.get<SupervisorBloc>()
+                          .add(LoadSupervisorDashboardDataEvent());
+                    },
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+            );
+          }
+
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

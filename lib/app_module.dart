@@ -105,6 +105,9 @@ import 'features/student/pages/time_log_page.dart';
 import 'features/student/pages/contract_page.dart';
 import 'features/shared/pages/notification_page.dart';
 import 'features/auth/pages/forgot_password_page.dart';
+import 'features/student/pages/student_colleagues_page.dart';
+import 'features/student/pages/student_profile_page.dart';
+import 'features/supervisor/pages/supervisor_time_approval_page.dart';
 
 // Guards
 import 'core/guards/auth_guard.dart';
@@ -301,14 +304,24 @@ class AppModule extends Module {
             ));
     r.child("/student/contracts",
         child: (context) => ContractPage(
-              studentId: r.args.data["studentId"] ?? "",
+              studentId: (r.args.data is Map && r.args.data != null)
+                  ? (r.args.data["studentId"] ?? "")
+                  : "",
             ));
+    r.child("/student/colleagues",
+        child: (context) => const StudentColleaguesPage());
+    r.child("/student/profile", child: (context) => const StudentProfilePage());
 
     // Supervisor Routes
     r.child("/supervisor",
         child: (context) => BlocProvider(
               create: (_) => Modular.get<SupervisorBloc>(),
               child: const SupervisorHomePage(),
+            ));
+    r.child("/supervisor/time-approval",
+        child: (context) => BlocProvider(
+              create: (_) => Modular.get<SupervisorBloc>(),
+              child: const SupervisorTimeApprovalPage(),
             ));
 
     // Shared Routes

@@ -1,5 +1,6 @@
 // lib/features/student/student_module.dart
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student_supervisor_app/features/student/bloc/student_bloc.dart';
 import 'package:student_supervisor_app/features/student/pages/student_home_page.dart';
 import 'package:student_supervisor_app/features/student/pages/student_profile_page.dart';
@@ -7,6 +8,9 @@ import 'package:student_supervisor_app/features/student/pages/student_time_log_p
 import 'package:student_supervisor_app/features/student/pages/contract_page.dart';
 import 'package:student_supervisor_app/features/student/pages/student_colleagues_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
+
+// Shared Bloc
+import '../../features/shared/bloc/contract_bloc.dart';
 
 // Datasources
 import '../../data/datasources/supabase/student_datasource.dart';
@@ -36,6 +40,13 @@ import '../../domain/usecases/student/update_time_log_usecase.dart';
 import '../../domain/usecases/student/delete_time_log_usecase.dart';
 // Contract Usecases
 import '../../domain/usecases/contract/get_contracts_for_student_usecase.dart';
+import '../../domain/usecases/contract/get_contracts_by_student_usecase.dart';
+import '../../domain/usecases/contract/get_contracts_by_supervisor_usecase.dart';
+import '../../domain/usecases/contract/get_active_contract_by_student_usecase.dart';
+import '../../domain/usecases/contract/create_contract_usecase.dart';
+import '../../domain/usecases/contract/update_contract_usecase.dart';
+import '../../domain/usecases/contract/delete_contract_usecase.dart';
+import '../../domain/usecases/contract/get_contract_statistics_usecase.dart';
 // Student CRUD Usecases
 import '../../domain/usecases/student/get_all_students_usecase.dart';
 import '../../domain/usecases/student/get_student_by_id_usecase.dart';
@@ -89,6 +100,20 @@ class StudentModule extends Module {
     // Usecases de Contrato
     i.add<GetContractsForStudentUsecase>(
         () => GetContractsForStudentUsecase(i.get<IContractRepository>()));
+    i.add<GetContractsByStudentUsecase>(
+        () => GetContractsByStudentUsecase(i.get<IContractRepository>()));
+    i.add<GetContractsBySupervisorUsecase>(
+        () => GetContractsBySupervisorUsecase(i.get<IContractRepository>()));
+    i.add<GetActiveContractByStudentUsecase>(
+        () => GetActiveContractByStudentUsecase(i.get<IContractRepository>()));
+    i.add<CreateContractUsecase>(
+        () => CreateContractUsecase(i.get<IContractRepository>()));
+    i.add<UpdateContractUsecase>(
+        () => UpdateContractUsecase(i.get<IContractRepository>()));
+    i.add<DeleteContractUsecase>(
+        () => DeleteContractUsecase(i.get<IContractRepository>()));
+    i.add<GetContractStatisticsUsecase>(
+        () => GetContractStatisticsUsecase(i.get<IContractRepository>()));
 
     // Student CRUD Usecases
     i.add<GetAllStudentsUsecase>(
@@ -111,6 +136,19 @@ class StudentModule extends Module {
     // BLoC
     i.add<StudentBloc>(() => StudentBloc(
           getStudentDashboardUsecase: i.get<GetStudentDashboardUsecase>(),
+        ));
+
+    // Adicionar ContractBloc para ContractPage
+    i.add<ContractBloc>(() => ContractBloc(
+          getContractsByStudentUsecase: i.get<GetContractsByStudentUsecase>(),
+          getContractsBySupervisorUsecase:
+              i.get<GetContractsBySupervisorUsecase>(),
+          getActiveContractByStudentUsecase:
+              i.get<GetActiveContractByStudentUsecase>(),
+          createContractUsecase: i.get<CreateContractUsecase>(),
+          updateContractUsecase: i.get<UpdateContractUsecase>(),
+          deleteContractUsecase: i.get<DeleteContractUsecase>(),
+          getContractStatisticsUsecase: i.get<GetContractStatisticsUsecase>(),
         ));
   }
 
@@ -143,8 +181,13 @@ class StudentModule extends Module {
     // Rota para a página de contratos
     r.child(
       '/contracts',
-      child: (_) => ContractPage(
-        studentId: r.args.data["studentId"] ?? "",
+      child: (_) => BlocProvider(
+        create: (_) => Modular.get<ContractBloc>(),
+        child: ContractPage(
+          studentId: (r.args.data is Map && r.args.data != null)
+              ? (r.args.data["studentId"] ?? "")
+              : "",
+        ),
       ),
       transition: TransitionType.fadeIn,
     );

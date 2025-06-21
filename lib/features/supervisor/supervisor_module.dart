@@ -5,6 +5,7 @@ import 'package:student_supervisor_app/features/supervisor/pages/student_details
 import 'package:student_supervisor_app/features/supervisor/pages/student_edit_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/supervisor_dashboard_page.dart';
 import 'package:student_supervisor_app/features/supervisor/pages/supervisor_home_page.dart';
+import 'package:student_supervisor_app/features/supervisor/pages/supervisor_time_approval_page.dart';
 // Para SupabaseClient
 
 // Datasources
@@ -121,6 +122,11 @@ class SupervisorModule extends Module {
     r.child(
       Modular.initialRoute,
       child: (_) => const SupervisorHomePage(),
+      transition: TransitionType.fadeIn,
+    );
+    r.child(
+      '/time-approval',
+      child: (_) => const SupervisorTimeApprovalPage(),
       transition: TransitionType.fadeIn,
     );
     r.child(
