@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
+import 'package:gestao_de_estagio/core/errors/app_exceptions.dart';
 
-import 'package:student_supervisor_app/domain/entities/time_log_entity.dart';
+import 'package:gestao_de_estagio/domain/entities/time_log_entity.dart';
 
 import '../entities/student_entity.dart';
 

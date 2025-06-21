@@ -3,20 +3,20 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart'
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/errors/app_exceptions.dart'
     as exceptions;
-import 'package:student_supervisor_app/domain/entities/user_entity.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/get_auth_state_changes_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/get_current_user_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/login_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/logout_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/register_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/reset_password_usecase.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/update_profile_usecase.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_event.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart';
+import 'package:gestao_de_estagio/domain/entities/user_entity.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/get_auth_state_changes_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/get_current_user_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/login_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/logout_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/register_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/reset_password_usecase.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/update_profile_usecase.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_event.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_state.dart';
 
 import 'auth_bloc_test.mocks.dart';
 

@@ -1,6 +1,6 @@
 // lib/domain/entities/contract_entity.dart
 import 'package:equatable/equatable.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:gestao_de_estagio/core/enums/contract_status.dart';
 // Importa o enum ContractStatus da camada de dados.
 
 class ContractEntity extends Equatable {

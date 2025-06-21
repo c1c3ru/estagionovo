@@ -1,6 +1,6 @@
 // lib/domain/entities/supervisor_entity.dart
 import 'package:equatable/equatable.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
 // Importa o enum UserRole da camada de dados.
 
 class SupervisorEntity extends Equatable {

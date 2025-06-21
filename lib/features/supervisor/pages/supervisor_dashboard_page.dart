@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart'
+import 'package:gestao_de_estagio/core/enums/student_status.dart'
     as student_status_enum;
-import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/data/models/student_model.dart';
-import 'package:student_supervisor_app/domain/usecases/auth/register_usecase.dart';
-import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_event.dart';
-import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/data/models/student_model.dart';
+import 'package:gestao_de_estagio/domain/usecases/auth/register_usecase.dart';
+import 'package:gestao_de_estagio/features/supervisor/bloc/supervisor_event.dart';
+import 'package:gestao_de_estagio/features/supervisor/bloc/supervisor_state.dart';
 
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../domain/entities/student_entity.dart';

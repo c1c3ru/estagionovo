@@ -1,12 +1,12 @@
 // lib/features/student/student_module.dart
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student_supervisor_app/features/student/bloc/student_bloc.dart';
-import 'package:student_supervisor_app/features/student/pages/student_home_page.dart';
-import 'package:student_supervisor_app/features/student/pages/student_profile_page.dart';
-import 'package:student_supervisor_app/features/student/pages/student_time_log_page.dart';
-import 'package:student_supervisor_app/features/student/pages/contract_page.dart';
-import 'package:student_supervisor_app/features/student/pages/student_colleagues_page.dart';
+import 'package:gestao_de_estagio/features/student/bloc/student_bloc.dart';
+import 'package:gestao_de_estagio/features/student/pages/student_home_page.dart';
+import 'package:gestao_de_estagio/features/student/pages/student_profile_page.dart';
+import 'package:gestao_de_estagio/features/student/pages/student_time_log_page.dart';
+import 'package:gestao_de_estagio/features/student/pages/contract_page.dart';
+import 'package:gestao_de_estagio/features/student/pages/student_colleagues_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
 // Shared Bloc

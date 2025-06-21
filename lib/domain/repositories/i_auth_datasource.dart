@@ -1,4 +1,4 @@
-import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
 
 abstract class IAuthDatasource {
   Future<Map<String, dynamic>?> signInWithEmailAndPassword(

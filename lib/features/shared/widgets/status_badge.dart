@@ -1,7 +1,7 @@
 // lib/features/shared/widgets/status_badge.dart
 import 'package:flutter/material.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
+import 'package:gestao_de_estagio/core/enums/contract_status.dart';
+import 'package:gestao_de_estagio/core/errors/app_exceptions.dart';
 import '../../../core/constants/app_colors.dart'; // Para as cores de status
 
 class StatusBadge extends StatelessWidget {

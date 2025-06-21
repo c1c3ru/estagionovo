@@ -1,9 +1,9 @@
 // lib/core/guards/role_guard.dart
 import 'dart:async';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_state.dart';
 
 /// Um RouteGuard que verifica se o utilizador autenticado tem um dos papéis permitidos.
 /// Se não estiver autenticado ou não tiver o papel correto, redireciona.

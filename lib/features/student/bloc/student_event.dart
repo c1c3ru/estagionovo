@@ -1,8 +1,8 @@
 // lib/features/student/presentation/bloc/student_event.dart
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:student_supervisor_app/core/enums/class_shift.dart'; // Para TimeOfDay
-import 'package:student_supervisor_app/core/enums/internship_shift.dart';
+import 'package:gestao_de_estagio/core/enums/class_shift.dart'; // Para TimeOfDay
+import 'package:gestao_de_estagio/core/enums/internship_shift.dart';
 // Importe o enum ClassShift se for permitir a edição dele
 
 // Parâmetros para atualizar perfil do estudante, específicos para o evento

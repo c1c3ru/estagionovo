@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart';
+import 'package:gestao_de_estagio/core/enums/student_status.dart';
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_colors.dart';

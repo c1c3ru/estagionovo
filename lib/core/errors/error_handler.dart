@@ -1,6 +1,6 @@
 // lib/core/errors/error_handler.dart
 import 'package:flutter/material.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
+import 'package:gestao_de_estagio/core/errors/app_exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase_auth;
 import '../utils/logger_utils.dart';
 

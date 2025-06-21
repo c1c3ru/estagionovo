@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:student_supervisor_app/core/constants/app_colors.dart';
-import 'package:student_supervisor_app/core/theme/app_text_styles.dart';
-import 'package:student_supervisor_app/features/shared/bloc/contract_bloc.dart';
+import 'package:gestao_de_estagio/core/constants/app_colors.dart';
+import 'package:gestao_de_estagio/core/theme/app_text_styles.dart';
+import 'package:gestao_de_estagio/features/shared/bloc/contract_bloc.dart';
 
 class ContractPage extends StatefulWidget {
   final String studentId;

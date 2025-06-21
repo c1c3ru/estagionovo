@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'dart:math';
 
-import 'package:student_supervisor_app/core/enums/class_shift.dart';
-import 'package:student_supervisor_app/core/enums/internship_shift.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart';
+import 'package:gestao_de_estagio/core/enums/class_shift.dart';
+import 'package:gestao_de_estagio/core/enums/internship_shift.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/enums/student_status.dart';
 
 class StudentEntity extends Equatable {
   final String id;

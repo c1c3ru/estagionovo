@@ -1,4 +1,4 @@
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:gestao_de_estagio/core/enums/contract_status.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ContractDatasource {

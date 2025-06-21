@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
-import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart'
+import 'package:gestao_de_estagio/features/auth/bloc/auth_bloc.dart';
+import 'package:gestao_de_estagio/features/auth/bloc/auth_state.dart'
     as auth_state;
 import 'package:supabase_flutter/supabase_flutter.dart';
 

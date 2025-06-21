@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
+import 'package:gestao_de_estagio/core/enums/contract_status.dart';
 
 import '../../domain/repositories/i_contract_repository.dart';
 import '../../domain/entities/contract_entity.dart';

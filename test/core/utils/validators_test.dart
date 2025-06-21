@@ -1,6 +1,6 @@
 // test/core/utils/validators_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:student_supervisor_app/core/utils/validators.dart';
+import 'package:gestao_de_estagio/core/utils/validators.dart';
 
 void main() {
   group('Validators', () {

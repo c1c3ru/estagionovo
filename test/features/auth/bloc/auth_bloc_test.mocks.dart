@@ -7,22 +7,22 @@ import 'dart:async' as _i4;
 
 import 'package:dartz/dartz.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:student_supervisor_app/core/enums/user_role.dart' as _i10;
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart' as _i5;
-import 'package:student_supervisor_app/domain/entities/user_entity.dart' as _i6;
-import 'package:student_supervisor_app/domain/usecases/auth/get_auth_state_changes_usecase.dart'
+import 'package:gestao_de_estagio/core/enums/user_role.dart' as _i10;
+import 'package:gestao_de_estagio/core/errors/app_exceptions.dart' as _i5;
+import 'package:gestao_de_estagio/domain/entities/user_entity.dart' as _i6;
+import 'package:gestao_de_estagio/domain/usecases/auth/get_auth_state_changes_usecase.dart'
     as _i13;
-import 'package:student_supervisor_app/domain/usecases/auth/get_current_user_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/get_current_user_usecase.dart'
     as _i3;
-import 'package:student_supervisor_app/domain/usecases/auth/login_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/login_usecase.dart'
     as _i7;
-import 'package:student_supervisor_app/domain/usecases/auth/logout_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/logout_usecase.dart'
     as _i8;
-import 'package:student_supervisor_app/domain/usecases/auth/register_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/register_usecase.dart'
     as _i9;
-import 'package:student_supervisor_app/domain/usecases/auth/reset_password_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/reset_password_usecase.dart'
     as _i11;
-import 'package:student_supervisor_app/domain/usecases/auth/update_profile_usecase.dart'
+import 'package:gestao_de_estagio/domain/usecases/auth/update_profile_usecase.dart'
     as _i12;
 
 // ignore_for_file: type=lint

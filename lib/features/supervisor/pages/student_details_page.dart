@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart'
+import 'package:gestao_de_estagio/core/enums/contract_status.dart';
+import 'package:gestao_de_estagio/core/enums/student_status.dart'
     as student_status_enum;
 
 import '../../../../core/constants/app_colors.dart';

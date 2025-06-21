@@ -1,4 +1,4 @@
-name: student_supervisor_app
+name: gestao_de_estagio
 description: "Aplicativo Flutter para gestão de estudantes e supervisores com Clean Architecture e BLoC"
 publish_to: 'none'
 

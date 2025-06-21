@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
+import 'package:gestao_de_estagio/core/enums/user_role.dart';
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
