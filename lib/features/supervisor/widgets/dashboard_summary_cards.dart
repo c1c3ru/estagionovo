@@ -1,6 +1,6 @@
 // lib/features/supervisor/presentation/widgets/dashboard_summary_cards.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart'; // Se precisar de navegação ou outros serviços
+// Se precisar de navegação ou outros serviços
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_colors.dart'; // Para cores dos ícones/cards

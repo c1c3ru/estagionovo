@@ -4,6 +4,8 @@ import 'package:student_supervisor_app/features/student/bloc/student_bloc.dart';
 import 'package:student_supervisor_app/features/student/pages/student_home_page.dart';
 import 'package:student_supervisor_app/features/student/pages/student_profile_page.dart';
 import 'package:student_supervisor_app/features/student/pages/student_time_log_page.dart';
+import 'package:student_supervisor_app/features/student/pages/contract_page.dart';
+import 'package:student_supervisor_app/features/student/pages/student_colleagues_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Para SupabaseClient
 
 // Datasources
@@ -135,6 +137,22 @@ class StudentModule extends Module {
     r.child(
       '/profile',
       child: (_) => const StudentProfilePage(),
+      transition: TransitionType.fadeIn,
+    );
+
+    // Rota para a página de contratos
+    r.child(
+      '/contracts',
+      child: (_) => ContractPage(
+        studentId: r.args.data["studentId"] ?? "",
+      ),
+      transition: TransitionType.fadeIn,
+    );
+
+    // Rota para a página de colegas online
+    r.child(
+      '/colleagues',
+      child: (_) => const StudentColleaguesPage(),
       transition: TransitionType.fadeIn,
     );
   }

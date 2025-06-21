@@ -15,11 +15,13 @@ class OnlineColleague {
   final String id;
   final String fullName; // Assumindo que podemos obter o nome
   final String? profilePictureUrl;
+  final bool isOnline;
 
   OnlineColleague({
     required this.id,
     required this.fullName,
     this.profilePictureUrl,
+    required this.isOnline,
   });
 
   // Factory para criar a partir de um payload do Supabase (exemplo)
@@ -36,14 +38,17 @@ class OnlineColleague {
           'unknown_id',
       fullName: studentData['full_name'] ?? 'Colega Online',
       profilePictureUrl: studentData['profile_picture_url'] as String?,
+      isOnline: false,
     );
   }
   // Factory para criar a partir de uma consulta inicial
-  factory OnlineColleague.fromInitialQuery(Map<String, dynamic> studentData) {
+  factory OnlineColleague.fromInitialQuery(Map<String, dynamic> studentData,
+      {required bool isOnline}) {
     return OnlineColleague(
       id: studentData['id'] as String, // ID do estudante
       fullName: studentData['full_name'] as String? ?? 'Colega Online',
       profilePictureUrl: studentData['profile_picture_url'] as String?,
+      isOnline: isOnline,
     );
   }
 }
@@ -89,7 +94,15 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
       final today = DateTime.now();
       final todayDateString = DateFormat('yyyy-MM-dd').format(today);
 
-      final response = await _supabaseClient
+      // Buscar todos os estudantes ativos
+      final studentsResponse = await _supabaseClient
+          .from('students')
+          .select('id, full_name, profile_picture_url, status')
+          .eq('status', 'active')
+          .neq('id', _currentUserId ?? 'dummy_id_to_avoid_error_if_null');
+
+      // Buscar estudantes que estão realmente online (com time_log ativo)
+      final onlineStudentsResponse = await _supabaseClient
           .from('students')
           .select(
               'id, full_name, profile_picture_url, time_logs!inner(student_id, log_date, check_out_time)')
@@ -99,14 +112,25 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
 
       if (!mounted) return;
 
-      final List<OnlineColleague> initialOnline = [];
-      for (var studentData in response as List<dynamic>) {
-        initialOnline.add(OnlineColleague.fromInitialQuery(
-            studentData as Map<String, dynamic>));
+      // Criar conjunto de IDs de estudantes online
+      final Set<String> onlineStudentIds = {};
+      for (var studentData in onlineStudentsResponse as List<dynamic>) {
+        onlineStudentIds.add(studentData['id'] as String);
       }
+
+      final List<OnlineColleague> allColleagues = [];
+      for (var studentData in studentsResponse as List<dynamic>) {
+        final studentId = studentData['id'] as String;
+        final isOnline = onlineStudentIds.contains(studentId);
+
+        allColleagues.add(OnlineColleague.fromInitialQuery(
+            studentData as Map<String, dynamic>,
+            isOnline: isOnline));
+      }
+
       setState(() {
         _onlineColleagues.clear();
-        _onlineColleagues.addAll(initialOnline);
+        _onlineColleagues.addAll(allColleagues);
         _isLoading = false;
       });
 
@@ -137,7 +161,15 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
       final today = DateTime.now();
       final todayDateString = DateFormat('yyyy-MM-dd').format(today);
 
-      final response = await _supabaseClient
+      // Buscar todos os estudantes ativos
+      final studentsResponse = await _supabaseClient
+          .from('students')
+          .select('id, full_name, profile_picture_url, status')
+          .eq('status', 'active')
+          .neq('id', _currentUserId!);
+
+      // Buscar estudantes que estão realmente online (com time_log ativo)
+      final onlineStudentsResponse = await _supabaseClient
           .from('students')
           .select(
               'id, full_name, profile_picture_url, time_logs!inner(student_id, log_date, check_out_time)')
@@ -146,14 +178,26 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
           .neq('id', _currentUserId!);
 
       if (!mounted) return;
-      final List<OnlineColleague> updatedOnline = [];
-      for (var studentData in response as List<dynamic>) {
-        updatedOnline.add(OnlineColleague.fromInitialQuery(
-            studentData as Map<String, dynamic>));
+
+      // Criar conjunto de IDs de estudantes online
+      final Set<String> onlineStudentIds = {};
+      for (var studentData in onlineStudentsResponse as List<dynamic>) {
+        onlineStudentIds.add(studentData['id'] as String);
       }
+
+      final List<OnlineColleague> updatedColleagues = [];
+      for (var studentData in studentsResponse as List<dynamic>) {
+        final studentId = studentData['id'] as String;
+        final isOnline = onlineStudentIds.contains(studentId);
+
+        updatedColleagues.add(OnlineColleague.fromInitialQuery(
+            studentData as Map<String, dynamic>,
+            isOnline: isOnline));
+      }
+
       setState(() {
         _onlineColleagues.clear();
-        _onlineColleagues.addAll(updatedOnline);
+        _onlineColleagues.addAll(updatedColleagues);
       });
     } catch (e) {
       // logger.w('Erro ao re-buscar colegas online após evento realtime: $e');
@@ -195,7 +239,7 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
         child: const Padding(
           padding: EdgeInsets.all(16.0),
           child: Center(
-            child: Text('Nenhum colega online no momento.'),
+            child: Text('Nenhum colega cadastrado no sistema.'),
           ),
         ),
       );
@@ -212,7 +256,7 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
               MainAxisSize.min, // Para que o Card não ocupe todo o espaço
           children: [
             Text(
-              'Colegas Online (${_onlineColleagues.length})',
+              'Colegas (${_onlineColleagues.length})',
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
@@ -228,39 +272,77 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
                   itemBuilder: (context, index) {
                     final colleague = _onlineColleagues[index];
                     return Tooltip(
-                      message: colleague.fullName,
+                      message:
+                          '${colleague.fullName}${colleague.isOnline ? ' (Online)' : ' (Offline)'}',
                       child: Padding(
                         padding: const EdgeInsets.only(right: 12.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor:
-                                  theme.colorScheme.secondaryContainer,
-                              backgroundImage: colleague.profilePictureUrl !=
-                                          null &&
-                                      colleague.profilePictureUrl!.isNotEmpty
-                                  ? NetworkImage(colleague.profilePictureUrl!)
-                                  : null,
-                              child: colleague.profilePictureUrl == null ||
-                                      colleague.profilePictureUrl!.isEmpty
-                                  ? Text(
-                                      colleague.fullName.isNotEmpty
-                                          ? colleague.fullName[0].toUpperCase()
-                                          : '?',
-                                      style: TextStyle(
-                                          color: theme.colorScheme
-                                              .onSecondaryContainer),
-                                    )
-                                  : null,
+                            Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: colleague.isOnline
+                                      ? theme.colorScheme.primary
+                                          .withOpacity(0.1)
+                                      : theme.colorScheme.secondaryContainer,
+                                  backgroundImage:
+                                      colleague.profilePictureUrl != null &&
+                                              colleague
+                                                  .profilePictureUrl!.isNotEmpty
+                                          ? NetworkImage(
+                                              colleague.profilePictureUrl!)
+                                          : null,
+                                  child: colleague.profilePictureUrl == null ||
+                                          colleague.profilePictureUrl!.isEmpty
+                                      ? Text(
+                                          colleague.fullName.isNotEmpty
+                                              ? colleague.fullName[0]
+                                                  .toUpperCase()
+                                              : '?',
+                                          style: TextStyle(
+                                            color: colleague.isOnline
+                                                ? theme.colorScheme.primary
+                                                : theme.colorScheme
+                                                    .onSecondaryContainer,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                // Indicador de status online
+                                if (colleague.isOnline)
+                                  Positioned(
+                                    right: 0,
+                                    bottom: 0,
+                                    child: Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: theme.scaffoldBackgroundColor,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
                               colleague.fullName
                                   .split(" ")
                                   .first, // Primeiro nome
-                              style: theme.textTheme.bodySmall,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colleague.isOnline
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                                fontWeight: colleague.isOnline
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             )
                           ],
@@ -273,7 +355,7 @@ class _OnlineColleaguesWidgetState extends State<OnlineColleaguesWidget> {
                 ),
               )
             else
-              const Text('Ninguém online no momento.'),
+              const Text('Nenhum colega cadastrado.'),
           ],
         ),
       ),

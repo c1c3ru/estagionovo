@@ -8,8 +8,6 @@ import '../../../core/enums/user_role.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/auth_text_field.dart';
-import '../widgets/auth_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

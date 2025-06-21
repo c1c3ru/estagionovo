@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
+import '../../auth/bloc/auth_state.dart';
 
 class SupervisorHomePage extends StatelessWidget {
   const SupervisorHomePage({super.key});
@@ -13,6 +15,8 @@ class SupervisorHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Área do Supervisor'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
@@ -20,11 +24,18 @@ class SupervisorHomePage extends StatelessWidget {
               // TODO: Implement notifications
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              context.read<AuthBloc>().add(const AuthLogoutRequested());
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                Navigator.of(context).pushReplacementNamed('/login');
+              }
             },
+            child: IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                Modular.get<AuthBloc>().add(const AuthLogoutRequested());
+              },
+            ),
           ),
         ],
       ),
@@ -150,7 +161,13 @@ class SupervisorHomePage extends StatelessWidget {
                     subtitle: const Text('Visualizar e editar estudantes'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
-                      // TODO: Navigate to students management
+                      // TODO: Implementar página de gerenciamento de estudantes
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Funcionalidade em desenvolvimento'),
+                          backgroundColor: AppColors.warning,
+                        ),
+                      );
                     },
                   ),
                   const Divider(),
@@ -166,7 +183,13 @@ class SupervisorHomePage extends StatelessWidget {
                     subtitle: const Text('Visualizar relatórios de horas'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
-                      // TODO: Navigate to reports
+                      // TODO: Implementar página de relatórios
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Funcionalidade em desenvolvimento'),
+                          backgroundColor: AppColors.warning,
+                        ),
+                      );
                     },
                   ),
                   const Divider(),
@@ -182,7 +205,13 @@ class SupervisorHomePage extends StatelessWidget {
                     subtitle: const Text('Gerenciar contratos de estágio'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () {
-                      // TODO: Navigate to contracts
+                      // TODO: Implementar página de contratos
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Funcionalidade em desenvolvimento'),
+                          backgroundColor: AppColors.warning,
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -260,6 +289,39 @@ class SupervisorHomePage extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
+        currentIndex: 0, // Página inicial
+        onTap: (index) {
+          switch (index) {
+            case 0: // Início
+              // Já estamos na página inicial
+              break;
+            case 1: // Estudantes
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content:
+                      Text('Gerenciamento de estudantes em desenvolvimento'),
+                  backgroundColor: AppColors.warning,
+                ),
+              );
+              break;
+            case 2: // Relatórios
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Relatórios em desenvolvimento'),
+                  backgroundColor: AppColors.warning,
+                ),
+              );
+              break;
+            case 3: // Perfil
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Perfil do supervisor em desenvolvimento'),
+                  backgroundColor: AppColors.warning,
+                ),
+              );
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

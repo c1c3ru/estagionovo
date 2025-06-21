@@ -129,8 +129,8 @@ void main() {
         when(mockLoginUsecase(
           email: 'test@example.com',
           password: 'wrongpassword',
-        )).thenAnswer(
-            (_) async => Left(exceptions.AuthFailure('Invalid credentials')));
+        )).thenAnswer((_) async =>
+            const Left(exceptions.AuthFailure('Invalid credentials')));
         return authBloc;
       },
       act: (bloc) => bloc.add(const AuthLoginRequested(

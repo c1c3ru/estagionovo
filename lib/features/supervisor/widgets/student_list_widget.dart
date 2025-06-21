@@ -88,8 +88,7 @@ class StudentListWidget extends StatelessWidget {
         // ou de um campo 'is_active' na tabela 'users' ou 'students'.
         // Para este exemplo, vou usar a data do contrato para um status visual simples.
         final bool isActiveBasedOnContract =
-            student.contractStartDate != null &&
-                student.contractEndDate.isAfter(DateTime.now()) &&
+            student.contractEndDate.isAfter(DateTime.now()) &&
                 student.contractStartDate.isBefore(DateTime.now());
         final displayStatus = isActiveBasedOnContract
             ? StudentStatus.active

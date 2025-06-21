@@ -1,10 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/student/get_student_dashboard_usecase.dart';
-import '../../../domain/entities/student_entity.dart';
 import '../../../domain/entities/contract_entity.dart';
-import '../../../core/enums/class_shift.dart';
-import '../../../core/enums/internship_shift.dart';
-import '../../../core/enums/student_status.dart';
+
+import '../../../data/models/student_model.dart';
 
 // Importar eventos e estados dos arquivos separados
 import 'student_event.dart';
@@ -44,35 +42,11 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
       result.fold(
         (failure) => emit(StudentOperationFailure(message: failure.message)),
         (dashboardData) {
-          // Criar StudentEntity a partir dos dados do dashboard
+          // Criar StudentEntity a partir dos dados do dashboard usando StudentModel
           final studentData = dashboardData['student'] as Map<String, dynamic>;
-          final student = StudentEntity(
-            id: studentData['id'],
-            userId: studentData['userId'],
-            fullName: studentData['fullName'],
-            email: studentData['email'],
-            course: studentData['course'],
-            advisorName: studentData['advisorName'],
-            registrationNumber: studentData['registrationNumber'],
-            isMandatoryInternship: studentData['isMandatoryInternship'],
-            classShift: ClassShift.values.firstWhere(
-              (e) => e.name == studentData['classShift'],
-              orElse: () => ClassShift.morning,
-            ),
-            internshipShift:
-                InternshipShift.fromString(studentData['internshipShift']),
-            supervisorId: studentData['supervisorId'],
-            totalHoursCompleted: studentData['totalHoursCompleted'].toDouble(),
-            totalHoursRequired: studentData['totalHoursRequired'].toDouble(),
-            weeklyHoursTarget: studentData['weeklyHoursTarget'].toDouble(),
-            contractStartDate: DateTime.parse(studentData['contractStartDate']),
-            contractEndDate: DateTime.parse(studentData['contractEndDate']),
-            isOnTrack: studentData['isOnTrack'],
-            createdAt: DateTime.parse(studentData['createdAt']),
-            updatedAt: DateTime.parse(studentData['updatedAt']),
-          );
+          final student = StudentModel.fromJson(studentData).toEntity();
 
-          final timeStats = const StudentTimeStats();
+          const timeStats = StudentTimeStats();
           final contracts = <ContractEntity>[];
 
           emit(StudentDashboardLoadSuccess(

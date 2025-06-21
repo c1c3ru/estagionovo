@@ -50,6 +50,48 @@ class AuthDatasource implements IAuthDatasource {
         throw AuthException('Erro ao registrar usuário');
       }
 
+      // Criar dados do estudante/supervisor na tabela correspondente
+      try {
+        if (role == UserRole.student) {
+          await _supabaseClient.from('students').insert({
+            'id': response.user!.id,
+            'full_name': fullName,
+            'registration_number': registration,
+            'course': 'Curso não definido',
+            'advisor_name': 'Orientador não definido',
+            'is_mandatory_internship': true,
+            'class_shift': 'morning',
+            'internship_shift_1': 'morning',
+            'birth_date': '2000-01-01',
+            'contract_start_date':
+                DateTime.now().toIso8601String().split('T')[0],
+            'contract_end_date': DateTime.now()
+                .add(const Duration(days: 365))
+                .toIso8601String()
+                .split('T')[0],
+            'total_hours_required': 300.0,
+            'total_hours_completed': 0.0,
+            'weekly_hours_target': 20.0,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        } else if (role == UserRole.supervisor) {
+          await _supabaseClient.from('supervisors').insert({
+            'id': response.user!.id,
+            'full_name': fullName,
+            'department': 'Departamento não definido',
+            'position': 'Supervisor',
+            'job_code': registration,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+      } catch (e) {
+        // Se falhar ao criar os dados, não falha o registro
+        // mas loga o erro para debug
+        print('⚠️ Erro ao criar dados do ${role.name}: $e');
+      }
+
       return {
         'id': response.user!.id,
         'email': response.user!.email,
@@ -80,6 +122,9 @@ class AuthDatasource implements IAuthDatasource {
       if (response.user == null) {
         throw AuthException('Erro ao fazer login');
       }
+
+      // Verificar se o usuário tem dados na tabela correspondente
+      await _ensureUserDataExists(response.user!);
 
       return {
         'id': response.user!.id,
@@ -113,6 +158,9 @@ class AuthDatasource implements IAuthDatasource {
       final user = _supabaseClient.auth.currentUser;
       if (user == null) return null;
 
+      // Verificar se o usuário tem dados na tabela correspondente
+      await _ensureUserDataExists(user);
+
       return {
         'id': user.id,
         'email': user.email,
@@ -127,6 +175,74 @@ class AuthDatasource implements IAuthDatasource {
       };
     } catch (e) {
       throw AuthException('Erro ao buscar usuário atual: $e');
+    }
+  }
+
+  /// Verifica se o usuário tem dados na tabela correspondente e cria se não existir
+  Future<void> _ensureUserDataExists(User user) async {
+    try {
+      final role = user.userMetadata?['role'] ?? 'student';
+      final fullName = user.userMetadata?['full_name'] ?? '';
+      final registration = user.userMetadata?['registration'];
+
+      if (role == 'student') {
+        // Verificar se já existe na tabela students
+        final existingStudent = await _supabaseClient
+            .from('students')
+            .select()
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (existingStudent == null) {
+          // Criar dados do estudante
+          await _supabaseClient.from('students').insert({
+            'id': user.id,
+            'full_name': fullName,
+            'registration_number': registration,
+            'course': 'Curso não definido',
+            'advisor_name': 'Orientador não definido',
+            'is_mandatory_internship': true,
+            'class_shift': 'morning',
+            'internship_shift_1': 'morning',
+            'birth_date': '2000-01-01',
+            'contract_start_date':
+                DateTime.now().toIso8601String().split('T')[0],
+            'contract_end_date': DateTime.now()
+                .add(const Duration(days: 365))
+                .toIso8601String()
+                .split('T')[0],
+            'total_hours_required': 300.0,
+            'total_hours_completed': 0.0,
+            'weekly_hours_target': 20.0,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+          print('✅ Dados do estudante criados para usuário ${user.id}');
+        }
+      } else if (role == 'supervisor') {
+        // Verificar se já existe na tabela supervisors
+        final existingSupervisor = await _supabaseClient
+            .from('supervisors')
+            .select()
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (existingSupervisor == null) {
+          // Criar dados do supervisor
+          await _supabaseClient.from('supervisors').insert({
+            'id': user.id,
+            'full_name': fullName,
+            'department': 'Departamento não definido',
+            'position': 'Supervisor',
+            'job_code': registration,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+          print('✅ Dados do supervisor criados para usuário ${user.id}');
+        }
+      }
+    } catch (e) {
+      print('⚠️ Erro ao verificar/criar dados do usuário: $e');
     }
   }
 

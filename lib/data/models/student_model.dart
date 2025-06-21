@@ -34,11 +34,15 @@ class StudentModel extends StudentEntity {
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
+    // Se os dados vierem com join de users, extrair os dados do usuário
+    final userData = json['users'] as Map<String, dynamic>? ?? {};
+
     return StudentModel(
       id: json['id'] as String,
-      userId: json['user_id'] as String,
+      userId:
+          json['id'] as String, // No schema, o id do student é o mesmo do user
       fullName: json['full_name'] as String,
-      email: json['email'] as String,
+      email: userData['email'] as String? ?? '',
       phoneNumber: json['phone_number'] as String?,
       profilePictureUrl: json['profile_picture_url'] as String?,
       birthDate: json['birth_date'] != null
@@ -52,20 +56,21 @@ class StudentModel extends StudentEntity {
         (e) => e.name == json['class_shift'],
         orElse: () => ClassShift.morning,
       ),
-      internshipShift: InternshipShift.values.firstWhere(
-        (e) => e.name == json['internship_shift'],
-        orElse: () => InternshipShift.morning,
-      ),
-      supervisorId: json['supervisor_id'] as String,
-      totalHoursCompleted: (json['total_hours_completed'] as num).toDouble(),
-      totalHoursRequired: (json['total_hours_required'] as num).toDouble(),
-      weeklyHoursTarget: (json['weekly_hours_target'] as num).toDouble(),
+      internshipShift:
+          InternshipShift.fromString(json['internship_shift_1'] as String),
+      supervisorId: '', // Campo não existe no schema atual
+      totalHoursCompleted:
+          (json['total_hours_completed'] as num?)?.toDouble() ?? 0.0,
+      totalHoursRequired:
+          (json['total_hours_required'] as num?)?.toDouble() ?? 0.0,
+      weeklyHoursTarget:
+          (json['weekly_hours_target'] as num?)?.toDouble() ?? 0.0,
       contractStartDate: DateTime.parse(json['contract_start_date'] as String),
       contractEndDate: DateTime.parse(json['contract_end_date'] as String),
-      isOnTrack: json['is_on_track'] as bool,
+      isOnTrack: true, // Campo não existe no schema, assumir true
       createdAt: DateTime.parse(json['created_at'] as String),
       role: UserRole.values.firstWhere(
-        (e) => e.name == json['role'],
+        (e) => e.name == (userData['role'] as String? ?? 'student'),
         orElse: () => UserRole.student,
       ),
       updatedAt: json['updated_at'] != null
