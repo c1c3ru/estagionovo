@@ -11,6 +11,7 @@ abstract class IAuthRepository {
     required String password,
     required String fullName,
     required UserRole role,
+    String? registration,
   });
 
   Future<Either<AppFailure, UserEntity>> login({

@@ -14,6 +14,7 @@ class RegisterUsecase {
     required String password,
     required String fullName,
     required UserRole role,
+    String? registration,
   }) async {
     if (email.isEmpty) {
       return const Left(ValidationFailure('E-mail é obrigatório'));
@@ -36,6 +37,7 @@ class RegisterUsecase {
       password: password,
       fullName: fullName,
       role: role,
+      registration: registration,
     );
   }
 

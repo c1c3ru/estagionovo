@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -13,6 +14,7 @@ class AuthTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final bool enabled;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AuthTextField({
     super.key,
@@ -26,6 +28,7 @@ class AuthTextField extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.enabled = true,
+    this.inputFormatters,
   });
 
   @override
@@ -48,6 +51,7 @@ class AuthTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           enabled: enabled,
+          inputFormatters: inputFormatters,
           style: AppTextStyles.bodyMedium,
           decoration: InputDecoration(
             hintText: hint ?? label,
@@ -97,4 +101,3 @@ class AuthTextField extends StatelessWidget {
     );
   }
 }
-

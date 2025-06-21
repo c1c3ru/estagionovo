@@ -37,7 +37,7 @@ class SupervisorRegisterPage extends StatelessWidget {
                 backgroundColor: Colors.green,
               ),
             );
-            Modular.to.pushReplacementNamed('/supervisor/');
+            Modular.to.pushReplacementNamed('/supervisor');
           }
         },
         child: BlocBuilder<AuthBloc, AuthState>(

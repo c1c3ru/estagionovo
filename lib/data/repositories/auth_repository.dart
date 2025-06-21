@@ -71,6 +71,7 @@ class AuthRepository implements IAuthRepository {
     required String password,
     required String fullName,
     required UserRole role,
+    String? registration,
   }) async {
     try {
       final userData = await _authDatasource.signUpWithEmailAndPassword(
@@ -78,6 +79,7 @@ class AuthRepository implements IAuthRepository {
         password: password,
         fullName: fullName,
         role: role,
+        registration: registration,
       );
       final userModel = UserModel.fromJson(userData);
       await _preferencesManager.saveUserData(userModel.toJson());

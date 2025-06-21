@@ -70,13 +70,6 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: AppColors.error,
               ),
             );
-          } else if (state is AuthLogoutSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Logout realizado com sucesso'),
-                backgroundColor: AppColors.success,
-              ),
-            );
           }
         },
         child: SafeArea(
@@ -109,11 +102,16 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-                    AuthTextField(
+                    TextFormField(
                       controller: _emailController,
-                      label: AppStrings.email,
+                      decoration: InputDecoration(
+                        labelText: AppStrings.email,
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.email_outlined,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
                           return AppStrings.fieldRequired;
@@ -126,23 +124,28 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    AuthTextField(
+                    TextFormField(
                       controller: _passwordController,
-                      label: AppStrings.password,
-                      obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outlined,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                      decoration: InputDecoration(
+                        labelText: AppStrings.password,
+                        prefixIcon: const Icon(Icons.lock_outlined),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      obscureText: _obscurePassword,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
                           return AppStrings.fieldRequired;
@@ -153,11 +156,35 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 24),
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
-                        return AuthButton(
-                          text: AppStrings.login,
-                          onPressed:
-                              state is AuthLoading ? null : _onLoginPressed,
-                          isLoading: state is AuthLoading,
+                        return SizedBox(
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed:
+                                state is AuthLoading ? null : _onLoginPressed,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: state is AuthLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.white),
+                                    ),
+                                  )
+                                : Text(
+                                    AppStrings.login,
+                                    style: AppTextStyles.button.copyWith(
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                          ),
                         );
                       },
                     ),

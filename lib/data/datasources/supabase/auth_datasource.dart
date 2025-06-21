@@ -33,6 +33,7 @@ class AuthDatasource implements IAuthDatasource {
     required String password,
     required String fullName,
     required UserRole role,
+    String? registration,
   }) async {
     try {
       final response = await _supabaseClient.auth.signUp(
@@ -41,6 +42,7 @@ class AuthDatasource implements IAuthDatasource {
         data: {
           'full_name': fullName,
           'role': role.toString(),
+          if (registration != null) 'registration': registration,
         },
       );
 
@@ -53,6 +55,7 @@ class AuthDatasource implements IAuthDatasource {
         'email': response.user!.email,
         'role': role.toString(),
         'fullName': fullName,
+        'registration': registration,
         'createdAt': DateTime.parse(response.user!.createdAt).toIso8601String(),
         'updatedAt': response.user!.updatedAt != null
             ? DateTime.parse(response.user!.updatedAt!).toIso8601String()

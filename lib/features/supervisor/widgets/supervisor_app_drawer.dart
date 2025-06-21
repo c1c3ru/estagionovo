@@ -4,7 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 // É uma boa prática gerir as suas rotas num ficheiro dedicado.
 // Exemplo: lib/core/routes/app_routes.dart
 class SupervisorRoutes {
-  static const String dashboard = '/supervisor/';
+  static const String dashboard = '/supervisor';
   static const String team = '/supervisor/team';
   static const String reports = '/supervisor/reports';
   static const String login = '/login';

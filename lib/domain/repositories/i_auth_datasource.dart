@@ -1,19 +1,21 @@
 import 'package:student_supervisor_app/core/enums/user_role.dart';
 
 abstract class IAuthDatasource {
-  Future<Map<String, dynamic>?> signInWithEmailAndPassword(String email, String password);
-  
+  Future<Map<String, dynamic>?> signInWithEmailAndPassword(
+      String email, String password);
+
   Future<Map<String, dynamic>> signUpWithEmailAndPassword({
     required String email,
     required String password,
     required String fullName,
-    required UserRole role, 
+    required UserRole role,
+    String? registration,
   });
-  
+
   Future<void> signOut();
   Future<Map<String, dynamic>?> getCurrentUser();
   Future<void> resetPassword(String email);
-  
+
   Future<Map<String, dynamic>> updateProfile({
     required String userId,
     String? fullName,
@@ -22,6 +24,6 @@ abstract class IAuthDatasource {
     String? phoneNumber,
     String? profilePictureUrl,
   });
-  
+
   Stream<Map<String, dynamic>?> getAuthStateChanges();
 }

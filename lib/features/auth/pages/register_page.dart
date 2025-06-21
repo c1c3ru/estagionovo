@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/enums/user_role.dart';
+import '../../../core/utils/validators.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -24,6 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _registrationController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   UserRole _selectedRole = UserRole.student;
@@ -34,6 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _registrationController.dispose();
     super.dispose();
   }
 
@@ -45,6 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
           password: _passwordController.text,
           fullName: _nameController.text.trim(),
           role: _selectedRole.name,
+          registration: _registrationController.text.trim(),
         ),
       );
     }
@@ -68,11 +73,71 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            final route = state.user.role == UserRole.student
-                ? '/student/'
-                : '/supervisor/';
-            Modular.to.pushReplacementNamed(route);
+          if (state is AuthRegistrationSuccess) {
+            // Mostrar diálogo de confirmação de email
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Row(
+                    children: [
+                      Icon(Icons.email_outlined, color: AppColors.primary),
+                      SizedBox(width: 8),
+                      Text('Verifique seu email'),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.message,
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: AppColors.primary.withOpacity(0.3)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Próximos passos:',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              '1. Acesse seu email\n'
+                              '2. Clique no link de confirmação\n'
+                              '3. Volte ao app e faça login',
+                              style: AppTextStyles.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Modular.to.pop(); // Volta para a tela de login
+                      },
+                      child: const Text('Entendi'),
+                    ),
+                  ],
+                );
+              },
+            );
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -172,6 +237,31 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    AuthTextField(
+                      controller: _registrationController,
+                      label: _selectedRole == UserRole.supervisor
+                          ? 'Matrícula SIAPE'
+                          : 'Matrícula de Aluno',
+                      hint: _selectedRole == UserRole.supervisor
+                          ? 'Digite sua matrícula SIAPE (6 dígitos)'
+                          : 'Digite sua matrícula (12 dígitos)',
+                      keyboardType: TextInputType.number,
+                      prefixIcon: Icons.badge_outlined,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(
+                          _selectedRole == UserRole.supervisor ? 6 : 12,
+                        ),
+                      ],
+                      validator: (value) {
+                        if (_selectedRole == UserRole.supervisor) {
+                          return Validators.siapeRegistration(value);
+                        } else {
+                          return Validators.studentRegistration(value);
+                        }
+                      },
                     ),
                     const SizedBox(height: 16),
                     AuthTextField(

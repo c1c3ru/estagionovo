@@ -7,19 +7,19 @@ import 'dart:async' as _i4;
 
 import 'package:dartz/dartz.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:student_supervisor_app/core/enums/user_role.dart' as _i8;
+import 'package:student_supervisor_app/core/enums/user_role.dart' as _i10;
 import 'package:student_supervisor_app/core/errors/app_exceptions.dart' as _i5;
 import 'package:student_supervisor_app/domain/entities/user_entity.dart' as _i6;
 import 'package:student_supervisor_app/domain/usecases/auth/get_auth_state_changes_usecase.dart'
     as _i13;
 import 'package:student_supervisor_app/domain/usecases/auth/get_current_user_usecase.dart'
-    as _i10;
-import 'package:student_supervisor_app/domain/usecases/auth/login_usecase.dart'
     as _i3;
-import 'package:student_supervisor_app/domain/usecases/auth/logout_usecase.dart'
-    as _i9;
-import 'package:student_supervisor_app/domain/usecases/auth/register_usecase.dart'
+import 'package:student_supervisor_app/domain/usecases/auth/login_usecase.dart'
     as _i7;
+import 'package:student_supervisor_app/domain/usecases/auth/logout_usecase.dart'
+    as _i8;
+import 'package:student_supervisor_app/domain/usecases/auth/register_usecase.dart'
+    as _i9;
 import 'package:student_supervisor_app/domain/usecases/auth/reset_password_usecase.dart'
     as _i11;
 import 'package:student_supervisor_app/domain/usecases/auth/update_profile_usecase.dart'
@@ -49,10 +49,38 @@ class _FakeEither_0<L, R> extends _i1.SmartFake implements _i2.Either<L, R> {
         );
 }
 
+/// A class which mocks [GetCurrentUserUsecase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetCurrentUserUsecase extends _i1.Mock
+    implements _i3.GetCurrentUserUsecase {
+  MockGetCurrentUserUsecase() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>> call() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #call,
+          [],
+        ),
+        returnValue:
+            _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>>.value(
+                _FakeEither_0<_i5.AppFailure, _i6.UserEntity?>(
+          this,
+          Invocation.method(
+            #call,
+            [],
+          ),
+        )),
+      ) as _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>>);
+}
+
 /// A class which mocks [LoginUsecase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLoginUsecase extends _i1.Mock implements _i3.LoginUsecase {
+class MockLoginUsecase extends _i1.Mock implements _i7.LoginUsecase {
   MockLoginUsecase() {
     _i1.throwOnMissingStub(this);
   }
@@ -87,54 +115,10 @@ class MockLoginUsecase extends _i1.Mock implements _i3.LoginUsecase {
       ) as _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>>);
 }
 
-/// A class which mocks [RegisterUsecase].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockRegisterUsecase extends _i1.Mock implements _i7.RegisterUsecase {
-  MockRegisterUsecase() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>> call({
-    required String? email,
-    required String? password,
-    required String? fullName,
-    required _i8.UserRole? role,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #call,
-          [],
-          {
-            #email: email,
-            #password: password,
-            #fullName: fullName,
-            #role: role,
-          },
-        ),
-        returnValue:
-            _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>>.value(
-                _FakeEither_0<_i5.AppFailure, _i6.UserEntity>(
-          this,
-          Invocation.method(
-            #call,
-            [],
-            {
-              #email: email,
-              #password: password,
-              #fullName: fullName,
-              #role: role,
-            },
-          ),
-        )),
-      ) as _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>>);
-}
-
 /// A class which mocks [LogoutUsecase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLogoutUsecase extends _i1.Mock implements _i9.LogoutUsecase {
+class MockLogoutUsecase extends _i1.Mock implements _i8.LogoutUsecase {
   MockLogoutUsecase() {
     _i1.throwOnMissingStub(this);
   }
@@ -156,32 +140,51 @@ class MockLogoutUsecase extends _i1.Mock implements _i9.LogoutUsecase {
       ) as _i4.Future<_i2.Either<_i5.AppFailure, void>>);
 }
 
-/// A class which mocks [GetCurrentUserUsecase].
+/// A class which mocks [RegisterUsecase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetCurrentUserUsecase extends _i1.Mock
-    implements _i10.GetCurrentUserUsecase {
-  MockGetCurrentUserUsecase() {
+class MockRegisterUsecase extends _i1.Mock implements _i9.RegisterUsecase {
+  MockRegisterUsecase() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>> call() =>
+  _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>> call({
+    required String? email,
+    required String? password,
+    required String? fullName,
+    required _i10.UserRole? role,
+    String? registration,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [],
+          {
+            #email: email,
+            #password: password,
+            #fullName: fullName,
+            #role: role,
+            #registration: registration,
+          },
         ),
         returnValue:
-            _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>>.value(
-                _FakeEither_0<_i5.AppFailure, _i6.UserEntity?>(
+            _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>>.value(
+                _FakeEither_0<_i5.AppFailure, _i6.UserEntity>(
           this,
           Invocation.method(
             #call,
             [],
+            {
+              #email: email,
+              #password: password,
+              #fullName: fullName,
+              #role: role,
+              #registration: registration,
+            },
           ),
         )),
-      ) as _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity?>>);
+      ) as _i4.Future<_i2.Either<_i5.AppFailure, _i6.UserEntity>>);
 }
 
 /// A class which mocks [ResetPasswordUsecase].

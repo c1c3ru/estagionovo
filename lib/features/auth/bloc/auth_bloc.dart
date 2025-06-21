@@ -68,7 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print('🔵 AuthBloc: Mudança de usuário detectada: $userEntity');
       if (userEntity != null) {
         add(AuthUserChanged(user: userEntity));
-      } else if (state is! AuthUnauthenticated) {
+      } else if (state is! AuthUnauthenticated && state is! AuthLoading) {
         add(const AuthLogoutRequested());
       }
     });
@@ -123,16 +123,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthRegisterRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('🔵 AuthBloc: _onRegisterRequested chamado');
     emit(const AuthLoading());
     final result = await _registerUsecase(
       email: event.email,
       password: event.password,
       fullName: event.fullName,
       role: UserRole.fromString(event.role),
+      registration: event.registration,
     );
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (user) => emit(AuthAuthenticated(user: user)),
+      (user) => emit(const AuthRegistrationSuccess(
+        message:
+            'Conta criada com sucesso! Verifique seu email para confirmar o cadastro.',
+      )),
     );
   }
 
@@ -172,7 +177,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUserChanged event,
     Emitter<AuthState> emit,
   ) async {
-    if (event.user != null) {
+    if (event.user != null && state is! AuthAuthenticated) {
       emit(AuthAuthenticated(user: event.user!));
     }
   }
