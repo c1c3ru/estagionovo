@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart'; // Para formatação de datas
 import 'package:student_supervisor_app/core/enums/class_shift.dart';
+import 'package:student_supervisor_app/core/enums/internship_shift.dart';
 import 'package:student_supervisor_app/features/auth/bloc/auth_bloc.dart';
 import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart'
     as auth_state;
@@ -40,6 +41,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
 
   DateTime? _selectedBirthDate;
   ClassShift? _selectedClassShift;
+  InternshipShift? _selectedInternshipShift;
   bool? _selectedIsMandatoryInternship;
 
   bool _isEditMode = false;
@@ -92,6 +94,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
         : '';
 
     _selectedClassShift = student.classShift;
+    _selectedInternshipShift = student.internshipShift;
     _selectedIsMandatoryInternship = student.isMandatoryInternship;
   }
 
@@ -122,6 +125,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                 : _profilePictureUrlController.text.trim(),
             birthDate: _selectedBirthDate,
             classShift: _selectedClassShift,
+            internshipShift: _selectedInternshipShift,
             isMandatoryInternship: _selectedIsMandatoryInternship,
           ),
         ));
@@ -525,9 +529,30 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           secondary: Icon(Icons.star_border_outlined,
               color: theme.colorScheme.primary),
           activeColor: theme.colorScheme.primary,
-        )
-
-        // TODO: Adicionar Dropdowns para InternshipShift1 e InternshipShift2 se forem editáveis
+        ),
+        const SizedBox(height: 16),
+        _buildSectionTitle('Informações do Estágio'),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<InternshipShift>(
+          value: _selectedInternshipShift,
+          onChanged: _isEditMode
+              ? (newValue) {
+                  setState(() {
+                    _selectedInternshipShift = newValue;
+                  });
+                }
+              : null,
+          items: InternshipShift.values
+              .map((shift) => DropdownMenuItem(
+                    value: shift,
+                    child: Text(shift.name),
+                  ))
+              .toList(),
+          decoration: const InputDecoration(
+            labelText: 'Turno do Estágio',
+            border: OutlineInputBorder(),
+          ),
+        ),
       ],
     );
   }
@@ -570,6 +595,15 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 }

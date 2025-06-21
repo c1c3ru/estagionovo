@@ -36,7 +36,7 @@ class _SupervisorHomePageState extends State<SupervisorHomePage> {
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              // TODO: Implement notifications
+              Modular.to.pushNamed('/notifications');
             },
           ),
           BlocListener<AuthBloc, AuthState>(

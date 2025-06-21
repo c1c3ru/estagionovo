@@ -2,6 +2,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:student_supervisor_app/core/enums/class_shift.dart'; // Para TimeOfDay
+import 'package:student_supervisor_app/core/enums/internship_shift.dart';
 // Importe o enum ClassShift se for permitir a edição dele
 
 // Parâmetros para atualizar perfil do estudante, específicos para o evento
@@ -16,6 +17,7 @@ class UpdateStudentProfileEventParams extends Equatable {
   final String? phoneNumber;
   final DateTime? birthDate; // Adicionado
   final ClassShift? classShift; // Adicionado
+  final InternshipShift? internshipShift; // Adicionado
   // Adicione mais campos conforme necessário
 
   const UpdateStudentProfileEventParams({
@@ -28,6 +30,7 @@ class UpdateStudentProfileEventParams extends Equatable {
     this.phoneNumber,
     this.birthDate, // Adicionado
     this.classShift, // Adicionado
+    this.internshipShift, // Adicionado
   });
 
   @override
@@ -42,6 +45,7 @@ class UpdateStudentProfileEventParams extends Equatable {
         phoneNumber,
         birthDate,
         classShift,
+        internshipShift, // Adicionado
       ];
 }
 

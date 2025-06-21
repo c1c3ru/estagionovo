@@ -100,6 +100,7 @@ class AppStrings {
   static const String tryAgain = 'Tentar Novamente';
   static const String totalStudents = 'Total de Estudantes';
   static const String activeStudents = 'Estudantes Ativos';
+  static const String inactiveStudents = 'Estudantes Inativos';
   static const String expiringContracts = 'Contratos Expirando';
   static const String checkIn = 'Entrada';
   static const String checkOut = 'Saída';

@@ -298,8 +298,7 @@ class AppModule extends Module {
   @override
   void routes(RouteManager r) {
     // Auth Routes
-    r.child('/', child: (context) => const LoginPage());
-    r.child('/login', child: (context) => const LoginPage());
+    r.child(Modular.initialRoute, child: (context) => const LoginPage());
     r.child('/register', child: (context) => const RegisterPage());
     r.child('/forgot-password', child: (context) => const ForgotPasswordPage());
 
