@@ -221,10 +221,42 @@ class StudentRepository implements IStudentRepository {
   Future<Either<AppFailure, Map<String, dynamic>>> getStudentDashboard(
       String studentId) async {
     try {
-      // TODO: Implementar a lógica para buscar os dados do dashboard
-      // Isso pode envolver múltiplas chamadas ao datasource
-      return const Left(ServerFailure(
-          message: 'Método getStudentDashboard não implementado'));
+      // Implementação temporária com dados mock
+      final dashboardData = {
+        'student': {
+          'id': '1',
+          'userId': studentId,
+          'fullName': 'João Silva',
+          'email': 'joao.silva@email.com',
+          'course': 'Ciência da Computação',
+          'advisorName': 'Dr. Maria Santos',
+          'registrationNumber': '202300123456',
+          'isMandatoryInternship': true,
+          'classShift': 'morning',
+          'internshipShift': 'morning',
+          'supervisorId': 'supervisor-1',
+          'totalHoursCompleted': 120.0,
+          'totalHoursRequired': 300.0,
+          'weeklyHoursTarget': 20.0,
+          'contractStartDate': DateTime.now()
+              .subtract(const Duration(days: 30))
+              .toIso8601String(),
+          'contractEndDate':
+              DateTime.now().add(const Duration(days: 150)).toIso8601String(),
+          'isOnTrack': true,
+          'createdAt': DateTime.now().toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+        'timeStats': {
+          'hoursThisWeek': 15.5,
+          'hoursThisMonth': 68.0,
+          'recentLogs': [],
+          'activeTimeLog': null,
+        },
+        'contracts': [],
+      };
+
+      return Right(dashboardData);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

@@ -25,6 +25,12 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    print('🟢 LoginPage: initState chamado');
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -32,7 +38,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLoginPressed() {
+    print('🟢 LoginPage: _onLoginPressed chamado');
     if (_formKey.currentState?.validate() ?? false) {
+      print('🟢 LoginPage: Formulário válido, enviando evento de login');
       BlocProvider.of<AuthBloc>(context).add(
         AuthLoginRequested(
           email: _emailController.text.trim(),
@@ -53,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     print('🟢 LoginPage: BUILD chamado');
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocListener<AuthBloc, AuthState>(
@@ -62,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
             final route = state.user.role == UserRole.student
                 ? '/student'
                 : '/supervisor';
+            print('🟢 LoginPage: Redirecionando para: $route');
             Modular.to.pushReplacementNamed(route);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -104,21 +114,14 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 48),
                     TextFormField(
                       controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: AppStrings.email,
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
-                          return AppStrings.fieldRequired;
-                        }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                            .hasMatch(value!)) {
-                          return AppStrings.invalidEmail;
+                          return 'Campo obrigatório';
                         }
                         return null;
                       },
@@ -127,8 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        labelText: AppStrings.password,
-                        prefixIcon: const Icon(Icons.lock_outlined),
+                        labelText: 'Senha',
+                        border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -141,14 +144,11 @@ class _LoginPageState extends State<LoginPage> {
                             });
                           },
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
-                          return AppStrings.fieldRequired;
+                          return 'Campo obrigatório';
                         }
                         return null;
                       },
@@ -156,6 +156,8 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 24),
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
+                        print(
+                            '🟢 LoginPage: BlocBuilder - Estado atual: $state');
                         return SizedBox(
                           height: 56,
                           child: ElevatedButton(
@@ -164,9 +166,6 @@ class _LoginPageState extends State<LoginPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
                             ),
                             child: state is AuthLoading
                                 ? const SizedBox(
@@ -178,33 +177,24 @@ class _LoginPageState extends State<LoginPage> {
                                           AppColors.white),
                                     ),
                                   )
-                                : Text(
-                                    AppStrings.login,
-                                    style: AppTextStyles.button.copyWith(
-                                      color: AppColors.white,
-                                    ),
-                                  ),
+                                : const Text('Entrar'),
                           ),
                         );
                       },
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () => Modular.to.pushNamed('/register'),
-                      child: Text(
-                        'Não tem uma conta? ${AppStrings.register}',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                        ),
+                      onPressed: _onRegisterPressed,
+                      child: const Text(
+                        'Não tem uma conta? Cadastrar',
+                        style: TextStyle(color: AppColors.primary),
                       ),
                     ),
                     TextButton(
                       onPressed: _onForgotPasswordPressed,
-                      child: Text(
-                        AppStrings.forgotPassword,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                        ),
+                      child: const Text(
+                        'Esqueci minha senha',
+                        style: TextStyle(color: AppColors.primary),
                       ),
                     ),
                   ],
