@@ -8,10 +8,7 @@ import 'package:student_supervisor_app/features/auth/bloc/auth_state.dart'
     as auth_state;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/loading_indicator.dart';
-
-import '../../../../domain/entities/student_entity.dart';
 
 // Modelo simples para representar um colega online
 class OnlineColleague {

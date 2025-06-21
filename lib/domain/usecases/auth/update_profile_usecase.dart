@@ -18,11 +18,12 @@ class UpdateProfileUsecase {
     String? profilePictureUrl,
   }) async {
     if (fullName != null && fullName.isEmpty) {
-      return Left(ValidationFailure('O nome completo não pode estar vazio.'));
+      return const Left(
+          ValidationFailure('O nome completo não pode estar vazio.'));
     }
 
     if (email != null && !_isValidEmail(email)) {
-      return Left(ValidationFailure('Formato de email inválido.'));
+      return const Left(ValidationFailure('Formato de email inválido.'));
     }
 
     return await _repository.updateProfile(

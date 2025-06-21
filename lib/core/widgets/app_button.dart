@@ -1,6 +1,5 @@
 // lib/core/widgets/app_button.dart
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart'; // Para cores padrão
 import '../constants/app_constants.dart'; // Para padding/borderRadius
 
 enum AppButtonType { elevated, outlined, text }
@@ -18,7 +17,7 @@ class AppButton extends StatelessWidget {
   final double? minHeight;
 
   const AppButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.type = AppButtonType.elevated,
@@ -29,7 +28,7 @@ class AppButton extends StatelessWidget {
     this.foregroundColor,
     this.minWidth,
     this.minHeight = 48.0, // Altura padrão para boa tocabilidade
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,5 @@
 // lib/features/auth/presentation/bloc/auth_event.dart
 import 'package:equatable/equatable.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
 import 'package:student_supervisor_app/domain/entities/user_entity.dart';
 
 abstract class AuthEvent extends Equatable {

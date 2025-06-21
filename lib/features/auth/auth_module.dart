@@ -13,7 +13,6 @@ import '../../data/datasources/local/preferences_manager.dart';
 // Repositories
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import '../../domain/repositories/i_auth_datasource.dart';
 
 // Usecases
 import '../../domain/usecases/auth/login_usecase.dart';

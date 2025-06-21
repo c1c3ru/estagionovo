@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:student_supervisor_app/features/shared/bloc/time_log_bloc.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 class TimeLogPage extends StatefulWidget {

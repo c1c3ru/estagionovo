@@ -1,4 +1,3 @@
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/student_entity.dart';

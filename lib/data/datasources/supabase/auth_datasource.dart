@@ -2,7 +2,6 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../../../core/enums/user_role.dart';
 import '../../../core/errors/app_exceptions.dart';
 import '../../../domain/repositories/i_auth_datasource.dart';
-import '../../models/user_model.dart';
 
 class AuthDatasource implements IAuthDatasource {
   final SupabaseClient _supabaseClient;

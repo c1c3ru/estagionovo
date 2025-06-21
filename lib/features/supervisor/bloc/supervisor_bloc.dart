@@ -1,28 +1,21 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:dartz/dartz.dart';
 import 'package:student_supervisor_app/core/enums/student_status.dart'
     as student_status_enum;
 import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/core/enums/contract_status.dart';
 import 'package:student_supervisor_app/data/models/student_model.dart';
 import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_event.dart';
 import 'package:student_supervisor_app/features/supervisor/bloc/supervisor_state.dart';
 
 import '../../../../core/errors/app_exceptions.dart';
 import '../../../../domain/entities/student_entity.dart';
-import '../../../../domain/entities/supervisor_entity.dart';
 import '../../../../domain/entities/time_log_entity.dart';
 import '../../../../domain/entities/contract_entity.dart';
-import '../../../../domain/entities/user_entity.dart';
 import '../../../../domain/usecases/supervisor/get_all_time_logs_for_supervisor_usecase.dart';
 import '../../../../domain/usecases/supervisor/approve_or_reject_time_log_usecase.dart';
 import '../../../../domain/usecases/contract/get_all_contracts_usecase.dart';
-import '../../../../domain/usecases/contract/upsert_contract_usecase.dart';
-import '../../../../domain/repositories/i_supervisor_repository.dart';
 
 // Usecases de Supervisor
 import '../../../../domain/usecases/supervisor/get_supervisor_details_usecase.dart';
@@ -41,8 +34,7 @@ import '../../../../domain/usecases/contract/delete_contract_usecase.dart';
 
 // Usecases de Auth
 import '../../../../domain/usecases/auth/register_usecase.dart';
-import '../../../../domain/repositories/i_auth_repository.dart'
-    show RegisterParams;
+
 import '../../../../data/models/student_model.dart' show FilterStudentsParams;
 // import '../../../../domain/repositories/i_contract_repository.dart'
 //     show UpsertContractParams;
@@ -273,7 +265,7 @@ class SupervisorBloc extends Bloc<SupervisorEvent, SupervisorState> {
     try {
       final studentResult =
           await _getStudentDetailsForSupervisorUsecase.call(event.studentId);
-      final (student, timeLogs, contracts) = await studentResult.fold(
+      final (student, timeLogs, contracts) = studentResult.fold(
         (failure) => throw failure,
         (s) => s,
       );

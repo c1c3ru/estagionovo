@@ -38,7 +38,7 @@ class AuthRepository implements IAuthRepository {
         return Right(userModel.toEntity());
       }
 
-      return Left(AuthFailure('Usuário não encontrado'));
+      return const Left(AuthFailure('Usuário não encontrado'));
     } catch (e) {
       final cachedUserData = _preferencesManager.getUserData();
       if (cachedUserData != null) {
@@ -57,13 +57,9 @@ class AuthRepository implements IAuthRepository {
     try {
       final userData =
           await _authDatasource.signInWithEmailAndPassword(email, password);
-      if (userData != null) {
-        final userModel = UserModel.fromJson(userData);
-        await _preferencesManager.saveUserData(userModel.toJson());
-        return Right(userModel.toEntity());
-      } else {
-        return const Left(AuthFailure('Credenciais inválidas'));
-      }
+      final userModel = UserModel.fromJson(userData);
+      await _preferencesManager.saveUserData(userModel.toJson());
+      return Right(userModel.toEntity());
     } catch (e) {
       return Left(AuthFailure('Erro no login: $e'));
     }

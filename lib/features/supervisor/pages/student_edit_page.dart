@@ -4,12 +4,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:student_supervisor_app/core/enums/class_shift.dart';
 import 'package:student_supervisor_app/core/enums/internship_shift.dart';
-import 'package:student_supervisor_app/core/enums/student_status.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';

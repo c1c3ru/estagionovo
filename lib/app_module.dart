@@ -226,22 +226,6 @@ class AppModule extends Module {
 
     i.addLazySingleton<StudentBloc>(() => StudentBloc(
           getStudentDashboardUsecase: i(),
-          getAllStudentsUsecase: i(),
-          getStudentByIdUsecase: i(),
-          getStudentByUserIdUsecase: i(),
-          createStudentUsecase: i(),
-          updateStudentUsecase: i(),
-          getStudentDetailsUsecase: i(),
-          updateStudentProfileUsecase: i(),
-          checkInUsecase: i(),
-          checkOutUsecase: i(),
-          getStudentTimeLogsUsecase: i(),
-          createTimeLogUsecase: i(),
-          updateTimeLogUsecase: i(),
-          deleteTimeLogUsecase: i(),
-          getContractsForStudentUsecase: i(),
-          deleteStudentUsecase: i(),
-          getStudentsBySupervisorUsecase: i(),
         ));
 
     i.addLazySingleton<SupervisorBloc>(() => SupervisorBloc(

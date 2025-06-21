@@ -1,6 +1,5 @@
 // lib/features/shared/widgets/user_avatar.dart
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart'; // Para cores padrão
 
 class UserAvatar extends StatelessWidget {
   final String? imageUrl;
@@ -11,14 +10,14 @@ class UserAvatar extends StatelessWidget {
   final Color? foregroundColor; // Cor para as iniciais
 
   const UserAvatar({
-    Key? key,
+    super.key,
     this.imageUrl,
     required this.name,
     this.radius = 24.0, // Raio padrão para CircleAvatar
     this.fontSize = 16.0, // Tamanho da fonte para as iniciais
     this.backgroundColor,
     this.foregroundColor,
-  }) : super(key: key);
+  });
 
   String get _initials {
     if (name.isEmpty) return '?';
@@ -34,8 +33,10 @@ class UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveBackgroundColor = backgroundColor ?? theme.colorScheme.primaryContainer;
-    final effectiveForegroundColor = foregroundColor ?? theme.colorScheme.onPrimaryContainer;
+    final effectiveBackgroundColor =
+        backgroundColor ?? theme.colorScheme.primaryContainer;
+    final effectiveForegroundColor =
+        foregroundColor ?? theme.colorScheme.onPrimaryContainer;
     final bool hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
 
     ImageProvider? backgroundImage;
@@ -55,15 +56,18 @@ class UserAvatar extends StatelessWidget {
       radius: radius,
       backgroundColor: effectiveBackgroundColor,
       backgroundImage: backgroundImage,
-      onBackgroundImageError: hasImage ? (_, __) {
-        // Fallback se a imagem da rede não carregar, mas não queremos mostrar o texto sobre o erro.
-        // O CircleAvatar já mostra o child se backgroundImage falhar.
-        // No entanto, para forçar o child (iniciais) se a imagem falhar,
-        // poderíamos ter um estado ou usar um FutureBuilder/Image.network com errorBuilder.
-        // Para simplificar, se a URL for fornecida mas falhar, pode mostrar o backgroundColor.
-        // Se quisermos mostrar as iniciais em caso de erro de imagem, a lógica seria mais complexa aqui.
-      } : null,
-      child: (backgroundImage == null || !hasImage) // Mostra iniciais se não houver imagem ou se falhar (simplificado)
+      onBackgroundImageError: hasImage
+          ? (_, __) {
+              // Fallback se a imagem da rede não carregar, mas não queremos mostrar o texto sobre o erro.
+              // O CircleAvatar já mostra o child se backgroundImage falhar.
+              // No entanto, para forçar o child (iniciais) se a imagem falhar,
+              // poderíamos ter um estado ou usar um FutureBuilder/Image.network com errorBuilder.
+              // Para simplificar, se a URL for fornecida mas falhar, pode mostrar o backgroundColor.
+              // Se quisermos mostrar as iniciais em caso de erro de imagem, a lógica seria mais complexa aqui.
+            }
+          : null,
+      child: (backgroundImage == null ||
+              !hasImage) // Mostra iniciais se não houver imagem ou se falhar (simplificado)
           ? Text(
               _initials,
               style: TextStyle(

@@ -25,5 +25,5 @@ class AppConstants {
   static const int maxPasswordLength = 50;
   static const int maxNameLength = 100;
 
-  static var paddingSmall;
+  static const double paddingSmall = 8.0;
 }

@@ -109,23 +109,6 @@ class StudentModule extends Module {
     // BLoC
     i.add<StudentBloc>(() => StudentBloc(
           getStudentDashboardUsecase: i.get<GetStudentDashboardUsecase>(),
-          getStudentDetailsUsecase: i.get<GetStudentDetailsUsecase>(),
-          updateStudentProfileUsecase: i.get<UpdateStudentProfileUsecase>(),
-          checkInUsecase: i.get<CheckInUsecase>(),
-          checkOutUsecase: i.get<CheckOutUsecase>(),
-          getStudentTimeLogsUsecase: i.get<GetStudentTimeLogsUsecase>(),
-          createTimeLogUsecase: i.get<CreateTimeLogUsecase>(),
-          updateTimeLogUsecase: i.get<UpdateTimeLogUsecase>(),
-          deleteTimeLogUsecase: i.get<DeleteTimeLogUsecase>(),
-          getContractsForStudentUsecase: i.get<GetContractsForStudentUsecase>(),
-          getAllStudentsUsecase: i.get<GetAllStudentsUsecase>(),
-          getStudentByIdUsecase: i.get<GetStudentByIdUsecase>(),
-          getStudentByUserIdUsecase: i.get<GetStudentByUserIdUsecase>(),
-          createStudentUsecase: i.get<CreateStudentUsecase>(),
-          updateStudentUsecase: i.get<UpdateStudentUsecase>(),
-          deleteStudentUsecase: i.get<DeleteStudentUsecase>(),
-          getStudentsBySupervisorUsecase:
-              i.get<GetStudentsBySupervisorUsecase>(),
         ));
   }
 

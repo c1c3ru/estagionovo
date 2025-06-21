@@ -1,6 +1,5 @@
 // lib/core/widgets/loading_indicator.dart
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart'; // Para cor primária
 
 class LoadingIndicator extends StatelessWidget {
   final double size;
@@ -8,11 +7,11 @@ class LoadingIndicator extends StatelessWidget {
   final Color? color;
 
   const LoadingIndicator({
-    Key? key,
+    super.key,
     this.size = 40.0,
     this.strokeWidth = 4.0,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +39,13 @@ class LoadingOverlay extends StatelessWidget {
   final Widget? progressIndicator;
 
   const LoadingOverlay({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
     this.opacity = 0.5,
     this.color,
     this.progressIndicator,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

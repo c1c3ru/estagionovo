@@ -14,7 +14,6 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../domain/entities/time_log_entity.dart';
-import '../../../../domain/entities/student_entity.dart'; // Para mostrar o nome do estudante
 import '../bloc/supervisor_bloc.dart' as bloc;
 import '../bloc/supervisor_event.dart' as event;
 import '../bloc/supervisor_state.dart' as supervisor_state;

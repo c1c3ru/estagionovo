@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../../core/enums/user_role.dart';
-import '../../../core/errors/app_exceptions.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../../domain/usecases/auth/login_usecase.dart';
 import '../../../domain/usecases/auth/register_usecase.dart';
 import '../../../domain/usecases/auth/logout_usecase.dart';
@@ -72,13 +69,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _getCurrentUserUsecase();
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
       (user) => user != null
           ? emit(AuthAuthenticated(user: user))
-          : emit(AuthUnauthenticated()),
+          : emit(const AuthUnauthenticated()),
     );
   }
 
@@ -86,7 +83,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _loginUsecase(
       email: event.email,
       password: event.password,
@@ -101,11 +98,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _logoutUsecase();
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit(AuthUnauthenticated()),
+      (_) => emit(const AuthUnauthenticated()),
     );
   }
 
@@ -113,7 +110,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthRegisterRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _registerUsecase(
       email: event.email,
       password: event.password,
@@ -130,7 +127,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthResetPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _resetPasswordUsecase(email: event.email);
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
@@ -143,7 +140,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthUpdateProfileRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     final result = await _updateProfileUsecase(
       userId: event.userId,
       fullName: event.fullName,
@@ -166,8 +163,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user: event.user!));
     }
   }
-}
-
-class _authRepository {
-  static Future<void> resetPassword(String email) async {}
 }

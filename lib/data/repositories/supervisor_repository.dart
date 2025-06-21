@@ -6,14 +6,8 @@ import '../../domain/repositories/i_supervisor_repository.dart';
 import '../datasources/supabase/supervisor_datasource.dart';
 import '../models/student_model.dart';
 import '../models/supervisor_model.dart';
-import '../models/contract_model.dart';
-import '../models/time_log_model.dart';
-import '../datasources/supabase/student_datasource.dart';
-import '../datasources/supabase/contract_datasource.dart';
-import '../datasources/supabase/time_log_datasource.dart';
 import '../../domain/entities/time_log_entity.dart';
 import '../../domain/entities/contract_entity.dart';
-import '../../domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
 
 class SupervisorRepository implements ISupervisorRepository {
   final SupervisorDatasource _supervisorDatasource;

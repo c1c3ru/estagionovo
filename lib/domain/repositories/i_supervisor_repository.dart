@@ -5,12 +5,9 @@ import 'package:student_supervisor_app/data/models/student_model.dart';
 import 'package:student_supervisor_app/domain/entities/student_entity.dart';
 
 import 'package:student_supervisor_app/domain/entities/time_log_entity.dart';
-import 'package:student_supervisor_app/domain/usecases/supervisor/get_all_students_for_supervisor_usecase.dart';
 
 import '../entities/supervisor_entity.dart';
 import '../entities/contract_entity.dart';
-import '../entities/student_entity.dart';
-import '../entities/time_log_entity.dart';
 
 abstract class ISupervisorRepository {
   Future<Either<AppFailure, List<SupervisorEntity>>> getAllSupervisors();

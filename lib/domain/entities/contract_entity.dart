@@ -93,8 +93,8 @@ class ContractEntity extends Equatable {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      contractType: contractType ?? this._contractType,
-      documentUrl: documentUrl ?? this._documentUrl,
+      contractType: contractType ?? _contractType,
+      documentUrl: documentUrl ?? _documentUrl,
     );
   }
 

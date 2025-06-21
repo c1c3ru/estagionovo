@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:student_supervisor_app/core/enums/contract_status.dart';
 import 'package:student_supervisor_app/core/enums/student_status.dart'
     as student_status_enum;
-import 'package:student_supervisor_app/core/errors/app_exceptions.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -83,7 +82,15 @@ class _StudentDetailsPageState extends State<StudentDetailsPage> {
         return AppColors.statusTerminated;
       case ContractStatus.completed:
         return AppColors.statusCompleted;
-      default:
+      case ContractStatus.inactive:
+        return Theme.of(context).disabledColor;
+      case ContractStatus.expired:
+        return AppColors.statusTerminated;
+      case ContractStatus.terminated:
+        return AppColors.statusTerminated;
+      case ContractStatus.pendingApproval:
+        return AppColors.statusPending;
+      case ContractStatus.unknown:
         return Theme.of(context).disabledColor;
     }
   }

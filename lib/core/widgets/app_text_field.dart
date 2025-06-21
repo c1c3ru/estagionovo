@@ -27,7 +27,7 @@ class AppTextField extends StatefulWidget {
   final VoidCallback? onTap;
 
   const AppTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.labelText,
     this.hintText,
@@ -49,7 +49,7 @@ class AppTextField extends StatefulWidget {
     this.minLines,
     this.readOnly = false,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();

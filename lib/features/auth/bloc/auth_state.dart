@@ -1,6 +1,5 @@
 // lib/features/auth/presentation/bloc/auth_state.dart
 import 'package:equatable/equatable.dart';
-import 'package:student_supervisor_app/core/enums/user_role.dart';
 import '../../../../domain/entities/user_entity.dart'; // Importa UserEntity do domínio
 
 abstract class AuthState extends Equatable {
