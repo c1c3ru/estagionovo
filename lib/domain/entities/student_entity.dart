@@ -1,6 +1,3 @@
-import 'package:equatable/equatable.dart';
-import 'dart:math';
-
 import 'package:gestao_de_estagio/core/enums/class_shift.dart';
 import 'package:gestao_de_estagio/core/enums/internship_shift.dart';
 import 'package:gestao_de_estagio/core/enums/user_role.dart';
@@ -9,6 +6,7 @@ import 'package:gestao_de_estagio/core/enums/student_status.dart';
 import 'package:gestao_de_estagio/domain/entities/user_entity.dart';
 
 class StudentEntity extends UserEntity {
+  final String userId;
   final DateTime? birthDate;
   final String course;
   final String advisorName;
@@ -16,7 +14,7 @@ class StudentEntity extends UserEntity {
   final bool isMandatoryInternship;
   final ClassShift classShift;
   final InternshipShift internshipShift;
-  final String supervisorId;
+  final String? supervisorId;
   final double totalHoursCompleted;
   final double totalHoursRequired;
   final double weeklyHoursTarget;
@@ -32,8 +30,10 @@ class StudentEntity extends UserEntity {
     super.phoneNumber,
     super.profilePictureUrl,
     required super.role,
+    super.isActive = true,
     required super.createdAt,
     super.updatedAt,
+    required this.userId,
     this.birthDate,
     required this.course,
     required this.advisorName,
@@ -41,7 +41,7 @@ class StudentEntity extends UserEntity {
     required this.isMandatoryInternship,
     required this.classShift,
     required this.internshipShift,
-    required this.supervisorId,
+    this.supervisorId,
     required this.totalHoursCompleted,
     required this.totalHoursRequired,
     required this.weeklyHoursTarget,
@@ -74,7 +74,6 @@ class StudentEntity extends UserEntity {
     return age;
   }
 
-  @override
   StudentEntity copyWith({
     String? id,
     String? email,
@@ -82,8 +81,10 @@ class StudentEntity extends UserEntity {
     String? phoneNumber,
     String? profilePictureUrl,
     UserRole? role,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? userId,
     DateTime? birthDate,
     String? course,
     String? advisorName,
@@ -107,8 +108,10 @@ class StudentEntity extends UserEntity {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      userId: userId ?? this.userId,
       birthDate: birthDate ?? this.birthDate,
       course: course ?? this.course,
       advisorName: advisorName ?? this.advisorName,
@@ -131,6 +134,7 @@ class StudentEntity extends UserEntity {
   @override
   List<Object?> get props => [
         ...super.props,
+        userId,
         birthDate,
         course,
         advisorName,
@@ -147,4 +151,53 @@ class StudentEntity extends UserEntity {
         isOnTrack,
         status,
       ];
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is StudentEntity &&
+        super == other &&
+        other.userId == userId &&
+        other.birthDate == birthDate &&
+        other.course == course &&
+        other.advisorName == advisorName &&
+        other.registrationNumber == registrationNumber &&
+        other.isMandatoryInternship == isMandatoryInternship &&
+        other.classShift == classShift &&
+        other.internshipShift == internshipShift &&
+        other.supervisorId == supervisorId &&
+        other.totalHoursCompleted == totalHoursCompleted &&
+        other.totalHoursRequired == totalHoursRequired &&
+        other.weeklyHoursTarget == weeklyHoursTarget &&
+        other.contractStartDate == contractStartDate &&
+        other.contractEndDate == contractEndDate &&
+        other.isOnTrack == isOnTrack &&
+        other.status == status;
+  }
+
+  @override
+  int get hashCode {
+    return super.hashCode ^
+        userId.hashCode ^
+        birthDate.hashCode ^
+        course.hashCode ^
+        advisorName.hashCode ^
+        registrationNumber.hashCode ^
+        isMandatoryInternship.hashCode ^
+        classShift.hashCode ^
+        internshipShift.hashCode ^
+        supervisorId.hashCode ^
+        totalHoursCompleted.hashCode ^
+        totalHoursRequired.hashCode ^
+        weeklyHoursTarget.hashCode ^
+        contractStartDate.hashCode ^
+        contractEndDate.hashCode ^
+        isOnTrack.hashCode ^
+        status.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'StudentEntity(id: $id, email: $email, fullName: $fullName, userId: $userId, course: $course, registrationNumber: $registrationNumber, status: $status)';
+  }
 }

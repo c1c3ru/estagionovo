@@ -141,11 +141,11 @@ class _StudentEditPageState extends State<StudentEditPage> {
       email: _isEditMode ? _studentToEdit!.email : _emailController.text.trim(),
       fullName: _fullNameController.text.trim(),
       role: UserRole.student,
-      status: _isEditMode
-          ? _studentToEdit!.status
-          : student_status_enum.StudentStatus.pending,
+      isActive: true,
       createdAt: _isEditMode ? _studentToEdit!.createdAt : DateTime.now(),
-      supervisorId: _isEditMode ? _studentToEdit!.supervisorId : '',
+      userId:
+          _isEditMode ? _studentToEdit!.userId : _emailController.text.trim(),
+      supervisorId: _isEditMode ? _studentToEdit!.supervisorId : null,
       registrationNumber: _registrationNumberController.text.trim(),
       course: _courseController.text.trim(),
       advisorName: _advisorNameController.text.trim(),
@@ -169,6 +169,9 @@ class _StudentEditPageState extends State<StudentEditPage> {
           ? _phoneNumberController.text.trim()
           : null,
       isOnTrack: _isEditMode ? _studentToEdit!.isOnTrack : true,
+      status: _isEditMode
+          ? _studentToEdit!.status
+          : student_status_enum.StudentStatus.pending,
     );
 
     if (_isEditMode) {

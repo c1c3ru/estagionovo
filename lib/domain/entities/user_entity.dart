@@ -8,6 +8,7 @@ class UserEntity extends Equatable {
   final String? phoneNumber;
   final String? profilePictureUrl;
   final UserRole role;
+  final bool isActive;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -18,6 +19,7 @@ class UserEntity extends Equatable {
     this.phoneNumber,
     this.profilePictureUrl,
     required this.role,
+    this.isActive = true,
     required this.createdAt,
     this.updatedAt,
   });
@@ -30,6 +32,7 @@ class UserEntity extends Equatable {
         phoneNumber,
         profilePictureUrl,
         role,
+        isActive,
         createdAt,
         updatedAt,
       ];
@@ -44,6 +47,7 @@ class UserEntity extends Equatable {
         other.phoneNumber == phoneNumber &&
         other.profilePictureUrl == profilePictureUrl &&
         other.role == role &&
+        other.isActive == isActive &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -56,12 +60,13 @@ class UserEntity extends Equatable {
         phoneNumber.hashCode ^
         profilePictureUrl.hashCode ^
         role.hashCode ^
+        isActive.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserEntity(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }

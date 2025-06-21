@@ -12,9 +12,10 @@ class StudentModel extends StudentEntity {
     super.phoneNumber,
     super.profilePictureUrl,
     required super.role,
+    super.isActive = true,
     required super.createdAt,
     super.updatedAt,
-    required super.status,
+    required super.userId,
     super.birthDate,
     required super.course,
     required super.advisorName,
@@ -22,13 +23,14 @@ class StudentModel extends StudentEntity {
     required super.isMandatoryInternship,
     required super.classShift,
     required super.internshipShift,
-    required super.supervisorId,
+    super.supervisorId,
     required super.totalHoursCompleted,
     required super.totalHoursRequired,
     required super.weeklyHoursTarget,
     required super.contractStartDate,
     required super.contractEndDate,
     required super.isOnTrack,
+    required super.status,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -44,10 +46,12 @@ class StudentModel extends StudentEntity {
         (e) => e.name == (userData['role'] as String? ?? 'student'),
         orElse: () => UserRole.student,
       ),
+      isActive: userData['is_active'] as bool? ?? true,
       createdAt: DateTime.parse(userData['created_at'] as String),
       updatedAt: userData['updated_at'] != null
           ? DateTime.parse(userData['updated_at'] as String)
           : null,
+      userId: json['user_id'] as String? ?? json['id'] as String,
       birthDate: json['birth_date'] != null
           ? DateTime.parse(json['birth_date'] as String)
           : null,
@@ -63,7 +67,7 @@ class StudentModel extends StudentEntity {
         (e) => e.name == json['internship_shift'],
         orElse: () => InternshipShift.morning,
       ),
-      supervisorId: json['supervisor_id'] as String? ?? '',
+      supervisorId: json['supervisor_id'] as String?,
       totalHoursCompleted:
           (json['total_hours_completed'] as num?)?.toDouble() ?? 0.0,
       totalHoursRequired:
@@ -83,9 +87,15 @@ class StudentModel extends StudentEntity {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'email': email,
       'full_name': fullName,
       'phone_number': phoneNumber,
       'profile_picture_url': profilePictureUrl,
+      'role': role.name,
+      'is_active': isActive,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'user_id': userId,
       'birth_date': birthDate?.toIso8601String(),
       'course': course,
       'advisor_name': advisorName,
@@ -114,9 +124,10 @@ class StudentModel extends StudentEntity {
       phoneNumber: entity.phoneNumber,
       profilePictureUrl: entity.profilePictureUrl,
       role: entity.role,
+      isActive: entity.isActive,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      status: entity.status,
+      userId: entity.userId,
       birthDate: entity.birthDate,
       course: entity.course,
       advisorName: entity.advisorName,
@@ -131,6 +142,7 @@ class StudentModel extends StudentEntity {
       contractStartDate: entity.contractStartDate,
       contractEndDate: entity.contractEndDate,
       isOnTrack: entity.isOnTrack,
+      status: entity.status,
     );
   }
 }

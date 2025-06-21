@@ -5,7 +5,6 @@ import '../../../domain/entities/supervisor_entity.dart';
 import '../../../domain/entities/student_entity.dart';
 import '../../../domain/entities/time_log_entity.dart';
 import '../../../domain/entities/contract_entity.dart';
-import '../../../data/models/student_model.dart';
 
 // Dados agregados para o dashboard do supervisor
 class SupervisorDashboardStats extends Equatable {

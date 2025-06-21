@@ -9,6 +9,7 @@ class UserModel extends UserEntity {
     super.phoneNumber,
     super.profilePictureUrl,
     required super.role,
+    super.isActive = true,
     required super.createdAt,
     super.updatedAt,
   });
@@ -22,6 +23,7 @@ class UserModel extends UserEntity {
       profilePictureUrl:
           json['profile_picture_url'] ?? json['avatar_url'] as String?,
       role: UserRole.fromString(json['role'] as String),
+      isActive: json['is_active'] as bool? ?? true,
       createdAt:
           DateTime.parse(json['created_at'] ?? json['createdAt'] as String),
       updatedAt: json['updated_at'] != null || json['updatedAt'] != null
@@ -38,6 +40,7 @@ class UserModel extends UserEntity {
       'phone_number': phoneNumber,
       'profile_picture_url': profilePictureUrl,
       'role': role.toString(),
+      'is_active': isActive,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -51,6 +54,7 @@ class UserModel extends UserEntity {
       phoneNumber: phoneNumber,
       profilePictureUrl: profilePictureUrl,
       role: role,
+      isActive: isActive,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -64,12 +68,12 @@ class UserModel extends UserEntity {
       phoneNumber: entity.phoneNumber,
       profilePictureUrl: entity.profilePictureUrl,
       role: entity.role,
+      isActive: entity.isActive,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
   }
 
-  @override
   UserModel copyWith({
     String? id,
     String? email,
@@ -77,6 +81,7 @@ class UserModel extends UserEntity {
     String? phoneNumber,
     String? profilePictureUrl,
     UserRole? role,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -87,6 +92,7 @@ class UserModel extends UserEntity {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -102,6 +108,7 @@ class UserModel extends UserEntity {
         other.phoneNumber == phoneNumber &&
         other.profilePictureUrl == profilePictureUrl &&
         other.role == role &&
+        other.isActive == isActive &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt;
   }
@@ -114,12 +121,13 @@ class UserModel extends UserEntity {
         phoneNumber.hashCode ^
         profilePictureUrl.hashCode ^
         role.hashCode ^
+        isActive.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode;
   }
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, fullName: $fullName, phoneNumber: $phoneNumber, profilePictureUrl: $profilePictureUrl, role: $role, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
