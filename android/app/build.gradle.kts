@@ -1,6 +1,6 @@
 android {
-    namespace = "com.example.gestao_de_estagios"
-    compileSdk = flutter.compileSdkVersion  // Use a versão do Flutter
+    namespace = "com.example.gestao_de_estagio"
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -13,9 +13,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.estagiobloc"
+        applicationId = "com.example.gestao_de_estagios"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion  // Use a versão do Flutter
+        targetSdk = flutter.targetSdkVersion  // Usa a versão do Flutter
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -25,8 +25,4 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-}
-
-flutter {
-    source = "../.."
 }
