@@ -54,7 +54,7 @@ class AuthDatasource implements IAuthDatasource {
       try {
         if (role == UserRole.student) {
           await _supabaseClient.from('students').insert({
-            'id': response.user!.id,
+            // 'id': response.user!.id, // O ID será preenchido pelo default no DB (auth.uid())
             'full_name': fullName,
             'registration_number': registration,
             'course': 'Curso não definido',
@@ -77,7 +77,7 @@ class AuthDatasource implements IAuthDatasource {
           });
         } else if (role == UserRole.supervisor) {
           await _supabaseClient.from('supervisors').insert({
-            'id': response.user!.id,
+            // 'id': response.user!.id, // O ID será preenchido pelo default no DB (auth.uid())
             'full_name': fullName,
             'department': 'Departamento não definido',
             'position': 'Supervisor',
@@ -196,7 +196,7 @@ class AuthDatasource implements IAuthDatasource {
         if (existingStudent == null) {
           // Criar dados do estudante
           await _supabaseClient.from('students').insert({
-            'id': user.id,
+            // 'id': user.id, // O ID será preenchido pelo default no DB (auth.uid())
             'full_name': fullName,
             'registration_number': registration,
             'course': 'Curso não definido',
@@ -230,7 +230,7 @@ class AuthDatasource implements IAuthDatasource {
         if (existingSupervisor == null) {
           // Criar dados do supervisor
           await _supabaseClient.from('supervisors').insert({
-            'id': user.id,
+            // 'id': user.id, // O ID será preenchido pelo default no DB (auth.uid())
             'full_name': fullName,
             'department': 'Departamento não definido',
             'position': 'Supervisor',
