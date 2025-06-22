@@ -1,3 +1,9 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+
 android {
     namespace = "com.example.gestao_de_estagio"
     compileSdk = 35
@@ -13,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.gestao_de_estagios"
+        applicationId = "com.example.gestao_de_estagio"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion  // Usa a versão do Flutter
         versionCode = flutter.versionCode
@@ -25,4 +31,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
 }
