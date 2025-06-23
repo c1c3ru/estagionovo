@@ -1,4 +1,4 @@
-Visão Geral
+Visão Geral do app
 O Student Supervisor App é uma aplicação Flutter desenvolvida seguindo os princípios da Clean Architecture, projetada para gerenciar estudantes, supervisores e contratos de estágio. A aplicação utiliza Supabase como backend e implementa padrões modernos de desenvolvimento Flutter.
 
 Arquitetura do Projeto
